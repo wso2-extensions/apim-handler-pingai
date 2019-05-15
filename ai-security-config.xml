@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ WSO2 Inc. licenses this file to you under the Apache License,
+  ~ Version 2.0 (the "License"); you may not use this file except
+  ~ in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~  specific language governing permissions and limitations
+  ~  under the License.
+  -->
+<!-- Add this config file to <APIM_HOME>/repository/conf directory and name it as ai-security-config.xml-->
+<APIManager>
+    <PingAISecurityHandler>
+        <OperationMode>MODE</OperationMode>
+        <CacheExpiryTime>15</CacheExpiryTime>
+        <APISecurityEnforcer>
+            <EndPoint>ASE_END_POINT</EndPoint>
+            <ASEToken>ASE_ACCESS_TOKEN</ASEToken>
+        </APISecurityEnforcer>
+        <DataPublisher>
+            <MaxPerRoute>500</MaxPerRoute>
+            <MaxOpenConnections>200</MaxOpenConnections>
+            <ConnectionTimeout>30</ConnectionTimeout>
+        </DataPublisher>
+        <ThreadPoolExecutor>
+            <CorePoolSize>200</CorePoolSize>
+            <MaximumPoolSize>500</MaximumPoolSize>
+            <KeepAliveTime>100</KeepAliveTime>
+        </ThreadPoolExecutor>
+        <StackObjectPool>
+            <MaxIdle>1000</MaxIdle>
+            <InitIdleCapacity>200</InitIdleCapacity>
+        </StackObjectPool>
+        <Proxy>
+            <Hostname>www.example.com</Hostname>
+            <Port>8888</Port>
+            <UserName>username</UserName>
+            <Password>password</Password>
+        </Proxy>
+        <LimitTransportHeaders>
+            <Header>HEADER_1</Header>
+            <Header>HEADER_2</Header>
+            <Header>HEADER_3</Header>
+            <Header>HEADER_4</Header>
+            <Header>HEADER_5</Header>
+            <Header>HEADER_6</Header>
+            <Header>HEADER_7</Header>
+        </LimitTransportHeaders>
+    </PingAISecurityHandler>
+</APIManager>
