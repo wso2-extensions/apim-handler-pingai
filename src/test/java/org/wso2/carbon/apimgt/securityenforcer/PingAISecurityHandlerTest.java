@@ -56,7 +56,7 @@ public class PingAISecurityHandlerTest {
     @Before
     public void setup() throws AISecurityException {
 
-        messageContext = Mockito.mock(MessageContext.class);
+        messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgCntxt = new org.apache.axis2.context.MessageContext();
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
