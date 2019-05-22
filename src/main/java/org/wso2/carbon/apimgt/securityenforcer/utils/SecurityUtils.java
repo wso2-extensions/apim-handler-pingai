@@ -135,6 +135,18 @@ public class SecurityUtils {
                     throw new AISecurityException(AISecurityException.CLIENT_REQUEST_ERROR,
                             AISecurityException.CLIENT_REQUEST_ERROR_MESSAGE);
                 }
+
+                if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                        .isRemoveOAuthHeaderFromTransportHeaders()) {
+                    String authorizationHeaderName = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                            .getAuthorizationHeader();
+                    if (transportHeaderMap.containsKey(authorizationHeaderName)) {
+                        transportHeaderMap.remove(authorizationHeaderName);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Authorization header removed from the transport headers.");
+                        }
+                    }
+                }
             }
 
             for (String headerKey : headerKeysSet) {

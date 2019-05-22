@@ -21,9 +21,15 @@
     <PingAISecurityHandler>
         <OperationMode>MODE</OperationMode>
         <CacheExpiryTime>15</CacheExpiryTime>
+        <RemoveOAuthHeader>true</RemoveOAuthHeader>
         <APISecurityEnforcer>
             <EndPoint>ASE_END_POINT</EndPoint>
             <ASEToken>ASE_ACCESS_TOKEN</ASEToken>
+            <APIDiscovery>
+                <ManagementEndpoint>ENDPOINT</ManagementEndpoint>
+                <AccessKey>MANAGEMENT_PORTAL_ACCESS_KEY</AccessKey>
+                <SecretKey>SECRET_KEY</SecretKey>
+            </APIDiscovery>
         </APISecurityEnforcer>
         <DataPublisher>
             <MaxPerRoute>500</MaxPerRoute>
