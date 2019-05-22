@@ -16,49 +16,102 @@
   ~  specific language governing permissions and limitations
   ~  under the License.
   -->
-<!-- Add this config file to <APIM_HOME>/repository/conf directory and name it as ai-security-config.xml-->
-<APIManager>
+
+<!--APIManager-->
+
+    <!-- Add the following configurations under <APIManager> to <APIM_HOME>/repository/conf/api-manager.xml-->
+
+    <!--If any of the configurations are not set except the APISecurityEnforcer - ASE Configurations, the default
+    configuration will be used.-->
     <PingAISecurityHandler>
+
+        <!--Three operation modes. "sync", "async" and "hybrid" -->
         <OperationMode>MODE</OperationMode>
+
+        <!--Cache Expiry time in minutes.-->
         <CacheExpiryTime>15</CacheExpiryTime>
+
+        <!--Remove the OAuth header from the transport headers.-->
         <RemoveOAuthHeader>true</RemoveOAuthHeader>
+
+        <!--Ping ASE related configuration used by the feature.
+        API Security Enforcer is used to validate and authenticate users against the request metadata.
+        Without this configuration, feature will not work.-->
         <APISecurityEnforcer>
             <EndPoint>ASE_END_POINT</EndPoint>
             <ASEToken>ASE_ACCESS_TOKEN</ASEToken>
+
+            <!--Configurations related to management REST API of the Ping API Security Enforcer. This API is used to
+            create, update, list, delete models for the APIs.-->
             <APIDiscovery>
                 <ManagementEndpoint>ENDPOINT</ManagementEndpoint>
                 <AccessKey>MANAGEMENT_PORTAL_ACCESS_KEY</AccessKey>
                 <SecretKey>SECRET_KEY</SecretKey>
             </APIDiscovery>
         </APISecurityEnforcer>
+
+
+        <!--Configurations related to the HTTP Client used in this feature.
+        HTTP request are used to communicate with the API Security Enforcer and the WSO2 API Manager.-->
         <DataPublisher>
+
+            <!--The maximum number of HTTP connections allowed across all routes.-->
             <MaxPerRoute>500</MaxPerRoute>
+
+            <!--The maximum number of HTTP connections allowed for a route.-->
             <MaxOpenConnections>200</MaxOpenConnections>
+
+            <!-- Connection timeout for the HTTP request in seconds. The socket timeout is set with the addition
+            of another 10 seconds.-->
             <ConnectionTimeout>30</ConnectionTimeout>
         </DataPublisher>
+
+
+        <!--Configurations related to ThreadPoolExecutor. Thread pool is used to handle concurrent requests to feature"
+         -->
         <ThreadPoolExecutor>
+
+            <!-- The number of threads to keep in the pool, even if they are idle.-->
             <CorePoolSize>200</CorePoolSize>
+
+            <!--The maximum number of threads to allow in the pool. -->
             <MaximumPoolSize>500</MaximumPoolSize>
+
+            <!--When the number of threads is greater than the core, this is the maximum time in seconds that excess
+            idle threads will wait for new tasks before terminating. -->
             <KeepAliveTime>100</KeepAliveTime>
         </ThreadPoolExecutor>
+
+
+        <!--Configurations related to Stack object pool. Stack object pool is used to handle high concurrency scenarios
+        without dropping any messages.-->
         <StackObjectPool>
+
+            <!-- Cap on the number of "sleeping" instances in the pool.-->
             <MaxIdle>1000</MaxIdle>
+
+            <!-- Initial size of the pool (this specifies the size of the container, it does not cause the pool
+            to be pre-populated)-->
             <InitIdleCapacity>200</InitIdleCapacity>
         </StackObjectPool>
-        <Proxy>
+
+
+        <!-- Uncomment this section only if you are going to deploy api-manager with a proxy server.
+         Unless a proxy server is used, you don't need to configure this section. -->
+        <!--Proxy>
             <Hostname>www.example.com</Hostname>
             <Port>8888</Port>
             <UserName>username</UserName>
             <Password>password</Password>
-        </Proxy>
-        <LimitTransportHeaders>
+        </Proxy-->
+
+
+        <!-- Uncomment this section only if you need to limit the transport headers which are sent to API Security Enforcer.
+         Unless that is needed, you don't need to configure this section. Only transport headers mentioned in the
+         following list will be used.-->
+        <!--LimitTransportHeaders>
             <Header>HEADER_1</Header>
             <Header>HEADER_2</Header>
-            <Header>HEADER_3</Header>
-            <Header>HEADER_4</Header>
-            <Header>HEADER_5</Header>
-            <Header>HEADER_6</Header>
-            <Header>HEADER_7</Header>
-        </LimitTransportHeaders>
+        </LimitTransportHeaders-->
     </PingAISecurityHandler>
-</APIManager>
+<!--/APIManager-->
