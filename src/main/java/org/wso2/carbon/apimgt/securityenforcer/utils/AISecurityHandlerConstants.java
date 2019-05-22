@@ -53,6 +53,12 @@ public class AISecurityHandlerConstants {
     public static final String AUTHORIZATION = "Authorization";
     public static final String APPLICATION_NAME = "api.ut.application.name";
     public static final String CONFIG_FILE_NAME = "api-manager.xml";
+    public static final String PUBLISHED = "PUBLISHED";
+    public static final String RETIRED = "RETIRED";
+    public static final String UPDATE = "UPDATE";
+    public static final String DELETE = "DELETE";
+    public static final String CREATE = "CREATE";
+    public static final String LIST = "LIST";
     static final String HTTP_VERSION_CONNECTOR = ".";
     static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";
     static final String API_SECURITY_NS_PREFIX = "ams";
@@ -62,6 +68,10 @@ public class AISecurityHandlerConstants {
     static final String API_SECURITY_ENFORCER_CONFIGURATION = "APISecurityEnforcer";
     static final String END_POINT_CONFIGURATION = "EndPoint";
     static final String ASE_TOKEN_CONFIGURATION = "ASEToken";
+    static final String API_DISCOVERY_CONFIGURATION = "APIDiscovery";
+    static final String MANAGE_ASE_CONFIGURATION = "ManagementEndpoint";
+    static final String ACCESS_KEY_CONFIGURATION = "AccessKey";
+    static final String SECRET_KEY_CONFIGURATION = "SecretKey";
     static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
     static final String MAX_PER_ROUTE_CONFIGURATION = "MaxPerRoute";
     static final String MAX_OPEN_CONNECTIONS_CONFIGURATION = "MaxOpenConnections";
@@ -80,6 +90,11 @@ public class AISecurityHandlerConstants {
     static final String PASSWORD_CONFIGURATION = "Password";
     static final String LIMIT_TRANSPORT_HEADERS_CONFIGURATION = "LimitTransportHeaders";
     static final String HEADER_CONFIGURATION = "Header";
+    public static String ASE_MANAGEMENT_HEADER_ACCESS_KEY = "x-ase-access-key";
+    public static String ASE_MANAGEMENT_HEADER_SECRET_KEY = "x-ase-secret-key";
+    public static String ASE_MANAGEMENT_HEADER_ACCEPT = "Accept";
+    public static String ASE_MANAGEMENT_HEADER_CONTENT_TYPE = "Content-Type";
+    public static String ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME = "samplePingAIManagementPayload.json";
 
     private AISecurityHandlerConstants() {
     }

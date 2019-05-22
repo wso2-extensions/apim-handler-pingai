@@ -18,8 +18,12 @@ package org.wso2.carbon.apimgt.securityenforcer.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.simple.JSONObject;
@@ -167,6 +171,31 @@ public class HttpDataPublisher {
 
     public void setHttpClient(CloseableHttpClient httpClient) {
         this.httpClient = httpClient;
+    }
+
+    public StatusLine publishToASEManagementAPI(String type, Object request) {
+
+        CloseableHttpResponse response = null;
+
+        try {
+            if (AISecurityHandlerConstants.CREATE.equals(type)) {
+                HttpPost postRequest = (HttpPost) request;
+                response = httpClient.execute(postRequest);
+            } else if (AISecurityHandlerConstants.UPDATE.equals(type)) {
+                HttpPut putRequest = (HttpPut) request;
+                response = httpClient.execute(putRequest);
+            } else if (AISecurityHandlerConstants.LIST.equals(type)) {
+                HttpGet getRequest = (HttpGet) request;
+                response = httpClient.execute(getRequest);
+            } else if (AISecurityHandlerConstants.DELETE.equals(type)) {
+                HttpDelete deleteRequest = (HttpDelete) request;
+                response = httpClient.execute(deleteRequest);
+            }
+            return response.getStatusLine();
+        } catch (Exception e) {
+            log.error("Error occurred while publishing " + type + " request to ASE Management API", e);
+        }
+        return null;
     }
 }
 

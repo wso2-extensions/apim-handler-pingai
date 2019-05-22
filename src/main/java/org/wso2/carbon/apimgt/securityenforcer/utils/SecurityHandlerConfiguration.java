@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.securityenforcer.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -98,6 +99,16 @@ public class SecurityHandlerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
+
+            if ("OAuthConfigurations".equals(localName)) {
+                try {
+                    setOAuthHeaderName(serverConfig);
+                } catch (Exception e) {
+                    log.error("Error while reading custom authorization header", e);
+                    throw new AISecurityException(AISecurityException.HANDLER_ERROR,
+                            AISecurityException.HANDLER_ERROR_MESSAGE, e);
+                }
+            }
             if (AISecurityHandlerConstants.PING_AI_SECURITY_HANDLER_CONFIGURATION.equals(localName)) {
                 try {
                     setPingAISecurityHandlerProperties(serverConfig);
@@ -143,6 +154,17 @@ public class SecurityHandlerConfiguration {
                 log.debug("Cache expiry is not set. Set to default: " + securityHandlerConfig.getCacheExpiryTime());
             }
 
+            //Remove OAuth Header
+            OMElement removeOAuthHeaderElement = aiSecurityConfigurationElement
+                    .getFirstChildWithName(new QName("RemoveOAuthHeader"));
+            if (removeOAuthHeaderElement != null) {
+                securityHandlerConfig.setRemoveOAuthHeaderFromTransportHeaders(
+                        JavaUtils.isTrueExplicitly((removeOAuthHeaderElement.getText())));
+            } else {
+                log.debug("Remove OAuth header from transport headers is not set. Set to default: "
+                        + securityHandlerConfig.isRemoveOAuthHeaderFromTransportHeaders());
+            }
+
             //Get ASE config data
             OMElement aseConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_SECURITY_ENFORCER_CONFIGURATION));
@@ -169,6 +191,47 @@ public class SecurityHandlerConfiguration {
                     }
                 } else {
                     log.error("Ping AI config error - ASE access token not found");
+                    throw new AISecurityException(AISecurityException.HANDLER_ERROR,
+                            AISecurityException.HANDLER_ERROR_MESSAGE);
+                }
+
+                OMElement apiDiscoveryElement = aseConfigElement
+                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_DISCOVERY_CONFIGURATION));
+                AISecurityHandlerConfig.APIDiscovery apiDiscoveryConfig = new AISecurityHandlerConfig.APIDiscovery();
+                if (apiDiscoveryElement != null) {
+                    boolean configMissing = false;
+                    OMElement managementEndpointElement = apiDiscoveryElement
+                            .getFirstChildWithName(new QName(AISecurityHandlerConstants.MANAGE_ASE_CONFIGURATION));
+                    if (managementEndpointElement != null) {
+                        apiDiscoveryConfig.setManagementAPIEndpoint(managementEndpointElement.getText());
+                    } else
+                        configMissing = true;
+
+                    OMElement accessKeyElement = apiDiscoveryElement
+                            .getFirstChildWithName(new QName(AISecurityHandlerConstants.ACCESS_KEY_CONFIGURATION));
+                    if (accessKeyElement != null) {
+                        apiDiscoveryConfig.setAccessKey(accessKeyElement.getText());
+                    } else
+                        configMissing = true;
+
+                    OMElement secretKeyElement = apiDiscoveryElement
+                            .getFirstChildWithName(new QName(AISecurityHandlerConstants.SECRET_KEY_CONFIGURATION));
+                    if (secretKeyElement != null) {
+                        if (secretResolver.isInitialized() && secretResolver
+                                .isTokenProtected("APIManager.PingAISecurityHandler.SecretKey")) {
+                            aseConfig.setAseToken(secretResolver.resolve("APIManager.PingAISecurityHandler.SecretKey"));
+                        } else {
+                            apiDiscoveryConfig.setSecretKey(secretKeyElement.getText());
+                        }
+                    } else
+                        configMissing = true;
+
+                    if (!configMissing) {
+                        apiDiscoveryConfig.setEnable(true);
+                        securityHandlerConfig.setApiDiscoveryConfig(apiDiscoveryConfig);
+                    }
+                } else {
+                    log.error("Ping AI config error - ASE config not found");
                     throw new AISecurityException(AISecurityException.HANDLER_ERROR,
                             AISecurityException.HANDLER_ERROR_MESSAGE);
                 }
@@ -317,6 +380,17 @@ public class SecurityHandlerConfiguration {
                 log.debug("Limit transport headers config is not set. Set to default.");
             }
             securityHandlerConfig.setLimitTransportHeaders(limitTransportHeadersConfig);
+        }
+    }
+
+    private void setOAuthHeaderName(OMElement element) {
+        OMElement authorizationHeaderElement = element.getFirstChildWithName(new QName("AuthorizationHeader"));
+        if (authorizationHeaderElement != null) {
+            securityHandlerConfig.setAuthorizationHeader(authorizationHeaderElement.getText());
+            log.debug("Custom OAuth header is set." + securityHandlerConfig.getAuthorizationHeader());
+        } else {
+            log.debug(
+                    "Custom OAuth header is not set. Set to default " + securityHandlerConfig.getAuthorizationHeader());
         }
     }
 

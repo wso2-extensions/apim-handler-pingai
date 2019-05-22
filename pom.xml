@@ -47,9 +47,10 @@
         <carbon.kernel.version>4.4.35</carbon.kernel.version>
         <wiremock.version>2.5.0</wiremock.version>
         <mockito.version>2.10.0</mockito.version>
-        <powermock.version>1.7.3</powermock.version>
+        <powermock.version>1.7.4</powermock.version>
         <mockito.all.version>1.10.19</mockito.all.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
+        <carbon.governance.version>4.7.29</carbon.governance.version>
     </properties>
 
     <build>
@@ -109,6 +110,33 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.governance</groupId>
+            <artifactId>org.wso2.carbon.governance.lcm</artifactId>
+            <version>${carbon.governance.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jboss</groupId>
+                    <artifactId>javassist</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>wsdl4j.wso2</groupId>
+                    <artifactId>wsdl4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>

@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.dto;
 
+import org.apache.http.HttpHeaders;
+
 import java.util.Set;
 
 /**
@@ -27,12 +29,15 @@ public class AISecurityHandlerConfig {
 
     private String mode = "async";
     private int cacheExpiryTime = 15;
+    private boolean removeOAuthHeaderFromTransportHeaders = true;
+    private String authorizationHeader = HttpHeaders.AUTHORIZATION;
     private AISecurityHandlerConfig.AseConfig aseConfig;
     private AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfig;
     private AISecurityHandlerConfig.ProxyConfig proxyConfig;
     private AISecurityHandlerConfig.StackObjectPoolConfig stackObjectPoolConfig;
     private AISecurityHandlerConfig.ThreadPoolExecutorConfig threadPoolExecutorConfig;
     private AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeaders;
+    private AISecurityHandlerConfig.APIDiscovery apiDiscoveryConfig;
 
     public String getMode() {
         return mode;
@@ -48,6 +53,22 @@ public class AISecurityHandlerConfig {
 
     public void setCacheExpiryTime(int cacheExpiryTime) {
         this.cacheExpiryTime = cacheExpiryTime;
+    }
+
+    public boolean isRemoveOAuthHeaderFromTransportHeaders() {
+        return removeOAuthHeaderFromTransportHeaders;
+    }
+
+    public void setRemoveOAuthHeaderFromTransportHeaders(boolean removeOAuthHeaderFromTransportHeaders) {
+        this.removeOAuthHeaderFromTransportHeaders = removeOAuthHeaderFromTransportHeaders;
+    }
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
     }
 
     public AISecurityHandlerConfig.AseConfig getAseConfig() {
@@ -96,6 +117,14 @@ public class AISecurityHandlerConfig {
 
     public void setLimitTransportHeaders(LimitTransportHeaders limitTransportHeaders) {
         this.limitTransportHeaders = limitTransportHeaders;
+    }
+
+    public APIDiscovery getApiDiscoveryConfig() {
+        return apiDiscoveryConfig;
+    }
+
+    public void setApiDiscoveryConfig(APIDiscovery apiDiscoveryConfig) {
+        this.apiDiscoveryConfig = apiDiscoveryConfig;
     }
 
     public static class AseConfig {
@@ -272,6 +301,46 @@ public class AISecurityHandlerConfig {
 
         public void setHeaderSet(Set<String> headerSet) {
             this.headerSet = headerSet;
+        }
+    }
+
+    public static class APIDiscovery {
+
+        private boolean enable = false;
+        private String managementAPIEndpoint;
+        private String accessKey;
+        private String secretKey;
+
+        public boolean isEnable() {
+            return enable;
+        }
+
+        public void setEnable(boolean enable) {
+            this.enable = enable;
+        }
+
+        public String getManagementAPIEndpoint() {
+            return managementAPIEndpoint;
+        }
+
+        public void setManagementAPIEndpoint(String managementAPIEndpoint) {
+            this.managementAPIEndpoint = managementAPIEndpoint;
+        }
+
+        public String getAccessKey() {
+            return accessKey;
+        }
+
+        public void setAccessKey(String accessKey) {
+            this.accessKey = accessKey;
+        }
+
+        public String getSecretKey() {
+            return secretKey;
+        }
+
+        public void setSecretKey(String secretKey) {
+            this.secretKey = secretKey;
         }
     }
 
