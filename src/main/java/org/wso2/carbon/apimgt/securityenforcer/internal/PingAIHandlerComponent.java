@@ -51,6 +51,7 @@ public class PingAIHandlerComponent implements BundleActivator {
         log.info("OSGi start method for Ping AI security handler");
 
         AISecurityHandlerConfig securityHandlerConfig = getConfigData();
+        logConfigData(securityHandlerConfig);
         operationMode = securityHandlerConfig.getMode();
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
@@ -74,7 +75,7 @@ public class PingAIHandlerComponent implements BundleActivator {
         ServiceReferenceHolder.getInstance().setRequestPublisher(requestPublisher);
 
         //response publisher is for the second sideband request with the backend response metadata. This is sent
-        //asynchronously in all the operation methods and for that async publisher instance is needed. As both async and
+        //asynchronously in all three operation modes and for that async publisher instance is needed. As both async and
         //hybrid modes contains async publisher instance, only for the sync mode, there will be a new additional instance
         //created.
         if (AISecurityHandlerConstants.SYNC_MODE_STRING.equals(operationMode)) {
@@ -128,5 +129,56 @@ public class PingAIHandlerComponent implements BundleActivator {
         configuration.load(CarbonUtils.getCarbonConfigDirPath() + File.separator
                 + AISecurityHandlerConstants.CONFIG_FILE_NAME);
         return configuration.getPingAISecurityHandlerProperties();
+    }
+
+    private void logConfigData(AISecurityHandlerConfig securityHandlerConfig) {
+
+        if (log.isDebugEnabled()) {
+            String logMessage = "Ping AI configurations- ";
+            logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
+            logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
+            logMessage = logMessage + ", Remove OAuth Header: " + securityHandlerConfig
+                    .isRemoveOAuthHeaderFromTransportHeadersEnabled();
+            logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
+            logMessage = logMessage + ", ASE Token: " + securityHandlerConfig.getAseConfig().getAseToken();
+            logMessage = logMessage + ", Management Endpoint: " + securityHandlerConfig.getApiDiscoveryConfig()
+                    .getManagementAPIEndpoint();
+            logMessage =
+                    logMessage + ", ASE AccessKey: " + securityHandlerConfig.getApiDiscoveryConfig().getAccessKey();
+            logMessage =
+                    logMessage + ", ASE SecretKey: " + securityHandlerConfig.getApiDiscoveryConfig().getSecretKey();
+            logMessage = logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig()
+                    .getMaxPerRoute();
+            logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig
+                    .getDataPublisherConfig().getMaxOpenConnections();
+            logMessage =
+                    logMessage + ", DataPublisher- ConnectionTimeout: " + securityHandlerConfig.getDataPublisherConfig()
+                            .getConnectionTimeout();
+            logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: " + securityHandlerConfig
+                    .getThreadPoolExecutorConfig().getCorePoolSize();
+            logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: " + securityHandlerConfig
+                    .getThreadPoolExecutorConfig().getMaximumPoolSize();
+            logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: " + securityHandlerConfig
+                    .getThreadPoolExecutorConfig().getKeepAliveTime();
+            logMessage = logMessage + ", StackObjectPool- MaxIdle: " + securityHandlerConfig.getStackObjectPoolConfig()
+                    .getMaxIdle();
+            logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig
+                    .getStackObjectPoolConfig().getInitIdleCapacity();
+            if (securityHandlerConfig.getProxyConfig().isProxyEnabled()) {
+                logMessage = logMessage + ", Proxy- Hostname: " + securityHandlerConfig.getProxyConfig().getHostname();
+                logMessage = logMessage + ", Proxy- Port: " + securityHandlerConfig.getProxyConfig().getPort();
+                logMessage = logMessage + ", Proxy- UserName: " + securityHandlerConfig.getProxyConfig().getUserName();
+                logMessage = logMessage + ", Proxy- Password: " + securityHandlerConfig.getProxyConfig().getPassword();
+            } else {
+                logMessage = logMessage + ", Proxy Disabled";
+            }
+            if (securityHandlerConfig.getLimitTransportHeaders().isEnable()) {
+                logMessage = logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders()
+                        .getHeaderSet().toString();
+            } else {
+                logMessage = logMessage + ", Limit Transport headers Disabled";
+            }
+            log.debug(logMessage);
+        }
     }
 }
