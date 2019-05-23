@@ -100,7 +100,7 @@ public class SecurityHandlerConfiguration {
             String localName = element.getLocalName();
             nameStack.push(localName);
 
-            if ("OAuthConfigurations".equals(localName)) {
+            if (AISecurityHandlerConstants.OAUTH_CONFIGURATIONS.equals(localName)) {
                 try {
                     setOAuthHeaderName(serverConfig);
                 } catch (Exception e) {
@@ -158,11 +158,11 @@ public class SecurityHandlerConfiguration {
             OMElement removeOAuthHeaderElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName("RemoveOAuthHeader"));
             if (removeOAuthHeaderElement != null) {
-                securityHandlerConfig.setRemoveOAuthHeaderFromTransportHeaders(
+                securityHandlerConfig.setRemoveOAuthHeaderFromTransportHeadersEnabled(
                         JavaUtils.isTrueExplicitly((removeOAuthHeaderElement.getText())));
             } else {
                 log.debug("Remove OAuth header from transport headers is not set. Set to default: "
-                        + securityHandlerConfig.isRemoveOAuthHeaderFromTransportHeaders());
+                        + securityHandlerConfig.isRemoveOAuthHeaderFromTransportHeadersEnabled());
             }
 
             //Get ASE config data
@@ -184,8 +184,8 @@ public class SecurityHandlerConfiguration {
                         .getFirstChildWithName(new QName(AISecurityHandlerConstants.ASE_TOKEN_CONFIGURATION));
                 if (aseTokenElement != null) {
                     if (secretResolver.isInitialized() && secretResolver
-                            .isTokenProtected("APIManager.PingAISecurityHandler.ASEToken")) {
-                        aseConfig.setAseToken(secretResolver.resolve("APIManager.PingAISecurityHandler.ASEToken"));
+                            .isTokenProtected("APIManager.PingAISecurityHandler.ASE.ASEToken")) {
+                        aseConfig.setAseToken(secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.ASEToken"));
                     } else {
                         aseConfig.setAseToken(aseTokenElement.getText());
                     }
@@ -210,7 +210,13 @@ public class SecurityHandlerConfiguration {
                     OMElement accessKeyElement = apiDiscoveryElement
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.ACCESS_KEY_CONFIGURATION));
                     if (accessKeyElement != null) {
-                        apiDiscoveryConfig.setAccessKey(accessKeyElement.getText());
+                        if (secretResolver.isInitialized() && secretResolver
+                                .isTokenProtected("APIManager.PingAISecurityHandler.ASE.AccessKey")) {
+                            apiDiscoveryConfig.setAccessKey(
+                                    secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.AccessKey"));
+                        } else {
+                            apiDiscoveryConfig.setAccessKey(accessKeyElement.getText());
+                        }
                     } else
                         configMissing = true;
 
@@ -218,8 +224,9 @@ public class SecurityHandlerConfiguration {
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.SECRET_KEY_CONFIGURATION));
                     if (secretKeyElement != null) {
                         if (secretResolver.isInitialized() && secretResolver
-                                .isTokenProtected("APIManager.PingAISecurityHandler.SecretKey")) {
-                            aseConfig.setAseToken(secretResolver.resolve("APIManager.PingAISecurityHandler.SecretKey"));
+                                .isTokenProtected("APIManager.PingAISecurityHandler.ASE.SecretKey")) {
+                            apiDiscoveryConfig.setSecretKey(
+                                    secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.SecretKey"));
                         } else {
                             apiDiscoveryConfig.setSecretKey(secretKeyElement.getText());
                         }

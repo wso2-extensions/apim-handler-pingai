@@ -62,7 +62,6 @@ public class AsyncPublisher implements Publisher {
      * @param correlationID is the String with the xCorrelation ID.
      * @param resource       is the targeted resource of the ASE Instance. It can be either request or response
      */
-
     public void publishAsyncEvent(JSONObject requestBody, String correlationID, String resource)
             throws AISecurityException {
         if (asyncPublisherThreadPool != null) {
@@ -98,8 +97,9 @@ public class AsyncPublisher implements Publisher {
             return true;
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("ASE Response found for the metadata " + requestMetaData.toString() + " as " + aseResponseDTO
-                        .getResponseMessage() + " with the response code " + aseResponseDTO.getResponseCode());
+                log.debug("ASE Response found for the request "+ requestCorrelationID +" with metadata "
+                        + requestMetaData.toString() + " as " + aseResponseDTO.getResponseMessage()
+                        + " with the response code " + aseResponseDTO.getResponseCode());
             }
 
             if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS == aseResponseDTO.getResponseCode()) {

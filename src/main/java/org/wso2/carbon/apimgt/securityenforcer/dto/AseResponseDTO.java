@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.securityenforcer.dto;
 
 /**
- * This class contains the response received from Api Security Enforecer.
+ * This class contains the response received from Api Security Enforcer.
  *
  */
 

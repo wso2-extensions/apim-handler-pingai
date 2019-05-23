@@ -104,15 +104,15 @@ public class PingAIExecutor implements Execution {
                 Resource apiResource = context.getResource();
                 String artifactId = apiResource.getUUID();
                 if (artifactId == null || !ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getApiDiscoveryConfig().isEnable()) {
+                        .getApiDiscoveryConfig().isEnable() || targetState == null) {
                     return false;
                 }
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-                String apiName =
-                        apiArtifact.getAttribute("overview_name") + "_" + apiArtifact.getAttribute("overview_version");
-                String apiContext = apiArtifact.getAttribute("overview_context");
+                String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME)
+                        + AISecurityHandlerConstants.API_NAME_VERSION_CONNECTOR + apiArtifact
+                        .getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
+                String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
 
-                String newStatus = (targetState != null) ? targetState.toUpperCase() : targetState;
                 HttpDataPublisher httpDataPublisher = ServiceReferenceHolder.getInstance().getHttpDataPublisher();
 
                 String accessKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
@@ -125,7 +125,7 @@ public class PingAIExecutor implements Execution {
                 StatusLine responseStatus = null;
                 JSONObject requestBody;
 
-                if (AISecurityHandlerConstants.PUBLISHED.equals(newStatus)) {
+                if (AISecurityHandlerConstants.PUBLISHED.equals(targetState.toUpperCase())) {
                     requestBody = createAPIJSON(apiContext);
 
                     HttpPost postRequest = new HttpPost(managementAPIEndpoint + "?api_id=" + apiName);
@@ -139,7 +139,7 @@ public class PingAIExecutor implements Execution {
                     responseStatus = httpDataPublisher
                             .publishToASEManagementAPI(AISecurityHandlerConstants.CREATE, postRequest);
                 }
-                if (AISecurityHandlerConstants.RETIRED.equals(newStatus)) {
+                if (AISecurityHandlerConstants.RETIRED.equals(targetState.toUpperCase())) {
                     HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + apiName);
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
@@ -154,9 +154,9 @@ public class PingAIExecutor implements Execution {
 
                 if (responseStatus != null) {
                     if (responseStatus.getStatusCode() == AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS) {
-                        log.info(apiName + " is " + newStatus + "in ASE");
+                        log.info(apiName + " is " + targetState + "in ASE");
                     } else {
-                        log.info("ASE responded with " + responseStatus.getReasonPhrase() + " For the " + newStatus
+                        log.info("ASE responded with " + responseStatus.getReasonPhrase() + " For the " + targetState
                                 + " request for the " + apiName + " API");
                     }
                 }

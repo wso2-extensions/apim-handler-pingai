@@ -49,7 +49,7 @@ public class AISecurityException extends Exception {
 
     /**
      * returns an String that corresponds to errorCode passed in
-     * @param errorCode
+     * @param errorCode - error code
      * @return String
      */
     public static String getAuthenticationFailureMessage(int errorCode) {

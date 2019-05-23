@@ -41,19 +41,14 @@ import java.util.TreeMap;
 
 /**
  * This class is Handling the Ping Identity analysis. This class will use inside each API as securityenforcer.
- * It will fetch some of data from incoming message and send them to PING ASE.
+ * It will fetch some of meta data from incoming message and send them to PING API Security Enforcer.
  */
-
 public class PingAISecurityHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(PingAISecurityHandler.class);
 
-    /**
-     * Constructor will read the config file, initialize DataPublisher, ASEResponseStore. Cache will be initialized
-     * only if cache is enabled. If cache and sync both disabled, this feature will not work.
-     */
     public PingAISecurityHandler() {
-        log.debug("AISecurity Handler initialized");
+        log.debug("Ping AI Security Handler initialized");
     }
 
     /**
@@ -78,7 +73,8 @@ public class PingAISecurityHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 long difference = System.nanoTime() - handleRequestStartTime;
                 String messageDetails = logMessageDetails(messageContext);
-                log.debug("Call to Ping ASE : " + messageDetails + ", elapsedTimeInNano" + difference);
+                log.debug("Request " + requestCorrelationID + " failed. " + messageDetails + ", elapsedTimeInNano"
+                        + difference);
             }
             handleAuthFailure(messageContext, e);
         } finally {
@@ -154,12 +150,6 @@ public class PingAISecurityHandler extends AbstractHandler {
      */
     JSONObject extractRequestMetadata(MessageContext messageContext) throws AISecurityException {
 
-        String requestMethod;
-        String requestHttpVersion;
-        String requestPath;
-        String requestOriginIP;
-        int requestOriginPort;
-
         String requestCorrelationID = SecurityUtils.getAndSetCorrelationID(messageContext);
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
@@ -169,21 +159,17 @@ public class PingAISecurityHandler extends AbstractHandler {
                 .getTransportHeaders(axis2MessageContext, AISecurityHandlerConstants.ASE_RESOURCE_REQUEST,
                         requestCorrelationID);
 
-        requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
-        requestOriginPort = AISecurityHandlerConstants.DUMMY_REQUEST_PORT;
-        requestMethod = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.HTTP_METHOD_STRING);
-        requestPath = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.API_BASEPATH_STRING);
-        requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
+        String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
+        int requestOriginPort = AISecurityHandlerConstants.DUMMY_REQUEST_PORT;
+        String requestMethod = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.HTTP_METHOD_STRING);
+        String requestPath = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.API_BASEPATH_STRING);
+        String requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
 
         return createRequestJson(requestMethod, requestPath, requestHttpVersion, requestOriginIP, requestOriginPort,
                 transportHeaders);
     }
 
     JSONObject extractResponseMetadata(MessageContext messageContext) throws AISecurityException {
-
-        String responseCode;
-        String responseMessage;
-        String requestHttpVersion;
 
         String requestCorrelationID = SecurityUtils.getAndSetCorrelationID(messageContext);
 
@@ -194,10 +180,10 @@ public class PingAISecurityHandler extends AbstractHandler {
                 .getTransportHeaders(axis2MessageContext, AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE,
                         requestCorrelationID);
 
-        requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
-        responseCode = Integer.toString(
+        String requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
+        String responseCode = Integer.toString(
                 (Integer) axis2MessageContext.getProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_CODE));
-        responseMessage = (String) axis2MessageContext
+        String responseMessage = (String) axis2MessageContext
                 .getProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_MESSAGE);
 
         return createResponseJson(responseCode, responseMessage, requestHttpVersion, transportHeaders);
@@ -283,7 +269,7 @@ public class PingAISecurityHandler extends AbstractHandler {
         Date incomingReqTime = null;
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
-        String logMessage = "API call failed reason=Ping_AI_authentication_failure"; //"app-name=" + applicationName + " " + "user-name=" + endUserName;
+        String logMessage = "API call failed reason=Ping_AI_authentication_failure";
         String logID = axisMC.getOptions().getMessageId();
         if (applicationName != null) {
             logMessage = logMessage + " belonging to appName=" + applicationName;

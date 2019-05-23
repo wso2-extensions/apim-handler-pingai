@@ -29,7 +29,7 @@ public class AISecurityHandlerConfig {
 
     private String mode = "async";
     private int cacheExpiryTime = 15;
-    private boolean removeOAuthHeaderFromTransportHeaders = true;
+    private boolean removeOAuthHeaderFromTransportHeadersEnabled = true;
     private String authorizationHeader = HttpHeaders.AUTHORIZATION;
     private AISecurityHandlerConfig.AseConfig aseConfig;
     private AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfig;
@@ -55,12 +55,12 @@ public class AISecurityHandlerConfig {
         this.cacheExpiryTime = cacheExpiryTime;
     }
 
-    public boolean isRemoveOAuthHeaderFromTransportHeaders() {
-        return removeOAuthHeaderFromTransportHeaders;
+    public boolean isRemoveOAuthHeaderFromTransportHeadersEnabled() {
+        return removeOAuthHeaderFromTransportHeadersEnabled;
     }
 
-    public void setRemoveOAuthHeaderFromTransportHeaders(boolean removeOAuthHeaderFromTransportHeaders) {
-        this.removeOAuthHeaderFromTransportHeaders = removeOAuthHeaderFromTransportHeaders;
+    public void setRemoveOAuthHeaderFromTransportHeadersEnabled(boolean removeOAuthHeaderFromTransportHeadersEnabled) {
+        this.removeOAuthHeaderFromTransportHeadersEnabled = removeOAuthHeaderFromTransportHeadersEnabled;
     }
 
     public String getAuthorizationHeader() {

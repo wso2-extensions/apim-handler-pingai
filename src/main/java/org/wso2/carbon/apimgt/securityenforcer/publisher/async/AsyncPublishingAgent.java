@@ -92,7 +92,7 @@ public class AsyncPublishingAgent implements Runnable {
                 }
             }
         } else {
-            log.error("ASE response is null for the async request " + this.correlationID);
+            log.error("ASE response is null for the handle " + this.resource +" async request " + this.correlationID);
         }
     }
 

@@ -59,6 +59,16 @@ public class AISecurityHandlerConstants {
     public static final String DELETE = "DELETE";
     public static final String CREATE = "CREATE";
     public static final String LIST = "LIST";
+    public static final String ASE_MANAGEMENT_HEADER_ACCESS_KEY = "x-ase-access-key";
+    public static final String ASE_MANAGEMENT_HEADER_SECRET_KEY = "x-ase-secret-key";
+    public static final String ASE_MANAGEMENT_HEADER_ACCEPT = "Accept";
+    public static final String ASE_MANAGEMENT_HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME = "samplePingAIManagementPayload.json";
+    public static final String OAUTH_CONFIGURATIONS = "OAuthConfigurations";
+    public static final String ARTIFACT_ATTRIBUTE_API_NAME = "overview_name";
+    public static final String ARTIFACT_ATTRIBUTE_API_VERSION = "overview_version";
+    public static final String ARTIFACT_ATTRIBUTE_API_CONTEXT = "overview_context";
+    public static final String API_NAME_VERSION_CONNECTOR = "_";
     static final String HTTP_VERSION_CONNECTOR = ".";
     static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";
     static final String API_SECURITY_NS_PREFIX = "ams";
@@ -90,11 +100,7 @@ public class AISecurityHandlerConstants {
     static final String PASSWORD_CONFIGURATION = "Password";
     static final String LIMIT_TRANSPORT_HEADERS_CONFIGURATION = "LimitTransportHeaders";
     static final String HEADER_CONFIGURATION = "Header";
-    public static String ASE_MANAGEMENT_HEADER_ACCESS_KEY = "x-ase-access-key";
-    public static String ASE_MANAGEMENT_HEADER_SECRET_KEY = "x-ase-secret-key";
-    public static String ASE_MANAGEMENT_HEADER_ACCEPT = "Accept";
-    public static String ASE_MANAGEMENT_HEADER_CONTENT_TYPE = "Content-Type";
-    public static String ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME = "samplePingAIManagementPayload.json";
+
 
     private AISecurityHandlerConstants() {
     }

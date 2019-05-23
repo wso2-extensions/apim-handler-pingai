@@ -74,8 +74,8 @@ public class HttpDataPublisher {
     }
 
     public AseResponseDTO publish(JSONObject data, String correlationID, String resource) {
-        HttpPost postRequest = new HttpPost(this.getEndPoint() + resource);
-        postRequest.addHeader(AISecurityHandlerConstants.ASE_TOKEN_HEADER, this.getAuthToken());
+        HttpPost postRequest = new HttpPost(endPoint + resource);
+        postRequest.addHeader(AISecurityHandlerConstants.ASE_TOKEN_HEADER, authToken);
         postRequest.addHeader(AISecurityHandlerConstants.X_CORRELATION_ID_HEADER, correlationID);
 
         CloseableHttpResponse response = null;
@@ -138,39 +138,11 @@ public class HttpDataPublisher {
         return aseResponseDTO;
     }
 
-    private String getAuthToken() {
-
-        return authToken;
-    }
-
-    private void setAuthToken(String authToken) {
-
-        this.authToken = authToken;
-    }
-
-    private String getEndPoint() {
-
-        return endPoint;
-    }
-
-    private void setEndPoint(String endPoint) {
-
-        this.endPoint = endPoint;
-    }
-
     private AseResponseDTO getDefaultAcceptResponse() {
         AseResponseDTO aseResponseDTO = new AseResponseDTO();
         aseResponseDTO.setResponseCode(AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS);
         aseResponseDTO.setResponseMessage(AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS_MESSAGE);
         return aseResponseDTO;
-    }
-
-    public CloseableHttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    public void setHttpClient(CloseableHttpClient httpClient) {
-        this.httpClient = httpClient;
     }
 
     public StatusLine publishToASEManagementAPI(String type, Object request) {
@@ -191,11 +163,37 @@ public class HttpDataPublisher {
                 HttpDelete deleteRequest = (HttpDelete) request;
                 response = httpClient.execute(deleteRequest);
             }
-            return response.getStatusLine();
+            if(response != null)
+                return response.getStatusLine();
         } catch (Exception e) {
             log.error("Error occurred while publishing " + type + " request to ASE Management API", e);
         }
         return null;
     }
+
+    private String getAuthToken() {
+        return authToken;
+    }
+
+    private void setAuthToken(String authToken) {
+        this.authToken = authToken;
+    }
+
+    private String getEndPoint() {
+        return endPoint;
+    }
+
+    private void setEndPoint(String endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public void setHttpClient(CloseableHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
 }
 

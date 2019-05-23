@@ -109,12 +109,12 @@ public class SecurityUtils {
     public static JSONArray getTransportHeaders(org.apache.axis2.context.MessageContext axis2MessageContext,
             String sideBandCallType, String correlationID) throws AISecurityException {
 
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
+        TreeMap<String, String> transportHeadersMap = (TreeMap<String, String>) axis2MessageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-        if (transportHeaderMap != null) {
-            JSONArray transportHeaderArray = new JSONArray();
-            Set<String> headerKeysSet = new HashSet<String>(transportHeaderMap.keySet());
+        if (transportHeadersMap != null) {
+            JSONArray transportHeadersArray = new JSONArray();
+            Set<String> headerKeysSet = new HashSet<String>(transportHeadersMap.keySet());
 
             if (log.isDebugEnabled()) {
                 log.debug("Transport headers found for the request " + correlationID + " are " + headerKeysSet);
@@ -126,34 +126,38 @@ public class SecurityUtils {
             }
 
             if (AISecurityHandlerConstants.ASE_RESOURCE_REQUEST.equals(sideBandCallType)) {
-                String hostValue = transportHeaderMap.get(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME);
+                String hostValue = transportHeadersMap.get(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME);
                 if (hostValue != null) {
-                    transportHeaderArray.add(addObj(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME, hostValue));
+                    transportHeadersArray.add(addObj(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME, hostValue));
                     headerKeysSet.remove(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME);
                 } else {
                     log.error("Host not found in the transport headers for the request " + correlationID);
                     throw new AISecurityException(AISecurityException.CLIENT_REQUEST_ERROR,
                             AISecurityException.CLIENT_REQUEST_ERROR_MESSAGE);
                 }
-
-                if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .isRemoveOAuthHeaderFromTransportHeaders()) {
-                    String authorizationHeaderName = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                            .getAuthorizationHeader();
-                    if (transportHeaderMap.containsKey(authorizationHeaderName)) {
-                        transportHeaderMap.remove(authorizationHeaderName);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Authorization header removed from the transport headers.");
-                        }
-                    }
-                }
             }
 
             for (String headerKey : headerKeysSet) {
-                String headerValue = transportHeaderMap.get(headerKey);
-                transportHeaderArray.add(addObj(headerKey, headerValue));
+                String headerValue = transportHeadersMap.get(headerKey);
+                transportHeadersArray.add(addObj(headerKey, headerValue));
             }
-            return transportHeaderArray;
+            //TODO:OAuthHeader name should be changed in the ASE payload if a custom header name used.
+            if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                    .isRemoveOAuthHeaderFromTransportHeadersEnabled() && AISecurityHandlerConstants.ASE_RESOURCE_REQUEST
+                    .equals(sideBandCallType)) {
+                String authorizationHeaderName = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                        .getAuthorizationHeader();
+                if (transportHeadersMap.containsKey(authorizationHeaderName)) {
+                    transportHeadersMap.remove(authorizationHeaderName);
+                    log.debug("Authorization header removed from the transport headers.");
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Remove OAuth header was set. However" + authorizationHeaderName
+                                + " header was not found in the transport headers.");
+                    }
+                }
+            }
+            return transportHeadersArray;
         } else {
             log.error("No Transport headers found for the request " + correlationID);
             throw new AISecurityException(AISecurityException.CLIENT_REQUEST_ERROR,
@@ -185,7 +189,6 @@ public class SecurityUtils {
         PoolingHttpClientConnectionManager pool;
         try {
             pool = SecurityUtils.getPoolingHttpClientConnectionManager(protocol);
-
         } catch (Exception e) {
             throw new AISecurityException(e);
         }
@@ -193,6 +196,7 @@ public class SecurityUtils {
         pool.setMaxTotal(dataPublisherConfiguration.getMaxOpenConnections());
         pool.setDefaultMaxPerRoute(dataPublisherConfiguration.getMaxPerRoute());
 
+        //Socket timeout is set to 10 seconds addition to connection timeout.
         RequestConfig params = RequestConfig.custom()
                 .setConnectTimeout(dataPublisherConfiguration.getConnectionTimeout() * 1000)
                 .setSocketTimeout((dataPublisherConfiguration.getConnectionTimeout() + 10) * 10000).build();
@@ -221,7 +225,7 @@ public class SecurityUtils {
      * Return a PoolingHttpClientConnectionManager instance
      *
      * @param protocol- service endpoint protocol. It can be http/https
-     * @return
+     * @return PoolManager
      */
     private static PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager(String protocol)
             throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException, IOException,
@@ -254,13 +258,10 @@ public class SecurityUtils {
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("https", sslsf).build();
             poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-
         } else {
             poolManager = new PoolingHttpClientConnectionManager();
         }
-
         return poolManager;
-
     }
 
     /**
@@ -290,7 +291,6 @@ public class SecurityUtils {
         } else {
             remoteIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
-
         return remoteIP;
     }
 
@@ -323,7 +323,7 @@ public class SecurityUtils {
      * Return the httpVersion of the request
      *
      * @param axis2MessageContext - synapse variables
-     * @return
+     * @return payload - HTTP version of the request
      */
     public static String getHttpVersion(org.apache.axis2.context.MessageContext axis2MessageContext) {
 
