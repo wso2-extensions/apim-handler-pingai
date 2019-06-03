@@ -64,22 +64,23 @@ public class AISecurityHandlerConstants {
     public static final String ASE_MANAGEMENT_HEADER_ACCEPT = "Accept";
     public static final String ASE_MANAGEMENT_HEADER_CONTENT_TYPE = "Content-Type";
     public static final String ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME = "samplePingAIManagementPayload.json";
-    public static final String OAUTH_CONFIGURATIONS = "OAuthConfigurations";
     public static final String ARTIFACT_ATTRIBUTE_API_NAME = "overview_name";
     public static final String ARTIFACT_ATTRIBUTE_API_VERSION = "overview_version";
     public static final String ARTIFACT_ATTRIBUTE_API_CONTEXT = "overview_context";
     public static final String API_NAME_VERSION_CONNECTOR = "_";
+    public static final String API_KEY_HEADER_NAME = "APIKey";
+    public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     static final String HTTP_VERSION_CONNECTOR = ".";
     static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";
     static final String API_SECURITY_NS_PREFIX = "ams";
     static final String PING_AI_SECURITY_HANDLER_CONFIGURATION = "PingAISecurityHandler";
     static final String OPERATION_MODE_CONFIGURATION = "OperationMode";
     static final String CACHE_EXPIRY_TIME_CONFIG = "CacheExpiryTime";
+    static final String APPLY_FOR_ALL_APIS_CONFIG = "ApplyForAllAPIs";
     static final String API_SECURITY_ENFORCER_CONFIGURATION = "APISecurityEnforcer";
     static final String END_POINT_CONFIGURATION = "EndPoint";
     static final String ASE_TOKEN_CONFIGURATION = "ASEToken";
-    static final String API_DISCOVERY_CONFIGURATION = "APIDiscovery";
-    static final String MANAGE_ASE_CONFIGURATION = "ManagementEndpoint";
+    static final String MODEL_CREATION_ENDPOINT_CONFIGURATION = "ModelCreationEndpoint";
     static final String ACCESS_KEY_CONFIGURATION = "AccessKey";
     static final String SECRET_KEY_CONFIGURATION = "SecretKey";
     static final String DATA_PUBLISHER_CONFIGURATION = "DataPublisher";
@@ -93,14 +94,8 @@ public class AISecurityHandlerConstants {
     static final String STACK_OBJECT_POOL_CONFIGURATION = "StackObjectPool";
     static final String MAX_IDLE_CONFIGURATION = "MaxIdle";
     static final String INIT_IDLE_CAPACITY_CONFIGURATION = "InitIdleCapacity";
-    static final String PROXY_CONFIGURATION = "Proxy";
-    static final String HOST_NAME_CONFIGURATION = "Hostname";
-    static final String PORT_CONFIGURATION = "Port";
-    static final String USER_NAME_CONFIGURATION = "UserName";
-    static final String PASSWORD_CONFIGURATION = "Password";
     static final String LIMIT_TRANSPORT_HEADERS_CONFIGURATION = "LimitTransportHeaders";
     static final String HEADER_CONFIGURATION = "Header";
-
 
     private AISecurityHandlerConstants() {
     }

@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.securityenforcer.internal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Component;
@@ -38,6 +41,9 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 @Component(name = "org.wso2.carbon.apimgt.securityenforcer", immediate = true)
 public class PingAIHandlerComponent implements BundleActivator {
@@ -51,9 +57,11 @@ public class PingAIHandlerComponent implements BundleActivator {
         log.info("OSGi start method for Ping AI security handler");
 
         AISecurityHandlerConfig securityHandlerConfig = getConfigData();
+        JSONObject managementAPIPayload = getManagementAPIPayload();
         logConfigData(securityHandlerConfig);
         operationMode = securityHandlerConfig.getMode();
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
+        ServiceReferenceHolder.getInstance().setManagementAPIPayload(managementAPIPayload);
 
         Publisher requestPublisher;
         Publisher responsePublisher;
@@ -89,10 +97,9 @@ public class PingAIHandlerComponent implements BundleActivator {
         AISecurityHandlerConfig.AseConfig aseConfiguration = securityHandlerConfig.getAseConfig();
         AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration = securityHandlerConfig
                 .getDataPublisherConfig();
-        AISecurityHandlerConfig.ProxyConfig proxyConfiguration = securityHandlerConfig.getProxyConfig();
 
         try {
-            httpDataPublisher = new HttpDataPublisher(aseConfiguration, dataPublisherConfiguration, proxyConfiguration);
+            httpDataPublisher = new HttpDataPublisher(aseConfiguration, dataPublisherConfiguration);
         } catch (AISecurityException e) {
             log.error("Error when creating a httpDataPublisher Instance " + e.getMessage());
             throw new Exception(e);
@@ -131,22 +138,36 @@ public class PingAIHandlerComponent implements BundleActivator {
         return configuration.getPingAISecurityHandlerProperties();
     }
 
+    private JSONObject getManagementAPIPayload() {
+        InputStream inputStreamObject;
+        JSONParser jsonParser = new JSONParser();
+        JSONObject managementAPIPayloadJson = null;
+
+        try {
+            inputStreamObject = PingAIHandlerComponent.class
+                    .getResourceAsStream(AISecurityHandlerConstants.ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME);
+            managementAPIPayloadJson = (JSONObject) jsonParser
+                    .parse(new InputStreamReader(inputStreamObject, StandardCharsets.UTF_8));
+        } catch (IOException | ParseException e) {
+            log.error("Error when reading the payload", e);
+        }
+        return managementAPIPayloadJson;
+    }
+
     private void logConfigData(AISecurityHandlerConfig securityHandlerConfig) {
 
         if (log.isDebugEnabled()) {
             String logMessage = "Ping AI configurations- ";
             logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
             logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
-            logMessage = logMessage + ", Remove OAuth Header: " + securityHandlerConfig
-                    .isRemoveOAuthHeaderFromTransportHeadersEnabled();
             logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
             logMessage = logMessage + ", ASE Token: " + securityHandlerConfig.getAseConfig().getAseToken();
-            logMessage = logMessage + ", Management Endpoint: " + securityHandlerConfig.getApiDiscoveryConfig()
+            logMessage = logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig()
                     .getManagementAPIEndpoint();
-            logMessage =
-                    logMessage + ", ASE AccessKey: " + securityHandlerConfig.getApiDiscoveryConfig().getAccessKey();
-            logMessage =
-                    logMessage + ", ASE SecretKey: " + securityHandlerConfig.getApiDiscoveryConfig().getSecretKey();
+            logMessage = logMessage + ", ASE AccessKey: " + securityHandlerConfig.getModelCreationEndpointConfig()
+                    .getAccessKey();
+            logMessage = logMessage + ", ASE SecretKey: " + securityHandlerConfig.getModelCreationEndpointConfig()
+                    .getSecretKey();
             logMessage = logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig()
                     .getMaxPerRoute();
             logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig
@@ -164,14 +185,6 @@ public class PingAIHandlerComponent implements BundleActivator {
                     .getMaxIdle();
             logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig
                     .getStackObjectPoolConfig().getInitIdleCapacity();
-            if (securityHandlerConfig.getProxyConfig().isProxyEnabled()) {
-                logMessage = logMessage + ", Proxy- Hostname: " + securityHandlerConfig.getProxyConfig().getHostname();
-                logMessage = logMessage + ", Proxy- Port: " + securityHandlerConfig.getProxyConfig().getPort();
-                logMessage = logMessage + ", Proxy- UserName: " + securityHandlerConfig.getProxyConfig().getUserName();
-                logMessage = logMessage + ", Proxy- Password: " + securityHandlerConfig.getProxyConfig().getPassword();
-            } else {
-                logMessage = logMessage + ", Proxy Disabled";
-            }
             if (securityHandlerConfig.getLimitTransportHeaders().isEnable()) {
                 logMessage = logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders()
                         .getHeaderSet().toString();

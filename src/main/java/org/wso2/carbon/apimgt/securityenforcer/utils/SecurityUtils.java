@@ -19,52 +19,24 @@
 package org.wso2.carbon.apimgt.securityenforcer.utils;
 
 import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFactory;
-import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.soap.SOAPFaultCode;
-import org.apache.axiom.soap.SOAPFaultDetail;
-import org.apache.axiom.soap.SOAPFaultReason;
-import org.apache.axiom.soap.SOAPFaultText;
-import org.apache.axiom.soap.SOAPFaultValue;
-import org.apache.axiom.soap.SOAPHeader;
-import org.apache.axiom.soap.SOAPHeaderBlock;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.addressing.RelatesTo;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.ServerWorker;
 import org.apache.synapse.transport.passthru.SourceRequest;
 import org.json.simple.JSONArray;
@@ -80,16 +52,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
-import javax.xml.namespace.QName;
 
 public class SecurityUtils {
 
@@ -141,22 +109,6 @@ public class SecurityUtils {
                 String headerValue = transportHeadersMap.get(headerKey);
                 transportHeadersArray.add(addObj(headerKey, headerValue));
             }
-            //TODO:OAuthHeader name should be changed in the ASE payload if a custom header name used.
-            if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                    .isRemoveOAuthHeaderFromTransportHeadersEnabled() && AISecurityHandlerConstants.ASE_RESOURCE_REQUEST
-                    .equals(sideBandCallType)) {
-                String authorizationHeaderName = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getAuthorizationHeader();
-                if (transportHeadersMap.containsKey(authorizationHeaderName)) {
-                    transportHeadersMap.remove(authorizationHeaderName);
-                    log.debug("Authorization header removed from the transport headers.");
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Remove OAuth header was set. However" + authorizationHeaderName
-                                + " header was not found in the transport headers.");
-                    }
-                }
-            }
             return transportHeadersArray;
         } else {
             log.error("No Transport headers found for the request " + correlationID);
@@ -165,7 +117,7 @@ public class SecurityUtils {
         }
     }
 
-    private static JSONObject addObj(String key, Object value) {
+    public static JSONObject addObj(String key, Object value) {
         JSONObject obj = new JSONObject();
         obj.put(key, value);
         return obj;
@@ -179,12 +131,11 @@ public class SecurityUtils {
      *          maxPerRoute- maximum number of HTTP connections allowed across all routes.
      *          maxOpenConnections- maximum number of HTTP connections allowed for a route.
      *          connectionTimeout- the time to establish the connection with the remote host
-     * @param proxyConfiguration- proxy configurations
+     *
      * @return CloseableHttpClient
      */
     public static CloseableHttpClient getHttpClient(String protocol,
-            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration,
-            AISecurityHandlerConfig.ProxyConfig proxyConfiguration) throws AISecurityException {
+            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration) throws AISecurityException {
 
         PoolingHttpClientConnectionManager pool;
         try {
@@ -201,24 +152,7 @@ public class SecurityUtils {
                 .setConnectTimeout(dataPublisherConfiguration.getConnectionTimeout() * 1000)
                 .setSocketTimeout((dataPublisherConfiguration.getConnectionTimeout() + 10) * 10000).build();
 
-        if (proxyConfiguration.isProxyEnabled()) {
-            HttpHost proxy = new HttpHost(proxyConfiguration.getHostname(), proxyConfiguration.getPort());
-            DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxy);
-            AuthCache authCache = new BasicAuthCache();
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(
-                    new AuthScope(proxyConfiguration.getHostname(), proxyConfiguration.getPort(), AuthScope.ANY_HOST,
-                            null), new UsernamePasswordCredentials(proxyConfiguration.getUserName(),
-                            proxyConfiguration.getPassword()));
-            HttpClientContext context = HttpClientContext.create();
-            context.setCredentialsProvider(credentialsProvider);
-            context.setAuthCache(authCache);
-
-            return HttpClients.custom().setConnectionManager(pool).setDefaultCredentialsProvider(credentialsProvider)
-                    .setRoutePlanner(routePlanner).setDefaultRequestConfig(params).build();
-        } else {
-            return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
-        }
+        return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
     }
 
     /**
@@ -306,14 +240,14 @@ public class SecurityUtils {
         if (correlationObj != null) {
             correlationID = (String) correlationObj;
             if (log.isDebugEnabled()) {
-                log.debug("Correlation ID is available in the message context.");
+                log.debug("Correlation ID is available in the message context." + correlationID);
             }
         } else {
             correlationID = UUID.randomUUID().toString();
             messageContext.setProperty("am.correlationID", correlationID);
             if (log.isDebugEnabled()) {
-                log.debug(
-                        "Correlation ID is not available in the message context. Setting a new ID to message context.");
+                log.debug("Correlation ID is not available in the message context. Setting a new ID to message context."
+                        + correlationID);
             }
         }
         return correlationID;
@@ -351,130 +285,6 @@ public class SecurityUtils {
         payload.addChild(errorMessage);
         payload.addChild(errorDetail);
         return payload;
-    }
-
-    public static void setFaultPayload(org.apache.synapse.MessageContext messageContext, OMElement payload) {
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        JsonUtil.removeJsonPayload(axis2MC);
-        messageContext.getEnvelope().getBody().addChild(payload);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
-        Set<String> supportedMimes = new HashSet<String>(
-                Arrays.asList("application/x-www-form-urlencoded", "multipart/form-data", "text/html",
-                        "application/xml", "text/xml", "application/soap+xml", "text/plain", "application/json",
-                        "application/json/badgerfish", "text/javascript"));
-
-        // If an Accept header has been provided and is supported by the Gateway
-        if (!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)) {
-            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
-        } else {
-            // If there isn't Accept Header in the request, will use error_message_type property
-            // from _auth_failure_handler_.xml file
-            if (messageContext.getProperty("error_message_type") != null) {
-                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                        messageContext.getProperty("error_message_type"));
-            }
-        }
-    }
-
-    public static void sendFault(org.apache.synapse.MessageContext messageContext, int status) {
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-
-        axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);
-        axis2MC.removeProperty("NO_ENTITY_BODY");
-
-        // Always remove the ContentType - Let the formatter do its thing
-        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers != null) {
-            headers.remove(HttpHeaders.AUTHORIZATION);
-            headers.remove(HttpHeaders.AUTHORIZATION);
-
-            headers.remove(HttpHeaders.HOST);
-        }
-        Axis2Sender.sendBack(messageContext);
-    }
-
-    public static void setSOAPFault(org.apache.synapse.MessageContext messageContext, String code, String reason,
-            String detail) {
-        SOAPFactory factory = (messageContext.isSOAP11() ?
-                OMAbstractFactory.getSOAP11Factory() :
-                OMAbstractFactory.getSOAP12Factory());
-
-        OMDocument soapFaultDocument = factory.createOMDocument();
-        SOAPEnvelope faultEnvelope = factory.getDefaultFaultEnvelope();
-        soapFaultDocument.addChild(faultEnvelope);
-
-        SOAPFault fault = faultEnvelope.getBody().getFault();
-        if (fault == null) {
-            fault = factory.createSOAPFault();
-        }
-
-        SOAPFaultCode faultCode = factory.createSOAPFaultCode();
-        if (messageContext.isSOAP11()) {
-            faultCode.setText(new QName(fault.getNamespace().getNamespaceURI(), code));
-        } else {
-            SOAPFaultValue value = factory.createSOAPFaultValue(faultCode);
-            value.setText(new QName(fault.getNamespace().getNamespaceURI(), code));
-        }
-        fault.setCode(faultCode);
-
-        SOAPFaultReason faultReason = factory.createSOAPFaultReason();
-        if (messageContext.isSOAP11()) {
-            faultReason.setText(reason);
-        } else {
-            SOAPFaultText text = factory.createSOAPFaultText();
-            text.setText(reason);
-            text.setLang("en");
-            faultReason.addSOAPText(text);
-        }
-        fault.setReason(faultReason);
-
-        SOAPFaultDetail soapFaultDetail = factory.createSOAPFaultDetail();
-        soapFaultDetail.setText(detail);
-        fault.setDetail(soapFaultDetail);
-
-        // set the all headers of original SOAP Envelope to the Fault Envelope
-        if (messageContext.getEnvelope() != null) {
-            SOAPHeader soapHeader = messageContext.getEnvelope().getHeader();
-            if (soapHeader != null) {
-                for (Iterator iterator = soapHeader.examineAllHeaderBlocks(); iterator.hasNext(); ) {
-                    Object o = iterator.next();
-                    if (o instanceof SOAPHeaderBlock) {
-                        SOAPHeaderBlock header = (SOAPHeaderBlock) o;
-                        faultEnvelope.getHeader().addChild(header);
-                    } else if (o instanceof OMElement) {
-                        faultEnvelope.getHeader().addChild((OMElement) o);
-                    }
-                }
-            }
-        }
-
-        try {
-            messageContext.setEnvelope(faultEnvelope);
-        } catch (AxisFault af) {
-            log.error("Error while setting SOAP fault as payload", af);
-            return;
-        }
-
-        if (messageContext.getFaultTo() != null) {
-            messageContext.setTo(messageContext.getFaultTo());
-        } else if (messageContext.getReplyTo() != null) {
-            messageContext.setTo(messageContext.getReplyTo());
-        } else {
-            messageContext.setTo(null);
-        }
-
-        // set original messageID as relatesTo
-        if (messageContext.getMessageID() != null) {
-            RelatesTo relatesTo = new RelatesTo(messageContext.getMessageID());
-            messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
-        }
     }
 
     public static void updateLatency(Long latency, MessageContext messageContext) {

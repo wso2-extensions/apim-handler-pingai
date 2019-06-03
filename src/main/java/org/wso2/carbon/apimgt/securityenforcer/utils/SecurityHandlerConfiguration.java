@@ -100,15 +100,6 @@ public class SecurityHandlerConfiguration {
             String localName = element.getLocalName();
             nameStack.push(localName);
 
-            if (AISecurityHandlerConstants.OAUTH_CONFIGURATIONS.equals(localName)) {
-                try {
-                    setOAuthHeaderName(serverConfig);
-                } catch (Exception e) {
-                    log.error("Error while reading custom authorization header", e);
-                    throw new AISecurityException(AISecurityException.HANDLER_ERROR,
-                            AISecurityException.HANDLER_ERROR_MESSAGE, e);
-                }
-            }
             if (AISecurityHandlerConstants.PING_AI_SECURITY_HANDLER_CONFIGURATION.equals(localName)) {
                 try {
                     setPingAISecurityHandlerProperties(serverConfig);
@@ -154,15 +145,14 @@ public class SecurityHandlerConfiguration {
                 log.debug("Cache expiry is not set. Set to default: " + securityHandlerConfig.getCacheExpiryTime());
             }
 
-            //Remove OAuth Header
-            OMElement removeOAuthHeaderElement = aiSecurityConfigurationElement
-                    .getFirstChildWithName(new QName("RemoveOAuthHeader"));
-            if (removeOAuthHeaderElement != null) {
-                securityHandlerConfig.setRemoveOAuthHeaderFromTransportHeadersEnabled(
-                        JavaUtils.isTrueExplicitly((removeOAuthHeaderElement.getText())));
+            //Get Apply for all APIs
+            OMElement applyForAllAPIsElement = aiSecurityConfigurationElement
+                    .getFirstChildWithName(new QName(AISecurityHandlerConstants.APPLY_FOR_ALL_APIS_CONFIG));
+            if (applyForAllAPIsElement != null) {
+                securityHandlerConfig.setApplyForAllAPIs(JavaUtils.isTrueExplicitly(applyForAllAPIsElement.getText()));
             } else {
-                log.debug("Remove OAuth header from transport headers is not set. Set to default: "
-                        + securityHandlerConfig.isRemoveOAuthHeaderFromTransportHeadersEnabled());
+                log.debug("Apply For All APIs Element is not set. Set to default: " + securityHandlerConfig
+                        .isApplyForAllAPIs());
             }
 
             //Get ASE config data
@@ -195,47 +185,47 @@ public class SecurityHandlerConfiguration {
                             AISecurityException.HANDLER_ERROR_MESSAGE);
                 }
 
-                OMElement apiDiscoveryElement = aseConfigElement
-                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_DISCOVERY_CONFIGURATION));
-                AISecurityHandlerConfig.APIDiscovery apiDiscoveryConfig = new AISecurityHandlerConfig.APIDiscovery();
-                if (apiDiscoveryElement != null) {
+                OMElement modelCreationEndpointElement = aseConfigElement.getFirstChildWithName(
+                        new QName(AISecurityHandlerConstants.MODEL_CREATION_ENDPOINT_CONFIGURATION));
+                AISecurityHandlerConfig.ModelCreationEndpoint modelCreationEndpointConfig = new AISecurityHandlerConfig.ModelCreationEndpoint();
+                if (modelCreationEndpointElement != null) {
                     boolean configMissing = false;
-                    OMElement managementEndpointElement = apiDiscoveryElement
-                            .getFirstChildWithName(new QName(AISecurityHandlerConstants.MANAGE_ASE_CONFIGURATION));
+                    OMElement managementEndpointElement = modelCreationEndpointElement
+                            .getFirstChildWithName(new QName(AISecurityHandlerConstants.END_POINT_CONFIGURATION));
                     if (managementEndpointElement != null) {
-                        apiDiscoveryConfig.setManagementAPIEndpoint(managementEndpointElement.getText());
+                        modelCreationEndpointConfig.setManagementAPIEndpoint(managementEndpointElement.getText());
                     } else
                         configMissing = true;
 
-                    OMElement accessKeyElement = apiDiscoveryElement
+                    OMElement accessKeyElement = modelCreationEndpointElement
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.ACCESS_KEY_CONFIGURATION));
                     if (accessKeyElement != null) {
                         if (secretResolver.isInitialized() && secretResolver
                                 .isTokenProtected("APIManager.PingAISecurityHandler.ASE.AccessKey")) {
-                            apiDiscoveryConfig.setAccessKey(
+                            modelCreationEndpointConfig.setAccessKey(
                                     secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.AccessKey"));
                         } else {
-                            apiDiscoveryConfig.setAccessKey(accessKeyElement.getText());
+                            modelCreationEndpointConfig.setAccessKey(accessKeyElement.getText());
                         }
                     } else
                         configMissing = true;
 
-                    OMElement secretKeyElement = apiDiscoveryElement
+                    OMElement secretKeyElement = modelCreationEndpointElement
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.SECRET_KEY_CONFIGURATION));
                     if (secretKeyElement != null) {
                         if (secretResolver.isInitialized() && secretResolver
                                 .isTokenProtected("APIManager.PingAISecurityHandler.ASE.SecretKey")) {
-                            apiDiscoveryConfig.setSecretKey(
+                            modelCreationEndpointConfig.setSecretKey(
                                     secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.SecretKey"));
                         } else {
-                            apiDiscoveryConfig.setSecretKey(secretKeyElement.getText());
+                            modelCreationEndpointConfig.setSecretKey(secretKeyElement.getText());
                         }
                     } else
                         configMissing = true;
 
                     if (!configMissing) {
-                        apiDiscoveryConfig.setEnable(true);
-                        securityHandlerConfig.setApiDiscoveryConfig(apiDiscoveryConfig);
+                        modelCreationEndpointConfig.setEnable(true);
+                        securityHandlerConfig.setModelCreationEndpointConfig(modelCreationEndpointConfig);
                     }
                 } else {
                     log.error("Ping AI config error - ASE config not found");
@@ -324,47 +314,6 @@ public class SecurityHandlerConfiguration {
             }
             securityHandlerConfig.setStackObjectPoolConfig(stackObjectPoolConfig);
 
-            //Get proxy config data
-            OMElement proxyConfigElement = aiSecurityConfigurationElement
-                    .getFirstChildWithName(new QName(AISecurityHandlerConstants.PROXY_CONFIGURATION));
-            AISecurityHandlerConfig.ProxyConfig proxyConfig = new AISecurityHandlerConfig.ProxyConfig();
-            if (proxyConfigElement != null) {
-                proxyConfig.setProxyEnabled(true);
-
-                OMElement hostnameElement = proxyConfigElement
-                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.HOST_NAME_CONFIGURATION));
-                if (hostnameElement != null) {
-                    proxyConfig.setHostname(hostnameElement.getText());
-                }
-
-                OMElement portElement = proxyConfigElement
-                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.PORT_CONFIGURATION));
-                if (portElement != null) {
-                    proxyConfig.setPort(Integer.parseInt(portElement.getText()));
-                }
-
-                OMElement userNameElement = proxyConfigElement
-                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.USER_NAME_CONFIGURATION));
-                if (userNameElement != null) {
-                    proxyConfig.setUserName(userNameElement.getText());
-                }
-
-                OMElement passwordElement = proxyConfigElement
-                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.PASSWORD_CONFIGURATION));
-                if (passwordElement != null) {
-                    if (secretResolver.isInitialized() && secretResolver
-                            .isTokenProtected("APIManager.PingAISecurityHandler.Proxy.Password")) {
-                        proxyConfig
-                                .setPassword(secretResolver.resolve("APIManager.PingAISecurityHandler.Proxy.Password"));
-                    } else {
-                        proxyConfig.setPassword(passwordElement.getText());
-                    }
-                }
-            } else {
-                log.debug("Proxy config is not set. Set to default.");
-            }
-            securityHandlerConfig.setProxyConfig(proxyConfig);
-
             //Get limit transport headers config data
             OMElement limitTransportHeadersElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.LIMIT_TRANSPORT_HEADERS_CONFIGURATION));
@@ -387,17 +336,6 @@ public class SecurityHandlerConfiguration {
                 log.debug("Limit transport headers config is not set. Set to default.");
             }
             securityHandlerConfig.setLimitTransportHeaders(limitTransportHeadersConfig);
-        }
-    }
-
-    private void setOAuthHeaderName(OMElement element) {
-        OMElement authorizationHeaderElement = element.getFirstChildWithName(new QName("AuthorizationHeader"));
-        if (authorizationHeaderElement != null) {
-            securityHandlerConfig.setAuthorizationHeader(authorizationHeaderElement.getText());
-            log.debug("Custom OAuth header is set." + securityHandlerConfig.getAuthorizationHeader());
-        } else {
-            log.debug(
-                    "Custom OAuth header is not set. Set to default " + securityHandlerConfig.getAuthorizationHeader());
         }
     }
 

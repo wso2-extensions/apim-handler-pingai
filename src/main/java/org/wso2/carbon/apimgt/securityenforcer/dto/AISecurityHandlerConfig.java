@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.dto;
 
-import org.apache.http.HttpHeaders;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
 import java.util.Set;
 
@@ -27,17 +27,23 @@ import java.util.Set;
 
 public class AISecurityHandlerConfig {
 
-    private String mode = "async";
+    private boolean applyForAllAPIs = true;
+    private String mode = AISecurityHandlerConstants.ASYNC_MODE_STRING;
     private int cacheExpiryTime = 15;
-    private boolean removeOAuthHeaderFromTransportHeadersEnabled = true;
-    private String authorizationHeader = HttpHeaders.AUTHORIZATION;
     private AISecurityHandlerConfig.AseConfig aseConfig;
     private AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfig;
-    private AISecurityHandlerConfig.ProxyConfig proxyConfig;
     private AISecurityHandlerConfig.StackObjectPoolConfig stackObjectPoolConfig;
     private AISecurityHandlerConfig.ThreadPoolExecutorConfig threadPoolExecutorConfig;
     private AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeaders;
-    private AISecurityHandlerConfig.APIDiscovery apiDiscoveryConfig;
+    private ModelCreationEndpoint modelCreationEndpointConfig;
+
+    public boolean isApplyForAllAPIs() {
+        return applyForAllAPIs;
+    }
+
+    public void setApplyForAllAPIs(boolean applyForAllAPIs) {
+        this.applyForAllAPIs = applyForAllAPIs;
+    }
 
     public String getMode() {
         return mode;
@@ -53,22 +59,6 @@ public class AISecurityHandlerConfig {
 
     public void setCacheExpiryTime(int cacheExpiryTime) {
         this.cacheExpiryTime = cacheExpiryTime;
-    }
-
-    public boolean isRemoveOAuthHeaderFromTransportHeadersEnabled() {
-        return removeOAuthHeaderFromTransportHeadersEnabled;
-    }
-
-    public void setRemoveOAuthHeaderFromTransportHeadersEnabled(boolean removeOAuthHeaderFromTransportHeadersEnabled) {
-        this.removeOAuthHeaderFromTransportHeadersEnabled = removeOAuthHeaderFromTransportHeadersEnabled;
-    }
-
-    public String getAuthorizationHeader() {
-        return authorizationHeader;
-    }
-
-    public void setAuthorizationHeader(String authorizationHeader) {
-        this.authorizationHeader = authorizationHeader;
     }
 
     public AISecurityHandlerConfig.AseConfig getAseConfig() {
@@ -103,14 +93,6 @@ public class AISecurityHandlerConfig {
         this.stackObjectPoolConfig = stackObjectPoolConfig;
     }
 
-    public ProxyConfig getProxyConfig() {
-        return proxyConfig;
-    }
-
-    public void setProxyConfig(ProxyConfig proxyConfig) {
-        this.proxyConfig = proxyConfig;
-    }
-
     public LimitTransportHeaders getLimitTransportHeaders() {
         return limitTransportHeaders;
     }
@@ -119,12 +101,12 @@ public class AISecurityHandlerConfig {
         this.limitTransportHeaders = limitTransportHeaders;
     }
 
-    public APIDiscovery getApiDiscoveryConfig() {
-        return apiDiscoveryConfig;
+    public ModelCreationEndpoint getModelCreationEndpointConfig() {
+        return modelCreationEndpointConfig;
     }
 
-    public void setApiDiscoveryConfig(APIDiscovery apiDiscoveryConfig) {
-        this.apiDiscoveryConfig = apiDiscoveryConfig;
+    public void setModelCreationEndpointConfig(ModelCreationEndpoint modelCreationEndpointConfig) {
+        this.modelCreationEndpointConfig = modelCreationEndpointConfig;
     }
 
     public static class AseConfig {
@@ -177,55 +159,6 @@ public class AISecurityHandlerConfig {
 
         public void setConnectionTimeout(Integer connectionTimeout) {
             this.connectionTimeout = connectionTimeout;
-        }
-    }
-
-    public static class ProxyConfig {
-
-        private Boolean proxyEnabled = false;
-        private String hostname;
-        private Integer port;
-        private String userName;
-        private String password;
-
-        public Boolean isProxyEnabled() {
-            return proxyEnabled;
-        }
-
-        public void setProxyEnabled(Boolean proxyEnabled) {
-            this.proxyEnabled = proxyEnabled;
-        }
-
-        public String getHostname() {
-            return hostname;
-        }
-
-        public void setHostname(String hostname) {
-            this.hostname = hostname;
-        }
-
-        public Integer getPort() {
-            return port;
-        }
-
-        public void setPort(Integer port) {
-            this.port = port;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
         }
     }
 
@@ -304,7 +237,7 @@ public class AISecurityHandlerConfig {
         }
     }
 
-    public static class APIDiscovery {
+    public static class ModelCreationEndpoint {
 
         private boolean enable = false;
         private String managementAPIEndpoint;

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.internal;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
@@ -30,6 +31,7 @@ public class ServiceReferenceHolder {
     private volatile Publisher requestPublisher;
     private volatile Publisher responsePublisher;
     private volatile HttpDataPublisher httpDataPublisher;
+    private JSONObject managementAPIPayload;
 
     private ServiceReferenceHolder() {
     }
@@ -68,5 +70,13 @@ public class ServiceReferenceHolder {
 
     public void setHttpDataPublisher(HttpDataPublisher httpDataPublisher) {
         this.httpDataPublisher = httpDataPublisher;
+    }
+
+    public JSONObject getManagementAPIPayload() {
+        return managementAPIPayload;
+    }
+
+    public void setManagementAPIPayload(JSONObject managementAPIPayload) {
+        this.managementAPIPayload = managementAPIPayload;
     }
 }

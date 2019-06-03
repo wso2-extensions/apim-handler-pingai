@@ -28,6 +28,8 @@
         <!--Three operation modes. "sync", "async" and "hybrid" -->
         <OperationMode>MODE</OperationMode>
 
+        <ApplyForAllAPIs>false</ApplyForAllAPIs>
+
         <!--Cache Expiry time in minutes.-->
         <CacheExpiryTime>15</CacheExpiryTime>
 
@@ -43,11 +45,11 @@
 
             <!--Configurations related to management REST API of the Ping API Security Enforcer. This API is used to
             create, update, list, delete models for the APIs.-->
-            <APIDiscovery>
-                <ManagementEndpoint>ENDPOINT</ManagementEndpoint>
+            <ModelCreationEndpoint>
+                <Endpoint>ENDPOINT</Endpoint>
                 <AccessKey>MANAGEMENT_PORTAL_ACCESS_KEY</AccessKey>
                 <SecretKey>SECRET_KEY</SecretKey>
-            </APIDiscovery>
+            </ModelCreationEndpoint>
         </APISecurityEnforcer>
 
 
@@ -94,16 +96,6 @@
             to be pre-populated)-->
             <InitIdleCapacity>200</InitIdleCapacity>
         </StackObjectPool>
-
-
-        <!-- Uncomment this section only if you are going to deploy api-manager with a proxy server.
-         Unless a proxy server is used, you don't need to configure this section. -->
-        <!--Proxy>
-            <Hostname>www.example.com</Hostname>
-            <Port>8888</Port>
-            <UserName>username</UserName>
-            <Password>password</Password>
-        </Proxy-->
 
 
         <!-- Uncomment this section only if you need to limit the transport headers which are sent to API Security Enforcer.

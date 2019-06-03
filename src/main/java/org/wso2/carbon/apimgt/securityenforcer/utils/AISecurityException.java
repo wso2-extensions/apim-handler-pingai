@@ -25,11 +25,11 @@ package org.wso2.carbon.apimgt.securityenforcer.utils;
 public class AISecurityException extends Exception {
 
     public static final int HANDLER_ERROR = 90100;
-    public static final String HANDLER_ERROR_MESSAGE = "Unexpected Handler failure";
+    public static final String HANDLER_ERROR_MESSAGE = "AI Security Handler: Unexpected Handler failure";
     public static final int CLIENT_REQUEST_ERROR = 90101;
-    public static final String CLIENT_REQUEST_ERROR_MESSAGE = "Error with the client request";
+    public static final String CLIENT_REQUEST_ERROR_MESSAGE = "AI Security Handler: Error with the client request";
     public static final int ACCESS_REVOKED = 901000;
-    public static final String ACCESS_REVOKED_MESSAGE = "Access Revoked by ASE";
+    public static final String ACCESS_REVOKED_MESSAGE = "AI Security Handler: Access Revoked by ASE";
 
     private int errorCode;
 

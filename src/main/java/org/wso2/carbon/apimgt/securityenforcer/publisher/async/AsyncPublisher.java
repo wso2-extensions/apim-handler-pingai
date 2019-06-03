@@ -97,7 +97,7 @@ public class AsyncPublisher implements Publisher {
             return true;
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("ASE Response found for the request "+ requestCorrelationID +" with metadata "
+                log.debug("ASE Response found for the request " + requestCorrelationID + " with metadata "
                         + requestMetaData.toString() + " as " + aseResponseDTO.getResponseMessage()
                         + " with the response code " + aseResponseDTO.getResponseCode());
             }

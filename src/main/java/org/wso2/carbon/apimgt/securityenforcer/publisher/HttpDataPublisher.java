@@ -52,8 +52,7 @@ public class HttpDataPublisher {
     private String endPoint;
 
     public HttpDataPublisher(AISecurityHandlerConfig.AseConfig aseConfiguration,
-            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration,
-            AISecurityHandlerConfig.ProxyConfig proxyConfiguration) throws AISecurityException {
+            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration) throws AISecurityException {
 
         String protocol;
         try {
@@ -63,7 +62,7 @@ public class HttpDataPublisher {
             throw new AISecurityException(AISecurityException.HANDLER_ERROR, AISecurityException.HANDLER_ERROR_MESSAGE,
                     e);
         }
-        httpClient = SecurityUtils.getHttpClient(protocol, dataPublisherConfiguration, proxyConfiguration);
+        httpClient = SecurityUtils.getHttpClient(protocol, dataPublisherConfiguration);
         setAuthToken(aseConfiguration.getAseToken());
         setEndPoint(aseConfiguration.getEndPoint());
     }
@@ -153,34 +152,35 @@ public class HttpDataPublisher {
             if (AISecurityHandlerConstants.CREATE.equals(type)) {
                 HttpPost postRequest = (HttpPost) request;
                 response = httpClient.execute(postRequest);
+                log.debug("ASE Management API create request sent");
             } else if (AISecurityHandlerConstants.UPDATE.equals(type)) {
                 HttpPut putRequest = (HttpPut) request;
                 response = httpClient.execute(putRequest);
+                log.debug("ASE Management API update request sent");
             } else if (AISecurityHandlerConstants.LIST.equals(type)) {
                 HttpGet getRequest = (HttpGet) request;
                 response = httpClient.execute(getRequest);
+                log.debug("ASE Management API list request sent");
             } else if (AISecurityHandlerConstants.DELETE.equals(type)) {
                 HttpDelete deleteRequest = (HttpDelete) request;
                 response = httpClient.execute(deleteRequest);
+                log.debug("ASE Management API delete request sent");
             }
-            if(response != null)
+            if (response != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("ASE responded with " + response.getStatusLine().getReasonPhrase() + " with code "
+                            + response.getStatusLine().getStatusCode());
+                }
                 return response.getStatusLine();
+            }
         } catch (Exception e) {
             log.error("Error occurred while publishing " + type + " request to ASE Management API", e);
         }
         return null;
     }
 
-    private String getAuthToken() {
-        return authToken;
-    }
-
     private void setAuthToken(String authToken) {
         this.authToken = authToken;
-    }
-
-    private String getEndPoint() {
-        return endPoint;
     }
 
     private void setEndPoint(String endPoint) {

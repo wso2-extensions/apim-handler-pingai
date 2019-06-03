@@ -31,6 +31,8 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
@@ -159,6 +161,15 @@ public class PingAISecurityHandler extends AbstractHandler {
                 .getTransportHeaders(axis2MessageContext, AISecurityHandlerConstants.ASE_RESOURCE_REQUEST,
                         requestCorrelationID);
 
+        AuthenticationContext authContext = (AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT");
+
+        //OAuth header may not be included in the transport headers. Therefore API key is used.
+        String apiKey = authContext.getApiKey();
+        String tier = authContext.getTier();
+        if (apiKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
+            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.API_KEY_HEADER_NAME, apiKey));
+        }
+
         String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
         int requestOriginPort = AISecurityHandlerConstants.DUMMY_REQUEST_PORT;
         String requestMethod = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.HTTP_METHOD_STRING);
@@ -217,10 +228,6 @@ public class PingAISecurityHandler extends AbstractHandler {
     }
 
     protected void handleAuthFailure(MessageContext messageContext, AISecurityException e) {
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, e.getErrorCode());
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,
-                AISecurityException.getAuthenticationFailureMessage(e.getErrorCode()));
-        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
 
         Mediator sequence = messageContext.getSequence("_auth_failure_handler_");
         // Invoke the custom error handler specified by the user
@@ -243,23 +250,32 @@ public class PingAISecurityHandler extends AbstractHandler {
         }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
+        String errorMessage;
         if (e.getErrorCode() == AISecurityException.HANDLER_ERROR) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+            errorMessage = "Internal Sever Error";
         } else if (e.getErrorCode() == AISecurityException.ACCESS_REVOKED) {
             status = HttpStatus.SC_FORBIDDEN;
+            errorMessage = "Forbidden";
         } else if (e.getErrorCode() == AISecurityException.CLIENT_REQUEST_ERROR) {
             status = HttpStatus.SC_BAD_REQUEST;
+            errorMessage = "Bad Request";
         } else {
             status = HttpStatus.SC_UNAUTHORIZED;
+            errorMessage = "Unauthorized";
         }
 
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, status);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
+
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            SecurityUtils.setFaultPayload(messageContext, SecurityUtils.getFaultPayload(e));
+            Utils.setFaultPayload(messageContext, SecurityUtils.getFaultPayload(e));
         } else {
-            SecurityUtils.setSOAPFault(messageContext, "Client", "Authentication Failure from Ping AI Security Handler",
+            Utils.setSOAPFault(messageContext, "Client", "Authentication Failure from AI Security Handler",
                     e.getMessage());
         }
-        SecurityUtils.sendFault(messageContext, status);
+        Utils.sendFault(messageContext, status);
     }
 
     private String logMessageDetails(MessageContext messageContext) {

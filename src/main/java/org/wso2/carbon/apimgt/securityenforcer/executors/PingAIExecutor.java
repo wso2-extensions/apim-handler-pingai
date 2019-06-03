@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.executors;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.StatusLine;
@@ -25,8 +26,6 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -42,14 +41,10 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is an implementation of the
@@ -65,8 +60,8 @@ import java.util.Map;
 public class PingAIExecutor implements Execution {
 
     private Log log = LogFactory.getLog(PingAIExecutor.class);
-    private String ADDITIONAL_PROPERTY_NAME = "security";
-    private String ADDITIONAL_PROPERTY_VALUE = "ping_ai";
+    private String ADDITIONAL_PROPERTY_NAME = "ai_security";
+    private String ADDITIONAL_PROPERTY_VALUE = "enable";
     private String API_CONTEXT_RESOURCE_PROPERTY = "api_meta";
     private String API_CONTEXT_RESOURCE_CONJUNCTION = ".";
 
@@ -96,15 +91,21 @@ public class PingAIExecutor implements Execution {
             String property = context.getResource().getProperty(
                     API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + ADDITIONAL_PROPERTY_NAME);
 
-            if (ADDITIONAL_PROPERTY_VALUE.equals(property))
-                pingAIEnabled = true;
+            if (ADDITIONAL_PROPERTY_VALUE.equals(property) || ServiceReferenceHolder.getInstance()
+                    .getSecurityHandlerConfig().isApplyForAllAPIs()) {
+                if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getModelCreationEndpointConfig()
+                        .isEnable()) {
+                    pingAIEnabled = true;
+                } else {
+                    log.debug("Ping AI Model Creation Endpoint configurations not set");
+                }
+            }
 
             if (pingAIEnabled) {
                 GenericArtifactManager artifactManager = getArtifactManager(context.getSystemRegistry(), "api");
                 Resource apiResource = context.getResource();
                 String artifactId = apiResource.getUUID();
-                if (artifactId == null || !ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getApiDiscoveryConfig().isEnable() || targetState == null) {
+                if (artifactId == null || targetState == null) {
                     return false;
                 }
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
@@ -116,17 +117,22 @@ public class PingAIExecutor implements Execution {
                 HttpDataPublisher httpDataPublisher = ServiceReferenceHolder.getInstance().getHttpDataPublisher();
 
                 String accessKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getApiDiscoveryConfig().getAccessKey();
+                        .getModelCreationEndpointConfig().getAccessKey();
                 String secretKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getApiDiscoveryConfig().getSecretKey();
+                        .getModelCreationEndpointConfig().getSecretKey();
                 String managementAPIEndpoint = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getApiDiscoveryConfig().getManagementAPIEndpoint();
+                        .getModelCreationEndpointConfig().getManagementAPIEndpoint();
 
                 StatusLine responseStatus = null;
                 JSONObject requestBody;
 
                 if (AISecurityHandlerConstants.PUBLISHED.equals(targetState.toUpperCase())) {
-                    requestBody = createAPIJSON(apiContext);
+                    requestBody = createAPIJSON(apiContext, context);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("ASE Management API Payload : " + requestBody + " for the API " + apiName
+                                + " state change from " + currentState + " to " + targetState);
+                    }
 
                     HttpPost postRequest = new HttpPost(managementAPIEndpoint + "?api_id=" + apiName);
                     postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
@@ -154,9 +160,9 @@ public class PingAIExecutor implements Execution {
 
                 if (responseStatus != null) {
                     if (responseStatus.getStatusCode() == AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS) {
-                        log.info(apiName + " is " + targetState + "in ASE");
+                        log.info(apiName + " is " + targetState + " in ASE");
                     } else {
-                        log.info("ASE responded with " + responseStatus.getReasonPhrase() + " For the " + targetState
+                        log.info("ASE responded with " + responseStatus.getReasonPhrase() + " for the " + targetState
                                 + " request for the " + apiName + " API");
                     }
                 }
@@ -200,23 +206,34 @@ public class PingAIExecutor implements Execution {
         return artifactManager;
     }
 
-    private JSONObject createAPIJSON(String APIContext) {
-        FileReader reader;
-        JSONParser parser = new JSONParser();
-        JSONObject json = null;
+    private JSONObject createAPIJSON(String APIContext, RequestContext requestContext) {
+        JSONObject managmentAPIPayload = ServiceReferenceHolder.getInstance().getManagementAPIPayload();
 
-        try {
-            reader = new FileReader(CarbonUtils.getCarbonConfigDirPath() + File.separator
-                    + AISecurityHandlerConstants.ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME);
-            json = (JSONObject) parser.parse(reader);
-            ((JSONObject) json.get("api_metadata")).remove("url");
-            ((JSONObject) json.get("api_metadata")).put("url", APIContext);
-        } catch (FileNotFoundException e) {
-            log.error("samplePingAIManagementData.json file is not found.");
-        } catch (ParseException | IOException e) {
-            log.error("Error when parsing the API Create JSON");
+        if (managmentAPIPayload == null) {
+            return null;
         }
-        return json;
+
+        Set<String> payloadKeyArray = ((JSONObject) managmentAPIPayload.get("api_metadata")).keySet();
+
+        for (String key : payloadKeyArray) {
+            String property = requestContext.getResource()
+                    .getProperty(API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + key);
+            if (property != null) {
+                if ("true".equals(property) || "false".equals(property)) {
+                    ((JSONObject) managmentAPIPayload.get("api_metadata"))
+                            .put(key, JavaUtils.isTrueExplicitly(property));
+                } else {
+                    ((JSONObject) managmentAPIPayload.get("api_metadata")).put(key, property);
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Ping ASE management API payload updated with " + key + "," + property);
+                }
+            }
+        }
+        ((JSONObject) managmentAPIPayload.get("api_metadata")).put("url", APIContext);
+
+        return managmentAPIPayload;
     }
 }
 
