@@ -42,7 +42,7 @@ Artificial Intelligence.
     ```  
     
     If ASE is not in sideband mode, then stop ASE and change the mode by editing the 
-    /opt/pingidentity/ase/config/ase.conf file. Set mode as sideband and start ASE.
+    */opt/pingidentity/ase/config/ase.conf* file. Set mode as **sideband** and start ASE.
 
 - **Enable sideband authentication.**
   
@@ -70,7 +70,7 @@ Artificial Intelligence.
 
 #### Deploy WSO2 Extension with Ping Intelligence
 
-####For System admin
+#### For System admin
 
 1. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 
@@ -84,7 +84,7 @@ Artificial Intelligence.
         <OperationMode>async</OperationMode>
         <APISecurityEnforcer>
             <EndPoint>ASE_ENDPOINT</EndPoint>
-            <ASEToken>password</ASEToken>
+            <ASEToken>SIDEBAND_AUTHENTICATION_TOKEN</ASEToken>
             <ModelCreationEndpoint>
                 <EndPoint>ASE_REST_API_ENDPOINT</EndPoint>
                 <AccessKey>ASE_REST_API_ACCESS_KEY</AccessKey>
@@ -94,9 +94,10 @@ Artificial Intelligence.
     </PingAISecurityHandler>
    ```
     **Note:**
-    Select the Operation mode from **sync**,**async** and **hybrid**,
-If mode is not set, the default mode is set as **async**. If ModelCreationEndpoint configurations are not set,
- manual creation of ASE models will be needed.
+    - Select the Operation mode from **sync**,**async** and **hybrid**.
+    If mode is not set, the default mode is set as **async**. 
+    - If ModelCreationEndpoint configurations are not set,manual creation of ASE models will be needed.
+    - Include the sideband authentication token obtained from ASE as the ASEToken.
 
 3. To engage the handler to APIs, you need to update the *velocity_template.xml* file. 
 It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
@@ -126,7 +127,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     </execution>
     ```
      
-####For the API Publisher
+#### For the API Publisher
 
 **For new APIs**
 
@@ -143,6 +144,10 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 
 **Note:**
-By default, Ping intelligence will be included in all APIs published with individual AI model for each API. 
+By default, Ping intelligence policy will be included in all APIs published with individual AI model for each API. 
 But this can be configured to apply only for selected APIs.
 
+
+### Developer Guide
+
+Developer Guide can be found in here.
