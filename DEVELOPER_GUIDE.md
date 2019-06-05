@@ -8,7 +8,7 @@ There is a handler for the WSO2 API Gateway and once it receives a request from 
 
 If the response of ASE is 200 OK, the handler will forward the request and if the response is 403, it will block the request.
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/architecture.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/architecture.png)
 
 #### Data flow
 1. Client request to API Gateway.
@@ -27,7 +27,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
 7. ASE logs metadata and sends a **200-OK** response.
 8. API Gateway sends an API response to the client.
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/requestFlow.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/requestFlow.png)
 
 #### Prerequisites
 
@@ -155,7 +155,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     *Republishing the API will update the synapse config with the handler and by changing the life cycle to PUBLISHED 
     will create a new model.*
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/publishedState.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/publishedState.png)
 
 
 **Note:**
@@ -201,7 +201,7 @@ This is a thread blocking call and every request will wait until the ASE respond
 		    =~0.2ms + ~20ms
 		    =~20.2ms
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/syncFlow.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/syncFlow.png)
 
 ### Async Mode
 In this mode, both sideband calls are sent asynchronously. There is a cache which records the response of each request sent to ASE. 
@@ -210,7 +210,7 @@ Since the metadata set of each client request is unique to the client (with the 
 
     Total time = < 0.2ms
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/asyncFlow.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/asyncFlow.png)
 
 **Important:**
 *There is a slip rate as the requests received until the first cache update will be forwarded to the backend without monitoring.*
@@ -226,13 +226,13 @@ Requests until the first cache update will be handled in the sync mode and after
 
 For the cache, there is an expiry time for each record which is 15 mins after the last cache update.
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/hybridFlow.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/hybridFlow.png)
 
 ### Response
 
 The second sideband request of each request is sent to ASE asynchronously with the status of the backend server.
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/responseFlow.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/responseFlow.png)
 
 ## ASE Model Creation
 For every API deployed with this feature, there will be a new model created at the security engine. Security decisions will be taken according to this model. A Template of the ASE configuration file is used with default values and API context is used as the url. When OAuth protected, authentication token is sent as the API key with default header name “APIKey”. If any of these values needs to be changed with API, that can be done with additional properties. Model creation request will be sent to the ASE REST API when the API’s state is changed to PUBLISHED from CREATE state or PROTOTYPED state. Once the API state changes to RETIRED, this model will be deleted.
@@ -288,7 +288,7 @@ The API JSON file parameters define the behavior and properties of the API and t
 - api_memory_size: Maximum ASE memory allocation for an API. The data unit can be MB or GB. 
     - Default - "128mb".
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/ASEConfigsAsAdditionalProperties.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/ASEConfigsAsAdditionalProperties.png)
 
 ## Additional Configurations of Extension
 Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under \<PingAISecurityHandler> tag.
@@ -333,7 +333,7 @@ By default, Ping intelligence will be included in all APIs with individual AI mo
 
 4. Change the life cycle state to **PUBLISHED**.
 
-![alt text](https://raw.githubusercontent.com/1akshitha/apim-pingai-handler/master/guide/enablePolicyWithAdditionalProperties.png)
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/guide/enablePolicyWithAdditionalProperties.png)
 
 ### Limit Transport Headers
 All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add 
