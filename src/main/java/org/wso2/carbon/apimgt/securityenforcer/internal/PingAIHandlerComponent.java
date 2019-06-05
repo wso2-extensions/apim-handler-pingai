@@ -157,41 +157,36 @@ public class PingAIHandlerComponent implements BundleActivator {
     private void logConfigData(AISecurityHandlerConfig securityHandlerConfig) {
 
         if (log.isDebugEnabled()) {
-            String logMessage = "Ping AI configurations- ";
-            logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
-            logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
-            logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
-            logMessage = logMessage + ", ASE Token: " + securityHandlerConfig.getAseConfig().getAseToken();
-            logMessage = logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig()
-                    .getManagementAPIEndpoint();
-            logMessage = logMessage + ", ASE AccessKey: " + securityHandlerConfig.getModelCreationEndpointConfig()
-                    .getAccessKey();
-            logMessage = logMessage + ", ASE SecretKey: " + securityHandlerConfig.getModelCreationEndpointConfig()
-                    .getSecretKey();
-            logMessage = logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig()
-                    .getMaxPerRoute();
-            logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig
-                    .getDataPublisherConfig().getMaxOpenConnections();
-            logMessage =
-                    logMessage + ", DataPublisher- ConnectionTimeout: " + securityHandlerConfig.getDataPublisherConfig()
-                            .getConnectionTimeout();
-            logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: " + securityHandlerConfig
-                    .getThreadPoolExecutorConfig().getCorePoolSize();
-            logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: " + securityHandlerConfig
-                    .getThreadPoolExecutorConfig().getMaximumPoolSize();
-            logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: " + securityHandlerConfig
-                    .getThreadPoolExecutorConfig().getKeepAliveTime();
-            logMessage = logMessage + ", StackObjectPool- MaxIdle: " + securityHandlerConfig.getStackObjectPoolConfig()
-                    .getMaxIdle();
-            logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig
-                    .getStackObjectPoolConfig().getInitIdleCapacity();
-            if (securityHandlerConfig.getLimitTransportHeaders().isEnable()) {
-                logMessage = logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders()
-                        .getHeaderSet().toString();
-            } else {
-                logMessage = logMessage + ", Limit Transport headers Disabled";
+            try {
+                String logMessage = "Ping AI configurations- ";
+                logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
+                logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
+                logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
+                logMessage = logMessage + ", ASE Token: " + securityHandlerConfig.getAseConfig().getAseToken();
+                logMessage =
+                        logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig().getManagementAPIEndpoint();
+                logMessage = logMessage + ", ASE AccessKey: " + securityHandlerConfig.getModelCreationEndpointConfig().getAccessKey();
+                logMessage = logMessage + ", ASE SecretKey: " + securityHandlerConfig.getModelCreationEndpointConfig().getSecretKey();
+                logMessage =
+                        logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig().getMaxPerRoute();
+                logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig.getDataPublisherConfig().getMaxOpenConnections();
+                logMessage = logMessage + ", DataPublisher- ConnectionTimeout: " + securityHandlerConfig.getDataPublisherConfig().getConnectionTimeout();
+                logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: " + securityHandlerConfig.getThreadPoolExecutorConfig().getCorePoolSize();
+                logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: " + securityHandlerConfig.getThreadPoolExecutorConfig().getMaximumPoolSize();
+                logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: " + securityHandlerConfig.getThreadPoolExecutorConfig().getKeepAliveTime();
+                logMessage =
+                        logMessage + ", StackObjectPool- MaxIdle: " + securityHandlerConfig.getStackObjectPoolConfig().getMaxIdle();
+                logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig.getStackObjectPoolConfig().getInitIdleCapacity();
+                if (securityHandlerConfig.getLimitTransportHeaders().isEnable()) {
+                    logMessage =
+                            logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders().getHeaderSet().toString();
+                } else {
+                    logMessage = logMessage + ", Limit Transport headers Disabled";
+                }
+                log.debug(logMessage);
+            } catch (Exception e){
+                log.error("Error with Ping AI configurations", e);
             }
-            log.debug(logMessage);
         }
     }
 }
