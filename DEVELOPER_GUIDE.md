@@ -1,9 +1,9 @@
 # WSO2 API Manager extension with Ping Intelligence
 
-##What is PingIntelligence for APIs?
+## What is PingIntelligence for APIs?
 PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block cyber attacks on APIs and provide detailed reporting on all API activity. Deployed on premises, in public clouds or in hybrid clouds, the solution monitors API traffic across the environment. It uses AI and machine learning models to detect anomalous API behavior without relying on specifically defined policies or prior knowledge of attack patterns in which, can stop new and constantly changing attacks. Using continuous learning capabilities, it becomes more accurate at identifying and blocking attacks over time. 
 
-##How does integration happen?
+## How does integration happen?
 There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband request will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
 
 If the response of ASE is 200 OK, the handler will forward the request and if the response is 403, it will block the request.
@@ -352,7 +352,7 @@ Only the intercept of headers mentioned and present in the transport headers wil
 
 *If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise feature will not be useful in the async and hybrid modes.*
 
-###Other Configurations
+### Other Configurations
 #### Http Client Configurations
 Configurations regarding the Http Client can be changed as follows.
   ```
