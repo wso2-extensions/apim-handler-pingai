@@ -18,11 +18,11 @@ Artificial Intelligence.
 
 #### Prerequisites
 
-- #####PingIntelligence software installation.
+- **PingIntelligence software installation.**
 
     PingIntelligence 3.2.1 software is installed and configured. For installation of PingIntelligence software, 
     see the manual or platform specific automated deployment guides.
-- #####Verify that ASE is in sideband mode.
+- **Verify that ASE is in sideband mode.**
   
   Make sure that in ASE is in sideband mode by running the following command in the ASE command line:
     ```
@@ -44,7 +44,7 @@ Artificial Intelligence.
     If ASE is not in sideband mode, then stop ASE and change the mode by editing the 
     /opt/pingidentity/ase/config/ase.conf file. Set mode as sideband and start ASE.
 
-- #####Enable sideband authentication.
+- **Enable sideband authentication.**
   
   For a secure communication between WSO2 gateway and ASE, enable sideband authentication by entering the following 
   command in the ASE command line:
@@ -52,7 +52,8 @@ Artificial Intelligence.
     # ./bin/cli.sh enable_sideband_authentication -u admin –p
    ```
    
-- #####Generate sideband authentication token.
+- **Generate sideband authentication token.**
+
    A token is required for WSO2 gateway to authenticate with ASE. To generate the token in ASE, enter the following 
    command in the ASE command line:
    ```
@@ -60,7 +61,7 @@ Artificial Intelligence.
    ```
    Save the generated authentication token for further use.
    
-- #####Add the certificate of ASE to WSO2 client keystore
+- **Add the certificate of ASE to WSO2 client keystore.**
    ```
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
