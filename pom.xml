@@ -39,14 +39,9 @@
     </repositories>
 
     <properties>
-        <carbon.apimgt.version>6.4.120-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>[6.4.211,7.0.0]</carbon.apimgt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <carbon.apimgt.version>6.4.120-SNAPSHOT</carbon.apimgt.version>
         <carbon.kernel.version>4.4.35</carbon.kernel.version>
-        <wiremock.version>2.5.0</wiremock.version>
-        <mockito.version>2.10.0</mockito.version>
         <powermock.version>1.7.4</powermock.version>
         <mockito.all.version>1.10.19</mockito.all.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
@@ -96,9 +91,63 @@
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework,
-                            *; resolution:=optional
+                            org.apache.axis2,
+                            org.apache.axis2.util,
+                            org.apache.commons.logging,
+                            org.apache.commons.codec.digest,
+                            org.apache.commons.pool,
+                            org.apache.commons.pool.impl,
+                            org.apache.http.client.methods,
+                            org.apache.http.impl.client,
+                            org.apache.http.entity,
+                            org.apache.http,
+                            org.apache.http.client.config,
+                            org.apache.http.config,
+                            org.apache.http.conn.ssl,
+                            org.apache.http.impl.conn,
+                            org.apache.axiom.om,
+                            org.apache.synapse,
+                            org.apache.synapse.transport.passthru,
+                            org.apache.synapse.core.axis2,
+                            org.apache.synapse.rest,
+                            org.apache.synapse.transport.passthru.util,
+                            org.json.simple,
+                            org.wso2.carbon.context,
+                            org.wso2.carbon.governance.api.generic,
+                            org.wso2.carbon.governance.api.generic.dataobjects,
+                            org.wso2.carbon.governance.api.util,
+                            org.wso2.carbon.governance.registry.extensions.aspects.utils,
+                            org.wso2.carbon.governance.registry.extensions.interfaces,
+                            org.wso2.carbon.registry.core,
+                            org.wso2.carbon.registry.core.exceptions,
+                            org.wso2.carbon.registry.core.jdbc.handlers,
+                            org.wso2.carbon.registry.core.session,
+                            org.wso2.carbon.utils,
+                            org.wso2.carbon.utils.multitenancy,
+                            java.net,
+                            java.io,
+                            java.util,
+                            java.security,
+                            java.util.concurrent,
+                            javax.net.ssl,
+                            javax.cache,
+                            org.wso2.carbon.apimgt.gateway.handlers,
+                            org.wso2.carbon.apimgt.gateway.handlers.security,
+                            org.osgi.framework,
+                            javax.xml.namespace,
+                            javax.xml.stream,
+                            org.apache.axiom.om.impl.builder,
+                            org.apache.axis2.client,
+                            org.apache.axis2.context,
+                            org.apache.commons.io,
+                            org.apache.http.conn,
+                            org.json.simple.parser,
+                            org.wso2.carbon.base,
+                            org.wso2.securevault
                         </Import-Package>
-                        <Bundle-Activator>org.wso2.carbon.apimgt.securityenforcer.internal.PingAIHandlerComponent</Bundle-Activator>
+                        <Bundle-Activator>
+                            org.wso2.carbon.apimgt.securityenforcer.internal.PingAIHandlerComponent
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
@@ -114,11 +163,15 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
-            <version>6.4.120-SNAPSHOT</version>
+            <version>${carbon.apimgt.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>jboss</groupId>
                     <artifactId>javassist</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.testng</groupId>
+                    <artifactId>testng</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>wsdl4j.wso2</groupId>
