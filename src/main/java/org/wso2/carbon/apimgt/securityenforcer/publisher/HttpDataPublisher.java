@@ -73,7 +73,7 @@ public class HttpDataPublisher {
     }
 
     public AseResponseDTO publish(JSONObject data, String correlationID, String resource) {
-        HttpPost postRequest = new HttpPost(endPoint + resource);
+        HttpPost postRequest = new HttpPost(endPoint + "/ase/" + resource);
         postRequest.addHeader(AISecurityHandlerConstants.ASE_TOKEN_HEADER, authToken);
         postRequest.addHeader(AISecurityHandlerConstants.X_CORRELATION_ID_HEADER, correlationID);
 
