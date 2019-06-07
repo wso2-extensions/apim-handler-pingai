@@ -126,21 +126,18 @@ public class HttpDataPublisherTest {
             @Override
             public void setEntity(HttpEntity httpEntity) {
 
+            }
+
+            @Override
+            public Locale getLocale() {
+                return null;
             }            @Override
             public void setStatusCode(int i) throws IllegalStateException {
 
             }
 
             @Override
-            public Locale getLocale() {
-                return null;
-            }
-
-            @Override
             public void setLocale(Locale locale) {
-
-            }            @Override
-            public void setReasonPhrase(String s) throws IllegalStateException {
 
             }
 
@@ -152,6 +149,9 @@ public class HttpDataPublisherTest {
             @Override
             public boolean containsHeader(String s) {
                 return false;
+            }            @Override
+            public void setReasonPhrase(String s) throws IllegalStateException {
+
             }
 
             @Override

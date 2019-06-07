@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.securityenforcer.publisher.sync;
 
 import org.junit.Test;
-import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
+import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 
 public class SyncPublisherThreadPoolTest {
 

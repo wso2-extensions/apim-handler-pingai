@@ -163,25 +163,35 @@ public class PingAIHandlerComponent implements BundleActivator {
                 logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
                 logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
                 logMessage =
-                        logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig().getManagementAPIEndpoint();
+                        logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig()
+                                .getManagementAPIEndpoint();
                 logMessage =
-                        logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig().getMaxPerRoute();
-                logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig.getDataPublisherConfig().getMaxOpenConnections();
-                logMessage = logMessage + ", DataPublisher- ConnectionTimeout: " + securityHandlerConfig.getDataPublisherConfig().getConnectionTimeout();
-                logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: " + securityHandlerConfig.getThreadPoolExecutorConfig().getCorePoolSize();
-                logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: " + securityHandlerConfig.getThreadPoolExecutorConfig().getMaximumPoolSize();
-                logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: " + securityHandlerConfig.getThreadPoolExecutorConfig().getKeepAliveTime();
+                        logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig()
+                                .getMaxPerRoute();
+                logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig
+                        .getDataPublisherConfig().getMaxOpenConnections();
+                logMessage = logMessage + ", DataPublisher- ConnectionTimeout: " + securityHandlerConfig
+                        .getDataPublisherConfig().getConnectionTimeout();
+                logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: " + securityHandlerConfig
+                        .getThreadPoolExecutorConfig().getCorePoolSize();
+                logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: " + securityHandlerConfig
+                        .getThreadPoolExecutorConfig().getMaximumPoolSize();
+                logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: " + securityHandlerConfig
+                        .getThreadPoolExecutorConfig().getKeepAliveTime();
                 logMessage =
-                        logMessage + ", StackObjectPool- MaxIdle: " + securityHandlerConfig.getStackObjectPoolConfig().getMaxIdle();
-                logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig.getStackObjectPoolConfig().getInitIdleCapacity();
+                        logMessage + ", StackObjectPool- MaxIdle: " + securityHandlerConfig.getStackObjectPoolConfig()
+                                .getMaxIdle();
+                logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig
+                        .getStackObjectPoolConfig().getInitIdleCapacity();
                 if (securityHandlerConfig.getLimitTransportHeaders().isEnable()) {
                     logMessage =
-                            logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders().getHeaderSet().toString();
+                            logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders()
+                                    .getHeaderSet().toString();
                 } else {
                     logMessage = logMessage + ", Limit Transport headers Disabled";
                 }
                 log.debug(logMessage);
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("Error with Ping AI configurations", e);
             }
         }
