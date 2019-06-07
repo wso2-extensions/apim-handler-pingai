@@ -98,7 +98,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
                 <EndPoint>ASE_REST_API_ENDPOINT</EndPoint>
                 <AccessKey>ASE_REST_API_ACCESS_KEY</AccessKey>
                 <SecretKey>ASE_REST_API_SECRET_KEY</SecretKey>
-            </ModelCreationEndpointiscovery>
+            </ModelCreationEndpoint>
        </APISecurityEnforcer>
     </PingAISecurityHandler>
    ```
