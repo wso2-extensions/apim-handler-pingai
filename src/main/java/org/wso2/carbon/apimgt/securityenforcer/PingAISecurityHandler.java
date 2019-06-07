@@ -69,7 +69,6 @@ public class PingAISecurityHandler extends AbstractHandler {
                                     - handleRequestStartTime) + " Nano seconds");
                 }
                 SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
-                return true;
             }
         } catch (AISecurityException e) {
             if (log.isDebugEnabled()) {
@@ -82,7 +81,7 @@ public class PingAISecurityHandler extends AbstractHandler {
         } finally {
             SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
         }
-        return false;
+        return true;
     }
 
     /**
@@ -97,8 +96,6 @@ public class PingAISecurityHandler extends AbstractHandler {
                 log.debug("Handle Response Time " + (System.nanoTime() - handleResponseStartTime));
             }
             SecurityUtils.updateLatency(System.nanoTime() - handleResponseStartTime, messageContext);
-            return true;
-
         } catch (AISecurityException e) {
             if (log.isDebugEnabled()) {
                 long difference = (System.nanoTime() - handleResponseStartTime);
@@ -107,7 +104,7 @@ public class PingAISecurityHandler extends AbstractHandler {
             }
             handleAuthFailure(messageContext, e);
         }
-        return false;
+        return true;
     }
 
     /**

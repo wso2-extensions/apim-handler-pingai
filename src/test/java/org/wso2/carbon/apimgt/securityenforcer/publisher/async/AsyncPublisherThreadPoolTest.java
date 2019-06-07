@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher.async;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
@@ -36,5 +37,6 @@ public class AsyncPublisherThreadPoolTest {
         AsyncPublishingAgent runnableAgent = dataPublisherPoolInstance.get();
         dataPublisherPoolInstance.release(runnableAgent);
         dataPublisherPoolInstance.cleanup();
+        Assert.assertTrue(dataPublisherPoolInstance.clientPool.getNumActive() == 0);
     }
 }

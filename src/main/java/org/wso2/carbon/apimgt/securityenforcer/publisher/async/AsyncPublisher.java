@@ -148,7 +148,7 @@ public class AsyncPublisher implements Publisher {
                 AsyncPublishingAgent agent = (AsyncPublishingAgent) r;
                 asyncPublisherThreadPool.release(agent);
             } catch (Exception e) {
-                log.error("Error while returning Ping AI data publishing agent back to pool" + e.getMessage());
+                log.error("Error while returning Ping AI data publishing agent back to pool", e);
             }
         }
     }

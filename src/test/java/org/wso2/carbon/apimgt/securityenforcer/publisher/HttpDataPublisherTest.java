@@ -31,10 +31,8 @@ import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 
@@ -130,13 +128,13 @@ public class HttpDataPublisherTest {
             @Override
             public Locale getLocale() {
                 return null;
-            }            @Override
-            public void setStatusCode(int i) throws IllegalStateException {
-
             }
 
             @Override
             public void setLocale(Locale locale) {
+
+            }            @Override
+            public void setStatusCode(int i) throws IllegalStateException {
 
             }
 
@@ -148,9 +146,6 @@ public class HttpDataPublisherTest {
             @Override
             public boolean containsHeader(String s) {
                 return false;
-            }            @Override
-            public void setReasonPhrase(String s) throws IllegalStateException {
-
             }
 
             @Override
@@ -161,6 +156,9 @@ public class HttpDataPublisherTest {
             @Override
             public Header getFirstHeader(String s) {
                 return null;
+            }            @Override
+            public void setReasonPhrase(String s) throws IllegalStateException {
+
             }
 
             @Override
@@ -227,6 +225,10 @@ public class HttpDataPublisherTest {
             public void setParams(HttpParams httpParams) {
 
             }
+
+
+
+
         };
         return response;
     }

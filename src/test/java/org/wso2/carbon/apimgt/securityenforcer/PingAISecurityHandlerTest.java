@@ -18,35 +18,34 @@
 
 package org.wso2.carbon.apimgt.securityenforcer;
 
+import org.apache.axis2.Constants;
+import org.apache.http.ProtocolVersion;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.simple.JSONArray;
+import org.apache.synapse.transport.passthru.ServerWorker;
+import org.apache.synapse.transport.passthru.SourceRequest;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
-import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ SecurityUtils.class })
+import java.util.TreeMap;
+
 public class PingAISecurityHandlerTest {
 
     private AISecurityHandlerConfig securityHandlerConfig;
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
     private PingAISecurityHandler pingAiSecurityHandler;
-
-    private SecurityUtils securityUtils;
-    private JSONArray transportHeaderArray;
+    private ServerWorker worker;
+    private SourceRequest sourceRequest;
+    private ProtocolVersion httpProtocolVersion;
 
     public static JSONObject addObj(String key, Object value) {
         JSONObject obj = new JSONObject();
@@ -58,48 +57,65 @@ public class PingAISecurityHandlerTest {
     public void setup() throws AISecurityException {
 
         messageContext = Mockito.mock(Axis2MessageContext.class);
-        axis2MsgCntxt = new org.apache.axis2.context.MessageContext();
+        axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
+
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
-        securityHandlerConfig = new AISecurityHandlerConfig();
-        securityHandlerConfig.setMode("hybrid");
-        ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        authenticationContext.setApiKey("1234");
+        authenticationContext.setApiTier("secured");
+        Mockito.when((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT"))
+                .thenReturn(authenticationContext);
+
+        TreeMap<String, String> transportHeadersMap = new TreeMap<>();
+        transportHeadersMap.put(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME, "xbank.com");
+        transportHeadersMap.put("content-type", "application/xml");
+
+        Mockito.when((TreeMap<String, String>) axis2MsgCntxt
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(transportHeadersMap);
+
+        worker = Mockito.mock(ServerWorker.class);
+        sourceRequest = Mockito.mock(SourceRequest.class);
+
+        httpProtocolVersion = new ProtocolVersion("http", 1, 1);
+
+        Mockito.when(sourceRequest.getVersion()).thenReturn(httpProtocolVersion);
+        Mockito.when(worker.getSourceRequest()).thenReturn(sourceRequest);
+        Mockito.when((ServerWorker) axis2MsgCntxt.getProperty(Constants.OUT_TRANSPORT_INFO)).thenReturn(worker);
 
         pingAiSecurityHandler = new PingAISecurityHandler();
-
-        PowerMockito.mockStatic(SecurityUtils.class);
-        securityUtils = Mockito.mock(SecurityUtils.class);
-
-        transportHeaderArray = new JSONArray();
-        transportHeaderArray.add(addObj(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME, "xbank.com"));
-        transportHeaderArray.add(addObj("content-type", "application/xml"));
-        Mockito.when(SecurityUtils.getTransportHeaders(axis2MsgCntxt, "request", "1234"))
-                .thenReturn(transportHeaderArray);
-        Mockito.when(SecurityUtils.getTransportHeaders(axis2MsgCntxt, "response", "1234"))
-                .thenReturn(transportHeaderArray);
+        securityHandlerConfig = new AISecurityHandlerConfig();
+        securityHandlerConfig.setMode("hybrid");
+        AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeaders = new AISecurityHandlerConfig.LimitTransportHeaders();
+        securityHandlerConfig.setLimitTransportHeaders(limitTransportHeaders);
+        ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
     }
 
     @Test
     public void extractRequestMetadataTest() throws AISecurityException {
-/*
-        Mockito.when(SecurityUtils.getIp(axis2MsgCntxt)).thenReturn("55.56.38.20");
-        Mockito.when(SecurityUtils.getHttpVersion(axis2MsgCntxt)).thenReturn("1.1");
-        axis2MsgCntxt.setProperty(AISecurityHandlerConstants.HTTP_METHOD_STRING, "POST");
-        axis2MsgCntxt.setProperty(AISecurityHandlerConstants.API_BASEPATH_STRING, "/shop/get");
+
+        Mockito.when((String) axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR))
+                .thenReturn("1.1.1.1");
+        Mockito.when((String) axis2MsgCntxt.getProperty(AISecurityHandlerConstants.HTTP_METHOD_STRING))
+                .thenReturn("POST");
+        Mockito.when((String) axis2MsgCntxt.getProperty(AISecurityHandlerConstants.API_BASEPATH_STRING))
+                .thenReturn("/shop/get");
+
         JSONObject metaData = pingAiSecurityHandler.extractRequestMetadata(messageContext);
-*/
+        Assert.assertTrue(metaData.size() == 6);
     }
 
     @Test
     public void extractResponseMetadataTest() throws AISecurityException {
 
-        Object code = 200;
-        Mockito.when(SecurityUtils.getHttpVersion(axis2MsgCntxt)).thenReturn("1.1");
-        axis2MsgCntxt.setProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_CODE, code);
-        axis2MsgCntxt.setProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_MESSAGE, "OK");
+        Mockito.when((Integer) axis2MsgCntxt.getProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_CODE))
+                .thenReturn(200);
+        Mockito.when((String) axis2MsgCntxt.getProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_MESSAGE))
+                .thenReturn("OK");
         JSONObject responseJSON = pingAiSecurityHandler.extractResponseMetadata(messageContext);
-        Assert.assertTrue(((String) responseJSON.get("response_code")).equals("200"));
+        Assert.assertTrue(responseJSON.get("response_code").equals("200"));
     }
 
 }

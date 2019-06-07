@@ -36,7 +36,7 @@ public class SyncPublisherThreadPool {
 
     private static final Log log = LogFactory.getLog(SyncPublisherThreadPool.class);
 
-    private ObjectPool clientPool;
+    ObjectPool clientPool;
 
     private SyncPublisherThreadPool() {
 

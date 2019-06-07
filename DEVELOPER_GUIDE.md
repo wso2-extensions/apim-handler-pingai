@@ -96,7 +96,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
   For a secure communication between WSO2 gateway and ASE, enable sideband authentication by entering the following 
   command in the ASE command line:
    ```
-    # ./bin/cli.sh -u admin –p admin enable_sideband_authentication
+    # ./bin/cli.sh -u admin -p admin enable_sideband_authentication
    ```
    
 - **Generate sideband authentication token.**
@@ -210,9 +210,7 @@ Check whether \<handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISec
 2. Open ASE command line. Using the CLI tool, you can list the published APIs in ASE.
 Check whether the API is listed as <API_NAME>_\<VERSION>.
     Eg: HelloWorld_1.0.0
-```
-   # ./bin/cli.sh -u admin -p admin create_sideband_token
-   ```
+
    
 ## Configurations
 #### Bare minimum configurations

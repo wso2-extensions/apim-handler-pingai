@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher.sync;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
@@ -36,6 +37,7 @@ public class SyncPublisherThreadPoolTest {
         SyncPublishingAgent callablePublishingAgent = dataPublisherPoolInstance.get();
         dataPublisherPoolInstance.release(callablePublishingAgent);
         dataPublisherPoolInstance.cleanup();
+        Assert.assertTrue(dataPublisherPoolInstance.clientPool.getNumActive() == 0);
 
     }
 

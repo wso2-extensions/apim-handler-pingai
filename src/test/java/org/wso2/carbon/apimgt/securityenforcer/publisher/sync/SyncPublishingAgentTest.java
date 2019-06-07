@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.securityenforcer.publisher.sync;
 
 import org.json.simple.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -52,6 +53,7 @@ public class SyncPublishingAgentTest {
         syncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "request");
         AseResponseDTO aseResponseDTO = syncPublishingAgent.call();
         syncPublishingAgent.clearDataReference();
+        Assert.assertTrue(aseResponseDTO == null);
     }
 
 }

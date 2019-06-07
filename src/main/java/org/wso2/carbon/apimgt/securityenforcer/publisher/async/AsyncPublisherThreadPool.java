@@ -36,7 +36,7 @@ public class AsyncPublisherThreadPool {
 
     private static final Log log = LogFactory.getLog(AsyncPublisherThreadPool.class);
 
-    private ObjectPool clientPool;
+    ObjectPool clientPool;
 
     private AsyncPublisherThreadPool() {
         /*
