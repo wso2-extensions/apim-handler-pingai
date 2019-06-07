@@ -271,7 +271,7 @@ public class PingAISecurityHandler extends AbstractHandler {
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, SecurityUtils.getFaultPayload(e));
+            Utils.setFaultPayload(messageContext, SecurityUtils.getFaultPayload(new AISecurityException(status,errorMessage,e)));
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure from AI Security Handler",
                     e.getMessage());

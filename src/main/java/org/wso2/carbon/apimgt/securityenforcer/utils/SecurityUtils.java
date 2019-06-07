@@ -277,9 +277,9 @@ public class SecurityUtils {
         OMElement errorCode = fac.createOMElement("code", ns);
         errorCode.setText(String.valueOf(e.getErrorCode()));
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(AISecurityException.getAuthenticationFailureMessage(e.getErrorCode()));
+        errorMessage.setText(e.getMessage());
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(e.getMessage());
+        errorDetail.setText(AISecurityException.getAuthenticationFailureMessage(e.getErrorCode()));
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);

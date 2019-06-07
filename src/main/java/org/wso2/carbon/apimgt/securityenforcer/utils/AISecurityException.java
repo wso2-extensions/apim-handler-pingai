@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.utils;
 
+import org.apache.http.HttpStatus;
+
 /**
  * Represents an API security violation or a system error that may have occurred
  * while validating security requirements.
@@ -55,17 +57,17 @@ public class AISecurityException extends Exception {
     public static String getAuthenticationFailureMessage(int errorCode) {
         String errorMessage;
         switch (errorCode) {
-        case ACCESS_REVOKED:
-            errorMessage = ACCESS_REVOKED_MESSAGE;
+        case HttpStatus.SC_INTERNAL_SERVER_ERROR:
+            errorMessage = "Error with AI Security Handler";
             break;
-        case HANDLER_ERROR:
-            errorMessage = HANDLER_ERROR_MESSAGE;
+        case HttpStatus.SC_FORBIDDEN:
+            errorMessage = "Access revoked by AI Security Engine";
             break;
-        case CLIENT_REQUEST_ERROR:
-            errorMessage = CLIENT_REQUEST_ERROR_MESSAGE;
+        case HttpStatus.SC_BAD_REQUEST:
+            errorMessage = "Bad client request";
             break;
         default:
-            errorMessage = HANDLER_ERROR_MESSAGE;
+            errorMessage = "Unexpected error";
             break;
         }
         return errorMessage;
