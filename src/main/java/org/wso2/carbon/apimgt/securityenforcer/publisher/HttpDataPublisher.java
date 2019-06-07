@@ -114,16 +114,13 @@ public class HttpDataPublisher {
             }
         } catch (SocketTimeoutException e) {
             log.error(
-                    "Socket timeout exception when sending the HTTP Request with id " + correlationID + " ,Error : " + e
-                            .getMessage());
+                    "Socket timeout exception when sending the HTTP Request with id " + correlationID, e);
             aseResponseDTO = getDefaultAcceptResponse();
         } catch (SSLHandshakeException e) {
-            log.error("SSLHandshakeException exception when sending the HTTP Request with id " + correlationID
-                    + " ,Error : " + e.getMessage());
+            log.error("SSLHandshakeException exception when sending the HTTP Request with id " + correlationID, e);
             aseResponseDTO = getDefaultAcceptResponse();
         } catch (IOException e) {
-            log.error("IO exception when sending the HTTP Request with id " + correlationID + " ,Error : " + e
-                    .getMessage());
+            log.error("IO exception when sending the HTTP Request with id " + correlationID, e);
             aseResponseDTO = getDefaultAcceptResponse();
         } finally {
             if (response != null) {

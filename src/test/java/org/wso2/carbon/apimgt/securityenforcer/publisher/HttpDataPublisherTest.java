@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import java.io.IOException;
 import java.util.Locale;
 
-@RunWith(PowerMockRunner.class)
 public class HttpDataPublisherTest {
 
     private HttpDataPublisher httpDataPublisher;
@@ -228,11 +227,6 @@ public class HttpDataPublisherTest {
             public void setParams(HttpParams httpParams) {
 
             }
-
-
-
-
-
         };
         return response;
     }

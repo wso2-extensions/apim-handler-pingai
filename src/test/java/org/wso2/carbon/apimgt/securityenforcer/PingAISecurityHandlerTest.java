@@ -22,6 +22,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,7 +98,8 @@ public class PingAISecurityHandlerTest {
         Mockito.when(SecurityUtils.getHttpVersion(axis2MsgCntxt)).thenReturn("1.1");
         axis2MsgCntxt.setProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_CODE, code);
         axis2MsgCntxt.setProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_MESSAGE, "OK");
-        pingAiSecurityHandler.extractResponseMetadata(messageContext);
+        JSONObject responseJSON = pingAiSecurityHandler.extractResponseMetadata(messageContext);
+        Assert.assertTrue(((String) responseJSON.get("response_code")).equals("200"));
     }
 
 }
