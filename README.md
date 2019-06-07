@@ -2,21 +2,30 @@
 
 WSO2 API Manager is a full lifecycle API Management solution which has an API Gateway and a Microgateway. 
 
-PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block 
-cyber attacks on APIs and provide detailed reporting on all API activity. Deployed on premises, in public clouds or in 
-hybrid clouds, the solution monitors API traffic across the environment. It uses AI and machine learning models to 
-detect anomalous API behavior without relying on specifically defined policies or prior knowledge of attack patterns in 
-which, can stop new and constantly changing attacks. Using continuous learning capabilities, it becomes more accurate 
-at identifying and blocking attacks over time. 
-
 This explains how WSO2 API Manager plans to integrate with Ping Intelligence and expose APIs protected with 
 Artificial Intelligence.
 
 ## API Manager Extension with Ping Intelligence
 
-### Quick Start Guide
+### What is PingIntelligence for APIs?
+PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block cyber attacks on APIs and provide detailed reporting on all API activity. Deployed on premises, in public clouds or in hybrid clouds, the solution monitors API traffic across the environment. It uses AI and machine learning models to detect anomalous API behavior without relying on specifically defined policies or prior knowledge of attack patterns in which, can stop new and constantly changing attacks. Using continuous learning capabilities, it becomes more accurate at identifying and blocking attacks over time. 
 
-#### Prerequisites
+PingIntelligence for APIs can detect many types of cyberattacks, most of which are not visible to API teams today and can go undetected for very long times. 
+
+[Read more about cyber attacks which can be detected by Ping Intelligence.](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md)
+
+### How does integration happen?
+
+There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband request will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
+
+If the response of ASE is 200 OK, the handler will forward the request and if the response is 403, it will block the request.
+
+![alt text](https://raw.githubusercontent.com/1akshitha/apim-handler-pingai/master/images/architecture.png)
+
+
+## Quick Start Guide
+
+### Prerequisites
 
 - **PingIntelligence software installation.**
 
@@ -68,9 +77,9 @@ Artificial Intelligence.
 
    
 
-#### Deploy WSO2 Extension with Ping Intelligence
+## Deploy WSO2 Extension with Ping Intelligence
 
-#### For System admin
+### For System admin
 
 1. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 
@@ -94,14 +103,19 @@ Artificial Intelligence.
     </PingAISecurityHandler>
    ```
     **Note:**
-    - Select the Operation mode from **sync**,**async** and **hybrid**.
+    - Select the Operation mode from **[sync](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#sync-mode)**,
+    **[async](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)** and 
+    **[hybrid](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
     If mode is not set, the default mode is set as **async**. 
     - If ModelCreationEndpoint configurations are not set,manual creation of ASE models will be needed.
-    - Include the sideband authentication token obtained from ASE as the ASEToken.
+    - Include the [sideband authentication token](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
+     obtained from ASE as the ASEToken.
+     - For additional security SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY can be added to the secure vault.   
 
 3. To engage the handler to APIs, you need to update the *velocity_template.xml* file. 
 It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
-   Add the handler as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
+   Add the handler as follows inside the 
+   *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
    ```
@@ -127,7 +141,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     </execution>
     ```
      
-#### For the API Publisher
+### For the API Publisher
 
 **For new APIs**
 
@@ -145,9 +159,9 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 **Note:**
 By default, Ping intelligence policy will be included in all APIs published with individual AI model for each API. 
-But this can be configured to apply only for selected APIs.
+But this can be configured to [apply only for selected APIs.](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
 
 
 ### Developer Guide
 
-Developer Guide can be found in here.
+Developer Guide can be found in [here](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md).
