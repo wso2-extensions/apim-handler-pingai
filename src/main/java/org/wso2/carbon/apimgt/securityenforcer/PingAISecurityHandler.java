@@ -163,11 +163,12 @@ public class PingAISecurityHandler extends AbstractHandler {
 
         AuthenticationContext authContext = (AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT");
 
-        //OAuth header may not be included in the transport headers. Therefore API key is used.
+        //OAuth header may not be included in the transport headers after the Authentication handler. Therefore API key is used.
         String apiKey = authContext.getApiKey();
         String tier = authContext.getTier();
         if (apiKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
             transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.API_KEY_HEADER_NAME, apiKey));
+            log.debug("APIKey added as a new transport header with authorization token.");
         }
 
         String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);

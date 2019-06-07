@@ -162,11 +162,8 @@ public class PingAIHandlerComponent implements BundleActivator {
                 logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
                 logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
                 logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
-                logMessage = logMessage + ", ASE Token: " + securityHandlerConfig.getAseConfig().getAseToken();
                 logMessage =
                         logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig().getManagementAPIEndpoint();
-                logMessage = logMessage + ", ASE AccessKey: " + securityHandlerConfig.getModelCreationEndpointConfig().getAccessKey();
-                logMessage = logMessage + ", ASE SecretKey: " + securityHandlerConfig.getModelCreationEndpointConfig().getSecretKey();
                 logMessage =
                         logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig().getMaxPerRoute();
                 logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig.getDataPublisherConfig().getMaxOpenConnections();

@@ -86,7 +86,7 @@ public class PingAIExecutor implements Execution {
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
         try {
-            boolean pingAIEnabled = false;
+            boolean modelCreationEnabled = false;
 
             String property = context.getResource().getProperty(
                     API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + ADDITIONAL_PROPERTY_NAME);
@@ -95,13 +95,13 @@ public class PingAIExecutor implements Execution {
                     .getSecurityHandlerConfig().isApplyForAllAPIs()) {
                 if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getModelCreationEndpointConfig()
                         .isEnable()) {
-                    pingAIEnabled = true;
+                    modelCreationEnabled = true;
                 } else {
                     log.debug("Ping AI Model Creation Endpoint configurations not set");
                 }
             }
 
-            if (pingAIEnabled) {
+            if (modelCreationEnabled) {
                 GenericArtifactManager artifactManager = getArtifactManager(context.getSystemRegistry(), "api");
                 Resource apiResource = context.getResource();
                 String artifactId = apiResource.getUUID();

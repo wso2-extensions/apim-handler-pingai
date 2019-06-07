@@ -35,7 +35,7 @@ public class AISecurityHandlerConfig {
     private AISecurityHandlerConfig.StackObjectPoolConfig stackObjectPoolConfig;
     private AISecurityHandlerConfig.ThreadPoolExecutorConfig threadPoolExecutorConfig;
     private AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeaders;
-    private ModelCreationEndpoint modelCreationEndpointConfig;
+    private AISecurityHandlerConfig.ModelCreationEndpoint modelCreationEndpointConfig;
 
     public boolean isApplyForAllAPIs() {
         return applyForAllAPIs;

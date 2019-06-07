@@ -225,14 +225,12 @@ public class SecurityHandlerConfiguration {
 
                     if (!configMissing) {
                         modelCreationEndpointConfig.setEnable(true);
-                        securityHandlerConfig.setModelCreationEndpointConfig(modelCreationEndpointConfig);
                     }
                 } else {
-                    log.error("Ping AI config error - ASE config not found");
-                    throw new AISecurityException(AISecurityException.HANDLER_ERROR,
-                            AISecurityException.HANDLER_ERROR_MESSAGE);
+                    log.debug("Model creation endpoint not set. Models will not be created automatically.");
                 }
                 securityHandlerConfig.setAseConfig(aseConfig);
+                securityHandlerConfig.setModelCreationEndpointConfig(modelCreationEndpointConfig);
             } else {
                 log.error("Ping AI config error - ASE config not found");
                 throw new AISecurityException(AISecurityException.HANDLER_ERROR,
