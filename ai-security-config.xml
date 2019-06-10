@@ -90,11 +90,11 @@ configuration will be used.-->
     <StackObjectPool>
 
         <!-- Cap on the number of "sleeping" instances in the pool.-->
-        <MaxIdle>1000</MaxIdle>
+        <MaxIdle>100</MaxIdle>
 
         <!-- Initial size of the pool (this specifies the size of the container, it does not cause the pool
         to be pre-populated)-->
-        <InitIdleCapacity>200</InitIdleCapacity>
+        <InitIdleCapacity>50</InitIdleCapacity>
     </StackObjectPool>
 
 
