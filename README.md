@@ -12,11 +12,11 @@ PingIntelligence for APIs uses artificial intelligence (AI) to expose active API
 
 PingIntelligence for APIs can detect many types of cyberattacks, most of which are not visible to API teams today and can go undetected for very long times. 
 
-[Read more about cyber attacks which can be detected by Ping Intelligence.](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md)
+[Read more about cyber attacks which can be detected by Ping Intelligence.](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#pingintelligence-protects-against-three-main-types-of-attacks-specifically)
 
 ### How does integration happen?
 
-There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband request will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
+There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband call will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
 
 If the response of ASE is 200 OK, the handler will forward the request and if the response is 403, it will block the request.
 
@@ -110,11 +110,12 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
     - If ModelCreationEndpoint configurations are not set,manual creation of ASE models will be needed.
     - Include the [sideband authentication token](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
      obtained from ASE as the ASEToken.
-     - For additional security SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY can be added to the secure vault.   
+     - For additional security SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY can be 
+     [encrypted](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool).   
 
 3. To engage the handler to APIs, you need to update the *velocity_template.xml* file. 
 It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
-   Add the handler as follows inside the 
+   Add the handler class as follows inside the 
    *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 

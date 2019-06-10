@@ -7,38 +7,38 @@ PingIntelligence for APIs uses artificial intelligence (AI) to expose active API
 #### PingIntelligence protects against three main types of attacks, specifically:
 
 ##### Authentication System Attacks
- - Login system attacks: Bad actors use credential stuffing and other brute force attacks to test valid credentials from the dark web to determine the validity of these credentials. They then utilize the compromised credentials to access API services. Bots may execute aggressive attacks or run slower attacks designed to blend in with normal login failures.
+ - **Login system attacks**: Bad actors use credential stuffing and other brute force attacks to test valid credentials from the dark web to determine the validity of these credentials. They then utilize the compromised credentials to access API services. Bots may execute aggressive attacks or run slower attacks designed to blend in with normal login failures.
 
- - Account takeover with stolen credential attacks: Stolen credentials acquired via man-in-the-middle and other attacks are used to penetrate and take over accounts. These credentials include stolen tokens, cookies or API keys which may be used by the hacker to access data authorized to the compromised client.
+ - **Account takeover with stolen credential attacks**: Stolen credentials acquired via man-in-the-middle and other attacks are used to penetrate and take over accounts. These credentials include stolen tokens, cookies or API keys which may be used by the hacker to access data authorized to the compromised client.
 
 ##### Data and Application Attacks
- - API takeover attacks: Hackers use a valid account to reverse engineer the API and access other accounts using the vulnerabilities they found. Theft of data and private info follows, as well as the takeover of other accounts. Meanwhile, the hacker looks like a normal user at all times since they are using a valid account.
+ - **API takeover attacks**: Hackers use a valid account to reverse engineer the API and access other accounts using the vulnerabilities they found. Theft of data and private info follows, as well as the takeover of other accounts. Meanwhile, the hacker looks like a normal user at all times since they are using a valid account.
 
- - Data extraction or theft: Hackers use APIs to steal files, photos, credit card information and personal data from accounts available through an API. Since normal outbound activity on one API may be an attack on a different API, PingIntelligence uses its deep understanding of each API to block both normal and extended duration data exfiltration attacks.
+ - **Data extraction or theft**: Hackers use APIs to steal files, photos, credit card information and personal data from accounts available through an API. Since normal outbound activity on one API may be an attack on a different API, PingIntelligence uses its deep understanding of each API to block both normal and extended duration data exfiltration attacks.
 
- - Data scraping: APIs are commonly abused by bots which extract (scrape) data for subsequent use (e.g., competitive pricing) which can negatively impact your business. Data scraping attacks can be executed on the API service directly and can run over extended time frames to avoid detection.
+ - **Data scraping**: APIs are commonly abused by bots which extract (scrape) data for subsequent use (e.g., competitive pricing) which can negatively impact your business. Data scraping attacks can be executed on the API service directly and can run over extended time frames to avoid detection.
 
- - Data deletion or manipulation: A disgruntled employee or hacker could delete information to sabotage systems or change data to compromise information.
+ - **Data deletion or manipulation**: A disgruntled employee or hacker could delete information to sabotage systems or change data to compromise information.
 
- - Data injected into an application service: A hacker can load large data files to overrun system memory or inject excessive data to overload an API service.
+ - **Data injected into an application service**: A hacker can load large data files to overrun system memory or inject excessive data to overload an API service.
 
- - Malicious code injection: A hacker may inject malicious code, such as key loggers, which could compromise other users accessing the service.
+ - **Malicious code injection**: A hacker may inject malicious code, such as key loggers, which could compromise other users accessing the service.
 
- - Extreme application activity: A hacker can generate calls that require unusually high system resources which can overwhelm a backend and cause an application-level denial of service.
+ - **Extreme application activity**: A hacker can generate calls that require unusually high system resources which can overwhelm a backend and cause an application-level denial of service.
 
- - Probing and fuzzing attacks: A hacker may look for coding flaws which can be exploited to expose unintended content. The hacker may also try to mask the activity by probing the API over long time periods. These attacks can be used to force API errors to uncover IP and system addresses that can then be used to access resources.
+ - **Probing and fuzzing attacks**: A hacker may look for coding flaws which can be exploited to expose unintended content. The hacker may also try to mask the activity by probing the API over long time periods. These attacks can be used to force API errors to uncover IP and system addresses that can then be used to access resources.
 
 ##### API DoS/DDoS Attacks
- - Targeted API DDoS attacks: Hackers tune attacks to stay below rate limits and exploit API vulnerability with finely crafted API DDoS attacks to disable services provided by the API or damage the user experience. Existing anti-DoS/DDoS security solutions can’t stop these attacks, but PingIntelligence for APIs uses AI to identify and block them.
+ - **Targeted API DDoS attacks**: Hackers tune attacks to stay below rate limits and exploit API vulnerability with finely crafted API DDoS attacks to disable services provided by the API or damage the user experience. Existing anti-DoS/DDoS security solutions can’t stop these attacks, but PingIntelligence for APIs uses AI to identify and block them.
 
- - Extreme client activity: A bot or hacker may generate extreme levels of inbound activity on an API service.
+ - **Extreme client activity**: A bot or hacker may generate extreme levels of inbound activity on an API service.
 
  
 By analyzing client behavior on the API services, PingIntelligence can detect attacks where hackers have discovered vulnerabilities that circumvent the intended authorization systems or deviate from normal usage of the API service.
 
 
 ## How does integration happen?
-There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband request will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
+There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband call will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
 
 If the response of ASE is 200 OK, the handler will forward the request and if the response is 403, it will block the request.
 
@@ -67,7 +67,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
 
 - **PingIntelligence software installation.**
 
-    PingIntelligence 3.2.1 software is installed and configured. For installation of PingIntelligence software, 
+    PingIntelligence software is installed and configured. For installation of PingIntelligence software, 
     see the manual or platform specific automated deployment guides.
 - **Verify that ASE is in sideband mode.**
   
@@ -109,15 +109,17 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
    Save the generated authentication token for further use.
    
 - **Add the certificate of ASE to WSO2 client keystore.**
+ 
+    User *wso2carbon* as the default keystore password.
    ```
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
 
    
 
-#### Deploy WSO2 Extension with Ping Intelligence
+## Deploy WSO2 Extension with Ping Intelligence
 
-#### For System admin
+### For System admin
 
 1. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 
@@ -150,14 +152,30 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
    - Include the [sideband authentication token](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
          obtained from ASE as the ASEToken.
    - For additional security SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY can be 
-   [encrypted.](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool).   
+   [encrypted](https://github.com/1akshitha/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool).   
 
 3. To engage the handler to APIs, you need to update the *velocity_template.xml* file. 
 It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
-   Add the handler as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
+   Add the handler class as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
    ```
+   In default velocity_template.xml file, it should be as follows.
+     ``` 
+   <handlers xmlns="http://ws.apache.org/ns/synapse">
+   #foreach($handler in $handlers)
+   <handler xmlns="http://ws.apache.org/ns/synapse" class="$handler.className">
+       #if($handler.hasProperties())
+       #set ($map = $handler.getProperties() )
+       #foreach($property in $map.entrySet())
+       <property name="$!property.key" value="$!property.value"/>
+       #end
+       #end
+   </handler>
+   #end
+   <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
+   </handlers>
+     ```
   
 4. Deploy the WSO2 API Manager and open the management console: https://localhost:9443/carbon.
 
@@ -180,7 +198,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     </execution>
     ```
      
-#### For the API Publisher
+### For the API Publisher
 
 **For new APIs**
 
@@ -365,12 +383,10 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.
            <InitIdleCapacity>200</InitIdleCapacity>
        </StackObjectPool>
        <LimitTransportHeaders>
-           <Headers>
-               <Header>HEADER_1</Header>
-               <Header>HEADER_2</Header>
-               <Header>HEADER_3</Header>
-               <Header>HEADER_4</Header>
-           </Headers>
+            <Header>HEADER_1</Header>
+            <Header>HEADER_2</Header>
+            <Header>HEADER_3</Header>
+            <Header>HEADER_4</Header>
        </LimitTransportHeaders>
     </PingAISecurityHandler>
 
@@ -383,6 +399,26 @@ By default, Ping intelligence will be included in all APIs with individual AI mo
             <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
         #end
      ```
+     
+    In default velocity_template.xml file, it should be as follows.
+    ```
+     <handlers xmlns="http://ws.apache.org/ns/synapse">
+    #foreach($handler in $handlers)
+    <handler xmlns="http://ws.apache.org/ns/synapse" class="$handler.className">
+        #if($handler.hasProperties())
+        #set ($map = $handler.getProperties() )
+        #foreach($property in $map.entrySet())
+        <property name="$!property.key" value="$!property.value"/>
+        #end
+        #end
+    </handler>
+    #end
+    #if($apiObj.additionalProperties.get('ai_security') == "enable")
+        <handler class ="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
+    #end
+    </handlers>
+   ```
+
 3. Log into the API Publisher and create a new API. Before publishing, add a new additional property named **ai_security** and valued **enable**.
 
 4. Change the life cycle state to **PUBLISHED**.
@@ -393,16 +429,14 @@ By default, Ping intelligence will be included in all APIs with individual AI mo
 All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add 
    ```
     <LimitTransportHeaders>
-        <Headers>
-            <Header>HEADER_1</Header>
-            <Header>HEADER_2</Header>
-            <Header>HEADER_3</Header>
-            <Header>HEADER_4</Header>
-        </Headers>
+        <Header>HEADER_1</Header>
+        <Header>HEADER_2</Header>
+        <Header>HEADER_3</Header>
+        <Header>HEADER_4</Header>
     </LimitTransportHeaders>
    ```
 
-Only the intercept of headers mentioned and present in the transport headers will be sent to ASE.
+Only the intercept of headers mentioned and present in the transport headers will be sent to ASE in both sideband calls.
 
 *If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise feature will not be useful in the async and hybrid modes.*
 
@@ -446,7 +480,7 @@ The configuration file contains both ASE access token and the password for the p
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=[SECRET_KEY]
 
-    *If your password contains a backslash character (\) you need to use an alias with the escape characters. For example, if your password is admin\} the value should be given as shown in the example below.*
+    *If your password contains a backslash character (\) you need to use an alias with the escape characters. For example, if your password is admin\\} the value should be given as shown in the example below.*
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[admin\\\\}]
 
 3. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the cipher tool scripts (for Windows and Linux) are stored. 
@@ -530,6 +564,6 @@ To change any password which we have encrypted already, follow the below steps:
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
-|Headers|(String)|-|Names of the headers needed to sent to ASE.|
+|Header|(String)|-|Name of the header needed to sent to ASE.|
 
 
