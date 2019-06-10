@@ -164,8 +164,8 @@ public class AISecurityHandlerConfig {
 
     public static class StackObjectPoolConfig {
 
-        private Integer maxIdle = 1000;
-        private Integer initIdleCapacity = 200;
+        private Integer maxIdle = 100;
+        private Integer initIdleCapacity = 50;
 
         public Integer getMaxIdle() {
             return maxIdle;

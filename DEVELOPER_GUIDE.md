@@ -232,7 +232,7 @@ Check whether the API is listed as <API_NAME>_\<VERSION>.
    
 ## Configurations
 #### Bare minimum configurations
-Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under <APIManager> tag. If mode is not set, the default mode is set as async. If ModelCreationEndpoint configurations are not set, manual creation of ASE models will be needed.
+Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under \<APIManager> tag. If mode is not set, the default mode is set as async. If ModelCreationEndpoint configurations are not set, manual creation of ASE models will be needed.
 
 ```
     <PingAISecurityHandler>
@@ -250,10 +250,10 @@ Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager
    ```
 
 ## Modes of Operation
-To integrate this feature to WSO2 API Manager, a custom handler is implemented with the handleRequest and handleResponse methods. For every request, there need to be two sideband calls to ASE. First one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). Second sideband call is mainly for the learning mode of AI Engine.
+To integrate this feature to WSO2 API Manager, a custom handler is implemented with the handleRequest and handleResponse methods. For every request, WSO2 gateway will send two sideband calls to ASE. First one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). Second sideband call is mainly for the learning mode of AI Engine.
 
 
-There are three modes of operation when implementing the feature. Depends on the requirement, the client can choose the mode.
+There are three modes of operation when implementing the extension.
 1. Sync Mode
 2. Async Mode
 3. Hybrid Mode
@@ -263,7 +263,7 @@ The difference with all these modes is only with the first sideband request. The
 ### Sync Mode
 In the sync mode, first sideband call is sent synchronously to the request dataflow. Depends on the ASE response, the handler will allow each request to connect the backend. 
 
-This is a thread blocking call and every request will wait until the ASE respond for the first sideband call.
+This is a thread blocking call and every request will wait until the ASE respond.
 
    **Total time  =~0.2ms + ASE Sideband call time**
 
@@ -379,8 +379,8 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.
            <KeepAliveTime>100</KeepAliveTime>
        </ThreadPoolExecutor>
        <StackObjectPool>
-           <MaxIdle>1000</MaxIdle>
-           <InitIdleCapacity>200</InitIdleCapacity>
+           <MaxIdle>100</MaxIdle>
+           <InitIdleCapacity>50</InitIdleCapacity>
        </StackObjectPool>
        <LimitTransportHeaders>
             <Header>HEADER_1</Header>
@@ -557,8 +557,8 @@ To change any password which we have encrypted already, follow the below steps:
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
-|MaxIdle|(Integer)|1000|Cap on the number of "sleeping" instances in the pool.|
-|InitIdleCapacity|(Integer)|200|Initial size of the pool (this specifies the size of the container, it does not cause the pool to be pre-populated.)|
+|MaxIdle|(Integer)|100|Cap on the number of "sleeping" instances in the pool.|
+|InitIdleCapacity|(Integer)|50|Initial size of the pool (this specifies the size of the container, it does not cause the pool to be pre-populated.)|
 
 #### LimitTransportHeaders
 
