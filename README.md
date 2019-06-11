@@ -21,15 +21,26 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/architecture.png)
 
-
 ## Quick Start Guide
 
 ### Prerequisites
 
+- **Install Java 7 or 8.** 
+(http://www.oracle.com/technetwork/java/javase/downloads/)
+    
+- **Install Apache Maven 3.x.x**
+ (https://maven.apache.org/download.cgi#)
+
+- **Install the latest WSO2 API Manager**
+(https://wso2.com/api-management/)
+
+    Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, 
+    and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
+
 - **Install the PingIntelligence software.**
 
     PingIntelligence 3.2.1 software is installed and configured. For installation of PingIntelligence software, 
-    see the manual or platform specific automated deployment guides.
+    see the [manual or platform specific automated deployment guides](https://docs.pingidentity.com/bundle/PingIntelligence_For_APIs_Deployment_Guide_pingintel_32/page/pingintelligence_product_deployment.html).
 - **Verify that ASE is in sideband mode.**
   
   Make sure that the ASE is in sideband mode by running the following command in the ASE command line:
@@ -73,19 +84,20 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    ```
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
-
-   
-
 ## Deploy the WSO2 extension with PingIntelligence
 
 ### For system admin
 
-1. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
+1. Download the extension and navigate to the **apim-handler-pingai** directory and run the following Maven command.
+   ```
+    mvn clean install
+     ```
+    org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory. 
 
-    Name of the JAR should be *org.wso2.carbon.apimgt.securityenforcer-\<version>.jar*
+2. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 
-2. Add the bare minimum configurations to the *api-manager.xml* within the tag \<APIManager>, which can be found in the 
-**<PRODUCT_HOME>/repository/conf** directory.
+3. Add the bare minimum configurations to the *api-manager.xml* within the tag \<APIManager>, which can be found in the
+**<APIM_HOME>/repository/conf** directory.
 
     ```
     <PingAISecurityHandler>
@@ -111,18 +123,20 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
      that you obtained from the ASE as the ASEToken.
      - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY.   
 
-3. Update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file in order to engage the handler to APIs. Add the handler class as follows inside the 
+4. Update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file in order to engage the handler to APIs. Add the handler class as follows inside the 
    *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
    ```
   
-4. Deploy WSO2 API Manager and access the management console: https://localhost:9443/carbon.
-
-5. Navigate to **Extensions** > **Configure** > **Lifecycles** and Click the **View/Edit** link corresponding to the 
+5. Deploy WSO2 API Manager and access the management console: https://localhost:9443/carbon.
+   
+    Start the API Manager by going to <APIM_HOME>/bin using the command-line and executing wso2server.bat (for Windows) or wso2server.sh (for Linux.) 
+    
+6. Navigate to **Extensions** > **Configure** > **Lifecycles** and Click the **View/Edit** link corresponding to the 
 *default API LifeCycle*.
 
-6. Add a new execution for the **Publish** event under **CREATED** and **PROTOTYPED** states. 
+7. Add a new execution for the **Publish** event under **CREATED** and **PROTOTYPED** states. 
 Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
@@ -130,7 +144,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     </execution>
     ```
  
-7. Add another execution for the **Retire** event under the **DEPRECATED** state.
+8. Add another execution for the **Retire** event under the **DEPRECATED** state.
    This deletes the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire" 
@@ -148,10 +162,12 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 **For existing APIs**
 
-- The recommended method is to create a new version for the API with PingIntelligence enabled.
+- The recommended method is to create a [new version](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-VersioningtheAPI) 
+for the API with PingIntelligence enabled.
 
-    *When an API is republished, it updates the Synapse config with the handler and when you change the life cycle to 
-    **PUBLISHED** this creates a new model.*
+    *Although changing the status of a live API is not recommended, when an API is republished, it updates the Synapse config with the handler and 
+    by demoting to CREATED or PROTOTYPED state and changing the life cycle back to PUBLISHED state 
+   will create a new model for API in the ASE.*
 
 
 **Note:**
