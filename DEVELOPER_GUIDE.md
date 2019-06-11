@@ -82,7 +82,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
     see the [manual or platform specific automated deployment guides](https://docs.pingidentity.com/bundle/PingIntelligence_For_APIs_Deployment_Guide_pingintel_32/page/pingintelligence_product_deployment.html).
 - **Verify that ASE is in sideband mode.**
   
-  Make sure that in ASE is in sideband mode by running the following command in the ASE command line:
+  Make sure that ASE is in sideband mode by running the following command in the ASE command line:
     ```
    /opt/pingidentity/ase/bin/cli.sh status
    API Security Enforcer
