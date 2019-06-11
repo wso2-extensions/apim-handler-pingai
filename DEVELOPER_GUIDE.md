@@ -134,8 +134,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
    ```
     mvn clean install
      ```
-          
-      org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory. 
+    org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory. 
 
 2. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 

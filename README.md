@@ -22,11 +22,9 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/architecture.png)
 
-
 ## Quick Start Guide
 
 ### Prerequisites
-
 
 - **Install Java 7 or 8.** 
 (http://www.oracle.com/technetwork/java/javase/downloads/)
@@ -37,8 +35,8 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
 - **Install the latest WSO2 API Manager**
 (https://wso2.com/api-management/)
 
-    Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
-
+    Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, 
+    and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
 
 - **PingIntelligence software installation.**
 
@@ -87,9 +85,6 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
    ```
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
-
-   
-
 ## Deploy WSO2 Extension with Ping Intelligence
 
 ### For System admin
@@ -98,8 +93,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
    ```
     mvn clean install
      ```
-          
-      org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory. 
+    org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory. 
 
 2. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 
