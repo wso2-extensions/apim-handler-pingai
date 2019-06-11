@@ -1,22 +1,23 @@
-# WSO2 API Manager extension with Ping Intelligence
+# WSO2 API Manager extension with PingIntelligence
 
 ## What is PingIntelligence for APIs?
-PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block cyber attacks on APIs and provide detailed reporting on all API activity. Deployed on premises, in public clouds or in hybrid clouds, the solution monitors API traffic across the environment. It uses AI and machine learning models to detect anomalous API behavior without relying on specifically defined policies or prior knowledge of attack patterns in which, can stop new and constantly changing attacks. Using continuous learning capabilities, it becomes more accurate at identifying and blocking attacks over time. 
+PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block cyber attacks on APIs and provide detailed reporting on all API activity. You can deploy the PingIntelligence solution on premises, in public clouds, or in hybrid clouds to monitor API traffic across the environment. PingIntelligence uses AI and machine learning models to detect anomalous API behavior, without relying on specifically defined policies or prior knowledge of attack patterns, in order to stop new and constantly changing attacks. In addition, PingIntelligence uses its continuous learning capabilities to become more accurate at identifying and blocking attacks over time.  
 
 
-#### PingIntelligence protects against three main types of attacks, specifically:
+#### Types of Attacks PingIntelligence Protects Against
+The following are the types of attacks that PingIntelligence can detect.
 
 ##### Authentication System Attacks
  - **Login system attacks**: Bad actors use credential stuffing and other brute force attacks to test valid credentials from the dark web to determine the validity of these credentials. They then utilize the compromised credentials to access API services. Bots may execute aggressive attacks or run slower attacks designed to blend in with normal login failures.
 
- - **Account takeover with stolen credential attacks**: Stolen credentials acquired via man-in-the-middle and other attacks are used to penetrate and take over accounts. These credentials include stolen tokens, cookies or API keys which may be used by the hacker to access data authorized to the compromised client.
+ - **Account takeover with stolen credential attacks**: Stolen credentials acquired via man-in-the-middle and other attacks are used to penetrate and take over accounts. These credentials include stolen tokens, cookies or API keys that may be used by the hacker to access data authorized to the compromised client.
 
 ##### Data and Application Attacks
- - **API takeover attacks**: Hackers use a valid account to reverse engineer the API and access other accounts using the vulnerabilities they found. Theft of data and private info follows, as well as the takeover of other accounts. Meanwhile, the hacker looks like a normal user at all times since they are using a valid account.
+ - **API takeover attacks**: Hackers use a valid account to reverse engineer the API and access other accounts using the vulnerabilities they find. Theft of data and private info follows, as well as the takeover of other accounts. Meanwhile, the hacker looks like a normal user at all times since they are using a valid account.
 
  - **Data extraction or theft**: Hackers use APIs to steal files, photos, credit card information and personal data from accounts available through an API. Since normal outbound activity on one API may be an attack on a different API, PingIntelligence uses its deep understanding of each API to block both normal and extended duration data exfiltration attacks.
 
- - **Data scraping**: APIs are commonly abused by bots which extract (scrape) data for subsequent use (e.g., competitive pricing) which can negatively impact your business. Data scraping attacks can be executed on the API service directly and can run over extended time frames to avoid detection.
+ - **Data scraping**: APIs are commonly abused by bots that extract (scrape) data for subsequent use (e.g., competitive pricing), which can negatively impact your business. Data scraping attacks can be executed on the API service directly and can run over extended time frames to avoid detection.
 
  - **Data deletion or manipulation**: A disgruntled employee or hacker could delete information to sabotage systems or change data to compromise information.
 
@@ -24,9 +25,9 @@ PingIntelligence for APIs uses artificial intelligence (AI) to expose active API
 
  - **Malicious code injection**: A hacker may inject malicious code, such as key loggers, which could compromise other users accessing the service.
 
- - **Extreme application activity**: A hacker can generate calls that require unusually high system resources which can overwhelm a backend and cause an application-level denial of service.
+ - **Extreme application activity**: A hacker can generate calls that require unusually high system resources that can overwhelm a backend and cause an application-level denial of service.
 
- - **Probing and fuzzing attacks**: A hacker may look for coding flaws which can be exploited to expose unintended content. The hacker may also try to mask the activity by probing the API over long time periods. These attacks can be used to force API errors to uncover IP and system addresses that can then be used to access resources.
+ - **Probing and fuzzing attacks**: A hacker may look for coding flaws that can be exploited to expose unintended content. The hacker may also try to mask the activity by probing the API over long time periods. These attacks can be used to force API errors to uncover IP and system addresses that can then be used to access resources.
 
 ##### API DoS/DDoS Attacks
  - **Targeted API DDoS attacks**: Hackers tune attacks to stay below rate limits and exploit API vulnerability with finely crafted API DDoS attacks to disable services provided by the API or damage the user experience. Existing anti-DoS/DDoS security solutions can’t stop these attacks, but PingIntelligence for APIs uses AI to identify and block them.
@@ -38,27 +39,27 @@ By analyzing client behavior on the API services, PingIntelligence can detect at
 
 
 ## How does integration happen?
-There is a handler for the WSO2 API Gateway and once it receives a request from a client, a sideband call will be sent to PingIdentitys’ API Security Enforcer (ASE) with the client requests’ metadata. ASE will analyze the metadata with an Artificial Intelligence Engine and respond. 
+The WSO2 API Manager extension for PingIntelligence uses a new custom handler (Ping AI Security Handler) when working with the WSO2 API Gateway data flow. After this handler receives a request from a client, a sideband call is sent to PingIdentity’s API Security Enforcer (ASE) with the client request metadata. The ASE responds after analyzing the metadata with an Artificial Intelligence Engine. 
 
-If the response of ASE is 200 OK, the handler will forward the request and if the response is 403, it will block the request.
+If the response of ASE is 200 OK, the Ping AI Security Handler forwards the request and if the response is 403, it blocks the request.
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/architecture.png)
 
 #### Data flow
-1. Client request to API Gateway.
-2. API Gateway makes **ASE/REQUEST** API call to Ping ASE with request metadata.
-3. ASE logs metadata and checks:
-    - Unregistered API, format error, bad auth token? 
+1. The client request is sent to API Gateway.
+2. API Gateway makes a **ASE/REQUEST** API call to Ping ASE with request metadata.
+3. ASE logs metadata and checks the following.
+    - Checks if it is an unregistered API, format error, or bad Auth token.
         - If yes, return specified code.
-    - Origin IP/Cookie/API Key/OAuth Token on the blacklist?
-        - If on the blacklist, return **403**.
-    - Otherwise, return **200-OK**.
-4. API Gateway receives ASE response:
-    - If **200-OK**, send the API request to the App server.
-    - If **403**, block client.
-5. API Gateway receives API response from the app server.
-6. API Gateway makes **ASE/RESPONSE** API call to pass response metadata.
-7. ASE logs metadata and sends a **200-OK** response.
+    - Checks if the origin IP/Cookie/API Key/OAuth Token is on the blacklist.
+        - If on the blacklist, returns **403**.
+    - Otherwise, returns **200-OK**.
+4. WSO2 API Gateway receives the ASE response:
+    - If the response is **200-OK**, it sends the API request to the App server.
+    - If the response is **403**, it blocks the client.
+5. WSO2 API Gateway receives API response from the app server.
+6. WSO2 API Gateway makes a **ASE/RESPONSE** API call to pass the response metadata.
+7. ASE logs the metadata and sends a **200-OK** response.
 8. API Gateway sends an API response to the client.
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/requestFlow.png)
@@ -71,7 +72,7 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
     see the manual or platform specific automated deployment guides.
 - **Verify that ASE is in sideband mode.**
   
-  Make sure that in ASE is in sideband mode by running the following command in the ASE command line:
+  Make sure that the ASE is in sideband mode by running the following command in the ASE command line:
     ```
    /opt/pingidentity/ase/bin/cli.sh status
    API Security Enforcer
@@ -88,45 +89,44 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
    attack list memory      : configured 128.00 MB, used 25.60 MB, free 102.40 MB
     ```  
     
-    If ASE is not in sideband mode, then stop ASE and change the mode by editing the 
-    */opt/pingidentity/ase/config/ase.conf* file. Set mode as **sideband** and start ASE.
+    If the ASE is not in sideband mode, stop the ASE, set mode as **sideband** in the 
+    */opt/pingidentity/ase/config/ase.conf* file, and start ASE.
 
 - **Enable sideband authentication.**
   
-  For a secure communication between WSO2 gateway and ASE, enable sideband authentication by entering the following 
+  For a secure communication between WSO2 Gateway and the ASE, enable sideband authentication by entering the following 
   command in the ASE command line:
    ```
     # ./bin/cli.sh -u admin -p admin enable_sideband_authentication
    ```
    
-- **Generate sideband authentication token.**
+- **Generate a sideband authentication token.**
 
-   A token is required for WSO2 gateway to authenticate with ASE. To generate the token in ASE, enter the following 
+   A token is required for WSO2 Gateway to authenticate with the ASE. To generate the token in the ASE, enter the following 
    command in the ASE command line:
    ```
    # ./bin/cli.sh -u admin -p admin create_sideband_token
    ```
    Save the generated authentication token for further use.
    
-- **Add the certificate of ASE to WSO2 client keystore.**
+- **Add the certificate of the ASE to the WSO2 client keystore.**
  
-    User *wso2carbon* as the default keystore password.
+    Use *wso2carbon* as the default keystore password.
    ```
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
 
    
 
-## Deploy WSO2 Extension with Ping Intelligence
+## Deploy WSO2 Extension with PingIntelligence
 
-### For System admin
+### For System Admin
 
-1. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
+1. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
 
-    Name of the JAR should be *org.wso2.carbon.apimgt.securityenforcer-\<version>.jar*
+    The name of the JAR should be *org.wso2.carbon.apimgt.securityenforcer-\<version>.jar*
 
-2. Add the bare minimum configurations to the *api-manager.xml* within the tag \<APIManager>, which can be found in 
-**<PRODUCT_HOME>/repository/conf** folder.
+2. Add the bare minimum configurations to the **<PRODUCT_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
 
     ```
     <PingAISecurityHandler>
@@ -147,20 +147,18 @@ If the response of ASE is 200 OK, the handler will forward the request and if th
     - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#sync-mode)**,
         **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)** and 
         **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
-        If mode is not set, the default mode is set as **async**. 
-   - If ModelCreationEndpoint configurations are not set,manual creation of ASE models will be needed.
+        If the mode is not set, the default mode is set as **async**. 
+   - If ModelCreationEndpoint configurations are not set, you need to manually create ASE models.
    - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
-         obtained from ASE as the ASEToken.
-   - For additional security SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY can be 
-   [encrypted](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool).   
+         obtained from the ASE as the ASEToken.
+   - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, and the ASE_REST_API_SECRET_KEY.
 
-3. To engage the handler to APIs, you need to update the *velocity_template.xml* file. 
-It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
+3. To engage the handler to APIs, you need to update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file. 
    Add the handler class as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
    ```
-   In default velocity_template.xml file, it should be as follows.
+   In the default velocity_template.xml file, it should be as follows.
      ``` 
    <handlers xmlns="http://ws.apache.org/ns/synapse">
    #foreach($handler in $handlers)
@@ -177,13 +175,13 @@ It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
    </handlers>
      ```
   
-4. Deploy the WSO2 API Manager and open the management console: https://localhost:9443/carbon.
+4. Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.
 
-5. Navigate to **Extensions** > **Configure** > **Lifecycles** and Click the *View/Edit* link corresponding to the 
+5. Navigate to **Extensions** > **Configure** > **Lifecycles** and click the *View/Edit* link that corresponds to the 
 *default API LifeCycle*.
 
-6. Add a new execution for the **Publish** event under **CREATED** and **PROTOTYPED** states. 
-Do not update the already existing execution for the publish event. Add a new execution.
+6. Add a new execution for the **Publish** event under the **CREATED** and **PROTOTYPED** states. 
+Do not update the already existing execution for the Publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
@@ -191,7 +189,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     ```
  
 7. Add another execution for the **Retire** event under the **DEPRECATED** state.
-   This will delete the model associated with the API in the ASE once the API is retired.
+   This will delete the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire" 
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
@@ -202,23 +200,23 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 **For new APIs**
 
-- Once the API is successfully created and the life cycle state changed to **PUBLISHED**,
- a new model will be created in the ASE for the API and the handler will be added to the data flow. 
- Once the API state changed to **RETIRED**, the model will be deleted.
+- When the API is successfully created and the life cycle state changes to **PUBLISHED**,
+ a new model is created in the ASE for the API and the handler is added to the data flow. 
+ When the API state changes to **RETIRED**, the model is deleted.
 
 **For existing APIs**
 
-- The recommended method is to create a new version for the API with Ping Intelligence enabled.
+- The recommended method is to create a new version for the API with PingIntelligence enabled.
 
-    *Republishing the API will update the synapse config with the handler and by changing the life cycle to PUBLISHED 
+    *Republishing the API will update the Synapse config with the handler and by changing the life cycle to PUBLISHED 
     will create a new model.*
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/publishedState.png)
 
 
 **Note:**
-By default, Ping intelligence policy will be included in all APIs published with individual AI model for each API. 
-But this can be configured to [apply only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
+By default, PingIntelligence is enabled in all APIs that are published with an individual AI model. 
+However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
 
 
 #### Verify the policy deployment:
