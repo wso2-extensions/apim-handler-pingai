@@ -140,7 +140,8 @@ It can be found in **<APIM_HOME>/repository/resources/api_templates** directory.
    ```
   
 5. Deploy the WSO2 API Manager and open the management console: https://localhost:9443/carbon.
-
+    
+    Start the API Manager by going to <APIM_HOME>/bin using the command-line and executing wso2server.bat (for Windows) or wso2server.sh (for Linux.) 
 6. Navigate to **Extensions** > **Configure** > **Lifecycles** and Click the *View/Edit* link corresponding to the 
 *default API LifeCycle*.
 
@@ -164,16 +165,19 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 **For new APIs**
 
-- Once the API is successfully created and the life cycle state changed to **PUBLISHED**,
+- Once the API is successfully [created](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-CreatinganAPIfromscratch)
+ and the life cycle state changed to **PUBLISHED**,
  a new model will be created in the ASE for the API and the handler will be added to the data flow. 
  Once the API state changed to **RETIRED**, the model will be deleted.
 
 **For existing APIs**
 
-- The recommended method is to create a new version for the API with Ping Intelligence enabled.
+- The recommended method is to create a [new version](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-VersioningtheAPI) 
+for the API with Ping Intelligence enabled.
 
-    *Republishing the API will update the synapse config with the handler and by changing the life cycle to PUBLISHED 
-    will create a new model.*
+    *Although changing the status of a live API is not recommended, republishing the API will update the synapse config 
+    with the handler and by demoting to CREATED or PROTOTYPED state and changing the life cycle back to PUBLISHED state 
+    will create a new model for API in the ASE.*
 
 
 **Note:**
