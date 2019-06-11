@@ -5,7 +5,7 @@ WSO2 API Manager is a full lifecycle API Management solution which has an API Ga
 This explains how WSO2 API Manager plans to integrate with PingIntelligence and expose APIs protected with 
 artificial intelligence (AI).
 
-## API Manager Extension with PingIntelligence
+## WSO2 API Manager Extension with PingIntelligence
 
 ### What is PingIntelligence for APIs?
 PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block cyber attacks on APIs and provide detailed reporting on all API activity. You can deploy the PingIntelligence solution on premises, in public clouds, or in hybrid clouds to monitor API traffic across the environment. PingIntelligence uses AI and machine learning models to detect anomalous API behavior, without relying on specifically defined policies or prior knowledge of attack patterns, in order to stop new and constantly changing attacks. In addition, PingIntelligence uses its continuous learning capabilities to become more accurate at identifying and blocking attacks over time. 
@@ -15,10 +15,9 @@ PingIntelligence for APIs can detect many types of cyberattacks, most of which a
 [Read more about cyber attacks that can be detected by Ping Intelligence.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#pingintelligence-protects-against-three-main-types-of-attacks-specifically)
 
 ### How does integration happen?
+The WSO2 API Manager extension for PingIntelligence uses a new custom handler, namely Ping AI Security Handler, when working with the WSO2 API Gateway data flow. After this handler receives a request from a client, a sideband call is sent to PingIdentity’s API Security Enforcer (ASE) with the client request metadata. The ASE responds after analyzing the metadata with an Artificial Intelligence Engine. 
 
-After the WSO2 API Gateway handler receives a request from a client, a sideband call is sent to PingIdentity’s API Security Enforcer (ASE) with the client request metadata. The ASE responds after analyzing the metadata with an Artificial Intelligence Engine. 
-
-If the response of ASE is 200 OK, the  WSO2 API Gateway handler forwards the request and if the response is 403, it blocks the request.
+If the response of ASE is 200 OK, the Ping AI Security Handler forwards the request and if the response is 403, it blocks the request.
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/architecture.png)
 
@@ -156,8 +155,8 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 
 **Note:**
-By default, the PingIntelligence policy is included in all APIs that are published with the individual AI model. 
-However, this can be configured to [apply it only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
+By default, PingIntelligence is enabled in all APIs that are published with an individual AI model. 
+However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
 
 
 ### Developer Guide
