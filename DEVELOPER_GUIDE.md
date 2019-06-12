@@ -317,7 +317,7 @@ The second sideband request of each request is sent to ASE asynchronously with t
 
 ## ASE Model Creation
 There is a new model created in the security engine for every API deployed with this feature. Security decisions are taken according to this model. A template of the ASE configuration file is used with default values and the API context is used as the URL. When OAuth protection is enabled, the authentication token is sent as the API key with the default header name “APIKey”. If you need to change any of the default values with regard to an API, you can do this by adding additional properties. If you need to change any of the default values with regard to all the APIs, you can do this by updating the default JSON (apim-handler-pingai-<version>/src/main/resources/org/wso2/carbon/apimgt/securityenforcer/internal/samplePingAIManagementPayload.json) file. However, note that after you change the default JSON, you can not change it back, because it is inside the bundle. Therefore, if you need to change it back, you have to build the apim-handler-pingai distribution again.
- The model creation request is sent to the ASE REST API when the API’s state changes from the CREATE state or PROTOTYPED state to the PUBLISHED state. When the API state changes to RETIRED, this model will be deleted.
+ The model creation request is sent to the ASE REST API when the API’s state changes from the CREATED state or PROTOTYPED state to the PUBLISHED state. When the API state changes to RETIRED, this model will be deleted.
 
 #### ASE configurations - API JSON configuration file 
 
@@ -451,7 +451,7 @@ All transport headers found in the client request and backend response will be s
 
 Only the intercept of headers mentioned and present in the transport headers are sent to ASE in both sideband calls.
 
-*If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise, this feature will not be useful when working with async and hybrid modes.*
+*If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise, this extension will not be useful when working with async and hybrid modes.*
 
 ### Other configurations
 #### HTTP client configurations
@@ -480,7 +480,7 @@ Concurrent requests received for the handler are handled by a thread pool combin
 ```
 
 
-## Encrypting passwords with the Cipher Tool
+## Encrypting passwords with Cipher Tool
 The configuration file contains the ASE access token, Management API Access Key, and the Secret Key. If needed, you can use the Cipher Tool to encrypt sensitive data.
 
 1. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-tool.properties file.
