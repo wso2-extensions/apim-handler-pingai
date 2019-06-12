@@ -66,10 +66,21 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
 #### Prerequisites
 
+- **Install Java 7 or 8.** 
+(http://www.oracle.com/technetwork/java/javase/downloads/)
+    
+- **Install Apache Maven 3.x.x**
+ (https://maven.apache.org/download.cgi#)
+
+- **Install the latest WSO2 API Manager**
+(https://wso2.com/api-management/)
+
+    Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
+
 - **PingIntelligence software installation.**
 
     PingIntelligence software is installed and configured. For installation of PingIntelligence software, 
-    see the manual or platform specific automated deployment guides.
+    see the [manual or platform specific automated deployment guides](https://docs.pingidentity.com/bundle/PingIntelligence_For_APIs_Deployment_Guide_pingintel_32/page/pingintelligence_product_deployment.html).
 - **Verify that ASE is in sideband mode.**
   
   Make sure that the ASE is in sideband mode by running the following command in the ASE command line:
@@ -116,17 +127,19 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
 
-   
-
 ## Deploy WSO2 Extension with PingIntelligence
 
 ### For System Admin
 
-1. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
+1. Download the extension and navigate to the **apim-handler-pingai** directory and run the following Maven command to build the distribution.
+   ```
+    mvn clean install
+     ```
+    
+2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
+   You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory. 
 
-    The name of the JAR should be *org.wso2.carbon.apimgt.securityenforcer-\<version>.jar*
-
-2. Add the bare minimum configurations to the **<PRODUCT_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
+3. Add the bare minimum configurations to the **<PRODUCT_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
 
     ```
     <PingAISecurityHandler>
@@ -153,7 +166,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
          obtained from the ASE as the ASEToken.
    - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, and the ASE_REST_API_SECRET_KEY.
 
-3. To engage the handler to APIs, you need to update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file. 
+4. To engage the handler to APIs, you need to update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file. 
    Add the handler class as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
@@ -175,20 +188,21 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    </handlers>
      ```
   
-4. Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.
+5. Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.
+    Start WSO2 API Manager by navigating to the <APIM_HOME>/bin directory and using the command-line to execute either the wso2server.bat (for Windows) or wso2server.sh (for Linux.) file based on your OS.
 
-5. Navigate to **Extensions** > **Configure** > **Lifecycles** and click the *View/Edit* link that corresponds to the 
+6. Navigate to **Extensions** > **Configure** > **Lifecycles** and click the *View/Edit* link that corresponds to the 
 *default API LifeCycle*.
 
-6. Add a new execution for the **Publish** event under the **CREATED** and **PROTOTYPED** states. 
+7. Add a new execution for the **Publish** event under the **CREATED** and **PROTOTYPED** states. 
 Do not update the already existing execution for the Publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
     </execution>
     ```
- 
-7. Add another execution for the **Retire** event under the **DEPRECATED** state.
+    
+8. Add another execution for the **Retire** event under the **DEPRECATED** state.
    This will delete the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire" 
@@ -200,16 +214,18 @@ Do not update the already existing execution for the Publish event. Add a new ex
 
 **For new APIs**
 
-- When the API is successfully created and the life cycle state changes to **PUBLISHED**,
+- When the API is successfully [created](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-CreatinganAPIfromscratch) and the life cycle state changes to **PUBLISHED**,
  a new model is created in the ASE for the API and the handler is added to the data flow. 
  When the API state changes to **RETIRED**, the model is deleted.
 
 **For existing APIs**
 
-- The recommended method is to create a new version for the API with PingIntelligence enabled.
+- The recommended method is to create a [new version](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-VersioningtheAPI) for the API with PingIntelligence enabled.
 
-    *Republishing the API will update the Synapse config with the handler and by changing the life cycle to PUBLISHED 
-    will create a new model.*
+    *Although changing the status of a live API is not recommended, republishing the API will update the Synapse config 
+    with the handler and by demoting to the CREATED or PROTOTYPED state and thereafter changing the life cycle back to the PUBLISHED state 
+    it will create a new model for the API in the ASE.*
+
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/publishedState.png)
 
@@ -463,8 +479,9 @@ Concurrent requests received for the handler are handled by a thread pool combin
     </StackObjectPool>
 ```
 
+
 ## Encrypting passwords with the Cipher Tool
-The configuration file contains both ASE access token and the password for the proxy server. If neded, you can encrypt these feilds using the Cipher Tool.
+The configuration file contains the ASE access token, Management API Access Key, and the Secret Key. If needed, you can use the Cipher Tool to encrypt sensitive data.
 
 1. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-tool.properties file.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ASEToken,false
@@ -472,7 +489,7 @@ The configuration file contains both ASE access token and the password for the p
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/SecretKey,false
  
 
-2. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-text.properties file. Note that the password should be enclosed within square brackets.
+2. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-text.properties file. Note that you should enclose the password within square brackets.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=[ASE_TOKEN]
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=[SECRET_KEY]
@@ -480,7 +497,7 @@ The configuration file contains both ASE access token and the password for the p
     *If your password contains a backslash character (\) you need to use an alias with the escape characters. For example, if your password is admin\\} the value should be given as shown in the example below.*
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[admin\\\\}]
 
-3. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored. 
+3. Open a command prompt and go to the <APIM_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored. 
 4. Execute the Cipher Tool script from the command prompt using the command relevant to your OS: 
     - On Windows: ./ciphertool.bat -Dconfigure
     - On Linux: ./ciphertool.sh -Dconfigure
@@ -499,7 +516,7 @@ The configuration file contains both ASE access token and the password for the p
 Follow the instructions below to change a password that you had previously encrypted:
 
 1. Shut down the server.
-2. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored. 
+2. Open a command prompt and go to the <APIM_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored. 
 3. Execute one of the following commands based on your OS:
     - On Linux: ./ciphertool.sh -Dchange
     - On Windows: ./ciphertool.bat -Dchange
