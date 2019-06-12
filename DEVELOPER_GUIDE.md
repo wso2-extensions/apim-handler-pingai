@@ -359,8 +359,8 @@ The API JSON file parameters define the behavior and properties of the API and t
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/ASEConfigsAsAdditionalProperties.png)
 
-## Additional Extension related configurations
-Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<PingAISecurityHandler> tag.
+## Adding additional configurations
+Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<PingAISecurityHandler> tag in order to add additional configurations with regard to the PingIntelligence extension.
    
     <PingAISecurityHandler>
         <ApplyForAllAPIs>false</ApplyForAllAPIs>
@@ -416,14 +416,14 @@ By default, PingIntelligence is enabled in all APIs that are published with an i
     </handlers>
    ```
 
-3. Sign in to the API Publisher and create a new API. Before publishing the API, add a new additional property named **ai_security** and valued **enable**.
+3. Sign in to the API Publisher and create a new API. Before publishing the API, add a new additional property named **ai_security** with the value **enable**.
 
 4. Change the life cycle state to **PUBLISHED**.
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/enablePolicyWithAdditionalProperties.png)
 
 ### Limit Transport Headers
-All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add the following code.
+All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add the following code. For more information, see [Adding additional configurations](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#adding-additional-configurations).
    ```
     <LimitTransportHeaders>
         <Header>HEADER_1</Header>
@@ -433,13 +433,13 @@ All transport headers found in the client request and backend response will be s
     </LimitTransportHeaders>
    ```
 
-Only the intercept of headers mentioned and present in the transport headers will be sent to ASE in both sideband calls.
+Only the intercept of headers mentioned and present in the transport headers are sent to ASE in both sideband calls.
 
-*If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise feature will not be useful in the async and hybrid modes.*
+*If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise, this feature will not be useful when working with async and hybrid modes.*
 
-### Other Configurations
-#### Http Client Configurations
-Configurations regarding the Http Client can be changed as follows.
+### Other configurations
+#### HTTP client configurations
+Configurations with regard to the HTTP Client can be changed as follows.
   ```
     <DataPublisher>
         <MaxPerRoute>500</MaxPerRoute>
@@ -449,7 +449,7 @@ Configurations regarding the Http Client can be changed as follows.
    ```
 
 #### Thread pool and stack object pool configurations
-Concurrent requests received for the handler will be handled by a thread pool combined with a stack object pool.
+Concurrent requests received for the handler are handled by a thread pool combined with a stack object pool.
 
    ```
     <ThreadPoolExecutor>
@@ -463,16 +463,16 @@ Concurrent requests received for the handler will be handled by a thread pool co
     </StackObjectPool>
 ```
 
-## Encrypting Passwords with Cipher tool
-The configuration file contains both ASE access token and the password for the proxy server. If the customer wants to encrypt these fields, that capability is provided with the Cipher tool.
+## Encrypting passwords with the Cipher Tool
+The configuration file contains both ASE access token and the password for the proxy server. If neded, you can encrypt these feilds using the Cipher Tool.
 
-1. Open the cipher-tool.properties file stored in the <PRODUCT_HOME>/repository/conf/security folder and add the following lines.
+1. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-tool.properties file.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ASEToken,false
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/AccessKey,false
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/SecretKey,false
  
 
-2. Open the cipher-text.properties file stored in the <PRODUCT_HOME>/repository/conf/security folder. Add the following lines to the cipher-text.properties file.(Password should be enclosed within square brackets)
+2. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-text.properties file. Note that the password should be enclosed within square brackets.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=[ASE_TOKEN]
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=[SECRET_KEY]
@@ -480,8 +480,8 @@ The configuration file contains both ASE access token and the password for the p
     *If your password contains a backslash character (\) you need to use an alias with the escape characters. For example, if your password is admin\\} the value should be given as shown in the example below.*
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[admin\\\\}]
 
-3. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the cipher tool scripts (for Windows and Linux) are stored. 
-4. Execute the cipher tool script from the command prompt using the command relevant to your OS: 
+3. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored. 
+4. Execute the Cipher Tool script from the command prompt using the command relevant to your OS: 
     - On Windows: ./ciphertool.bat -Dconfigure
     - On Linux: ./ciphertool.sh -Dconfigure
 5. The following message will be prompted: 
@@ -493,25 +493,25 @@ The configuration file contains both ASE access token and the password for the p
     "[Secret Configurations are written to the property file successfully]"
 7. Now, to verify the password encryption: 
 
-    Open the cipher-text.properties file and see that the plain text passwords are replaced by a cipher value.
+    Open the cipher-text.properties file and see that the plain text passwords are replaced by a Cipher value.
 
 #### Changing encrypted passwords
-To change any password which we have encrypted already, follow the below steps:
+Follow the instructions below to change a password that you had previously encrypted:
 
-1. Be sure to shut down the server.
-2. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the cipher tool scripts (for Windows and Linux) are stored. 
-3. Execute the following command for your OS:
+1. Shut down the server.
+2. Open a command prompt and go to the <PRODUCT_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored. 
+3. Execute one of the following commands based on your OS:
     - On Linux: ./ciphertool.sh -Dchange
     - On Windows: ./ciphertool.bat -Dchange
     
-    If you are using the cipher tool for the first time, this command will first initialize the tool for your product. The tool will then encrypt any plain text passwords that are specified in the cipher-text.properties file for automatic encryption.
-5. It will prompt for the primary keystore password. Enter the keystore password (which is "wso2carbon" for the default keystore).
+    If you are using the Cipher Tool for the first time, this command will first initialize the tool for your product. The tool will then encrypt any plain text passwords that are specified in the cipher-text.properties file for automatic encryption.
+5. It will prompt for the primary keystore password. Enter the keystore password, which is "wso2carbon" for the default keystore.
 6. The alias values of all the passwords that you encrypted will now be shown in a numbered list. 
-7. The system will then prompt you to select the alias of the password which you want to change. Enter the list number of the password alias.
-8. The system will then prompt you (twice) to enter the new password. Enter your new password.
+7. When prompted select the alias of the password which you want to change. Enter the list number of the password alias.
+8. When prompted, enter the new password (twice). Enter your new password.
 
 
-## Configurations Guide
+## Configurations guide
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
@@ -519,14 +519,14 @@ To change any password which we have encrypted already, follow the below steps:
 |ApplyForAllAPIs|(Boolean)|true|Apply Ping Intelligence for all APIs published.|
 |CacheExpiryTime|(Integer)|15|Cache Expiry time in minutes.|
 
-#### APISecurityEnforcer - ASE Configurations
+#### APISecurityEnforcer - ASE configurations
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
 |EndPoint|(String)|-|The endpoint of ASE. Support both HTTP and HTTPS.|
 |ASEToken|(String)|-|If access token needed to communicate with ASE.|
 
-#### ModelCreationEndpoint - ASE Management REST API Configurations
+#### ModelCreationEndpoint - ASE Management REST API configurations
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
@@ -534,7 +534,7 @@ To change any password which we have encrypted already, follow the below steps:
 |AccessKey|(String)|-|AccessKey to the management endpoint.|
 |SecretKey|(String)|-|SecretKey to the management endpoint.|
 
-#### DataPublisher - HTTP Client configurations
+#### DataPublisher - HTTP client configurations
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
@@ -550,7 +550,7 @@ To change any password which we have encrypted already, follow the below steps:
 |MaximumPoolSize|(Integer)|500|The maximum number of threads to allow in the pool.|
 |KeepAliveTime|(Long)|100|When the number of threads is greater than the core, this is the maximum time in seconds that excess idle threads will wait for new tasks before terminating.|
 
-#### StackObjectPool - StackObjectPool Configurations
+#### StackObjectPool - StackObjectPool configurations
 
 | Field  | input| DefaultValue | Description|
 | ------------- | ------------- | ------------- | ------------- |
