@@ -4,15 +4,15 @@
 PingIntelligence for APIs uses artificial intelligence (AI) to expose active APIs, identify and automatically block cyber attacks on APIs and provide detailed reporting on all API activity. You can deploy the PingIntelligence solution on premises, in public clouds, or in hybrid clouds to monitor API traffic across the environment. PingIntelligence uses AI and machine learning models to detect anomalous API behavior, without relying on specifically defined policies or prior knowledge of attack patterns, in order to stop new and constantly changing attacks. In addition, PingIntelligence uses its continuous learning capabilities to become more accurate at identifying and blocking attacks over time.  
 
 
-#### Types of Attacks PingIntelligence Protects Against
+#### Types of attacks PingIntelligence protects against
 The following are the types of attacks that PingIntelligence can detect.
 
-##### Authentication System Attacks
+##### Authentication system attacks
  - **Login system attacks**: Bad actors use credential stuffing and other brute force attacks to test valid credentials from the dark web to determine the validity of these credentials. They then utilize the compromised credentials to access API services. Bots may execute aggressive attacks or run slower attacks designed to blend in with normal login failures.
 
  - **Account takeover with stolen credential attacks**: Stolen credentials acquired via man-in-the-middle and other attacks are used to penetrate and take over accounts. These credentials include stolen tokens, cookies or API keys that may be used by the hacker to access data authorized to the compromised client.
 
-##### Data and Application Attacks
+##### Data and application attacks
  - **API takeover attacks**: Hackers use a valid account to reverse engineer the API and access other accounts using the vulnerabilities they find. Theft of data and private info follows, as well as the takeover of other accounts. Meanwhile, the hacker looks like a normal user at all times since they are using a valid account.
 
  - **Data extraction or theft**: Hackers use APIs to steal files, photos, credit card information and personal data from accounts available through an API. Since normal outbound activity on one API may be an attack on a different API, PingIntelligence uses its deep understanding of each API to block both normal and extended duration data exfiltration attacks.
@@ -29,7 +29,7 @@ The following are the types of attacks that PingIntelligence can detect.
 
  - **Probing and fuzzing attacks**: A hacker may look for coding flaws that can be exploited to expose unintended content. The hacker may also try to mask the activity by probing the API over long time periods. These attacks can be used to force API errors to uncover IP and system addresses that can then be used to access resources.
 
-##### API DoS/DDoS Attacks
+##### API DoS/DDoS attacks
  - **Targeted API DDoS attacks**: Hackers tune attacks to stay below rate limits and exploit API vulnerability with finely crafted API DDoS attacks to disable services provided by the API or damage the user experience. Existing anti-DoS/DDoS security solutions can’t stop these attacks, but PingIntelligence for APIs uses AI to identify and block them.
 
  - **Extreme client activity**: A bot or hacker may generate extreme levels of inbound activity on an API service.
@@ -315,7 +315,7 @@ The second sideband request of each request is sent to ASE asynchronously with t
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/responseFlow.png)
 
-## ASE Model Creation
+## ASE Model creation
 There is a new model created in the security engine for every API deployed with this feature. Security decisions are taken according to this model. A template of the ASE configuration file is used with default values and the API context is used as the URL. When OAuth protection is enabled, the authentication token is sent as the API key with the default header name “APIKey”. If you need to change any of the default values with regard to an API, you can do this by adding additional properties. If you need to change any of the default values with regard to all the APIs, you can do this by updating the default JSON (apim-handler-pingai-<version>/src/main/resources/org/wso2/carbon/apimgt/securityenforcer/internal/samplePingAIManagementPayload.json) file. However, note that after you change the default JSON, you can not change it back, because it is inside the bundle. Therefore, if you need to change it back, you have to build the apim-handler-pingai distribution again.
  The model creation request is sent to the ASE REST API when the API’s state changes from the CREATED state or PROTOTYPED state to the PUBLISHED state. When the API state changes to RETIRED, this model will be deleted.
 
@@ -438,7 +438,7 @@ By default, PingIntelligence is enabled in all APIs that are published with an i
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/enablePolicyWithAdditionalProperties.png)
 
-### Limit Transport Headers
+### Limit transport headers
 All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add the following code. For more information, see [Adding additional configurations](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#adding-additional-configurations).
    ```
     <LimitTransportHeaders>
