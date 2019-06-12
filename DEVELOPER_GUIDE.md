@@ -221,16 +221,16 @@ However, if needed you can configure PingIntelligence to be [applied only for se
 
 #### Verify the policy deployment:
 
-1. Open the synapse Configuration of the published API, located in <APIM_HOME>/repository/deployment/server/synapse-configs/default/api directory. 
-Check whether \<handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>  added under \<handlers>.
-2. Open ASE command line. Using the CLI tool, you can list the published APIs in ASE.
+1. Open the Synapse configuration of the published API, located in in the <APIM_HOME>/repository/deployment/server/synapse-configs/default/api directory. 
+Check whether the \<handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>  handler is added under \<handlers>.
+2. Open ASE command line. Use the CLI tool to list the published APIs in ASE.
 Check whether the API is listed as <API_NAME>_\<VERSION>.
     Eg: HelloWorld_1.0.0
 
    
 ## Configurations
 #### Bare minimum configurations
-Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under \<APIManager> tag. If mode is not set, the default mode is set as async. If ModelCreationEndpoint configurations are not set, manual creation of ASE models will be needed.
+Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<APIManager> tag. If the mode is not set, the default mode is set as async. If the ModelCreationEndpoint configurations are not set, you need to manually create the ASE models.
 
 ```
     <PingAISecurityHandler>
@@ -247,49 +247,49 @@ Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager
     </PingAISecurityHandler>
    ```
 
-## Modes of Operation
-To integrate this feature to WSO2 API Manager, a custom handler is implemented with the handleRequest and handleResponse methods. For every request, WSO2 gateway will send two sideband calls to ASE. First one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). Second sideband call is mainly for the learning mode of AI Engine.
+## Modes of operation
+WSO2 has implemented a custom handler with the handleRequest and handleResponse methods in iorder to integrate this feature with WSO2 API Manager. For every request, WSO2 Gateway sends two sideband calls to the API Security Enforcer (ASE). The first one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). The second sideband call is mainly for the learning mode of the AI Engine.
 
 
 There are three modes of operation when implementing the extension.
-1. Sync Mode
-2. Async Mode
-3. Hybrid Mode
+* Sync Mode
+* Async Mode
+* Hybrid Mode
 
 The difference with all these modes is only with the first sideband request. The second sideband request will be asynchronous in all three modes.
 
-### Sync Mode
-In the sync mode, first sideband call is sent synchronously to the request dataflow. Depends on the ASE response, the handler will allow each request to connect the backend. 
+### Sync mode
+In the sync mode, the first sideband call is sent synchronously to the request data flow. Depending on the ASE response, the handler will allow each request to connect to the backend. 
 
-This is a thread blocking call and every request will wait until the ASE respond.
+As this is a thread blocking call, every request will wait until the ASE responds.
 
    **Total time  =~0.2ms + ASE Sideband call time**
 
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/syncFlow.png)
 
-### Async Mode
-In this mode, both sideband calls are sent asynchronously. There is a cache which records the response of each request sent to ASE. 
+### Async mode
+In this mode, both the sideband calls are sent asynchronously. There is a cache which records the response of each request sent to ASE. 
 
-Since the metadata set of each client request is unique to the client (with the authorization header), the cache will record ASE response with the metadata. Metadata will be hashed with MD5 and the hash code is used as the key.
+As the metadata set of each client request is unique to the client (with the authorization header), the cache records the ASE response with the metadata. The metadata is hashed with MD5 and the hash code is used as the key.
 
 **Total time = < 0.2ms**
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/asyncFlow.png)
 
 **Important:**
-*There is a slip rate as the requests received until the first cache update will be forwarded to the backend without monitoring.*
+*There is a slip rate because the requests received until the first cache update is forwarded to the backend without monitoring.*
 
 
-### Hybrid Mode
+### Hybrid mode
 
-In this mode, if an ASE response for the metadata is not present in the cache, the thread will be blocked and the sideband call to ASE will be sent synchronously. With its response, the cache will be updated and depends on the response, the request will be processed.
+In this mode, if there is no ASE response for the metadata in the cache, the thread is blocked and the sideband call to the ASE is sent synchronously. The cache is updated with the response and the request will be processed depending on the reponse.
 
-The next request of the same client will be handled according to the cached response and later cache will be updated asynchronously.
+The next request of the same client will be handled according to the cached response. However, later on the cache will be updated asynchronously.
 
-Requests until the first cache update will be handled in the sync mode and after that, it will be handled in async mode.
+Requests until the first cache update is handled in sync mode and after that it will be handled in async mode.
 
-For the cache, there is an expiry time for each record which is 15 mins after the last cache update.
+Each record in the cache has an expiry time, which is 15min from the last cache update.
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/hybridFlow.png)
 
@@ -300,7 +300,8 @@ The second sideband request of each request is sent to ASE asynchronously with t
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/responseFlow.png)
 
 ## ASE Model Creation
-For every API deployed with this feature, there will be a new model created at the security engine. Security decisions will be taken according to this model. A Template of the ASE configuration file is used with default values and API context is used as the url. When OAuth protected, authentication token is sent as the API key with default header name “APIKey”. If any of these values needs to be changed with API, that can be done with additional properties. Model creation request will be sent to the ASE REST API when the API’s state is changed to PUBLISHED from CREATE state or PROTOTYPED state. Once the API state changes to RETIRED, this model will be deleted.
+There is a new model created in the security engine for every API deployed with this feature. Security decisions are taken according to this model. A template of the ASE configuration file is used with default values and the API context is used as the URL. When OAuth protection is enabled, the authentication token is sent as the API key with the default header name “APIKey”. If you need to change any of the default values with regard to an API, you can do this by adding additional properties. If you need to change any of the default values with regard to all the APIs, you can do this by updating the default JSON (apim-handler-pingai-<version>/src/main/resources/org/wso2/carbon/apimgt/securityenforcer/internal/samplePingAIManagementPayload.json) file. However, note that after you change the default JSON, you can not change it back, because it is inside the bundle. Therefore, if you need to change it back, you have to build the apim-handler-pingai distribution again.
+ The model creation request is sent to the ASE REST API when the API’s state changes from the CREATE state or PROTOTYPED state to the PUBLISHED state. When the API state changes to RETIRED, this model will be deleted.
 
 #### ASE configurations - API JSON configuration file 
 
@@ -331,12 +332,10 @@ For every API deployed with this feature, there will be a new model created at t
     }
     
     
- **Note:** After the Authentication handler, by default Authorization header will be removed from the transport headers. 
- However **auth token** will be sent as the API Key and will be added to the request metadata payload as a new transport header **APIKey**.
- If you want Authorization header to be present in the transport headers, either by adding the PingAISecurityHandler before Authentication handler or 
- by changing the default configuration of Authentication handler not to remove Authorization header after the handler, you can achieve that.
+ **Note:** After the Authentication handler (APIAuthenticationHandler) gets executed, by default the Authorization header is removed from the transport headers. However, the **auth token** will be sent as the API Key and will be added to the request metadata payload as a new transport header **APIKey**. If you want the Authorization header to be present in the transport headers, you can either add the PingAISecurityHandler before the Authentication handler or you can change the default configuration of the Authentication handler so that it does not remove the Authorization header after the handler processes the request.
+
 #### Changing the ASE model parameters
-The API JSON file parameters define the behavior and properties of the API and the learning model. If there are more configurations for the AI model, add those configurations as additional properties before publishing the API. If no additional parameters added, default values will be used.
+The API JSON file parameters define the behavior and properties of the API and the learning model. If there are more configurations for the AI model, add those configurations as additional properties before publishing the API. If you do not add any additional parameters, the default values are used.
 
 **Supported configurations :**
 - protocol: API request type with supported values of http - HTTP. 
@@ -360,8 +359,8 @@ The API JSON file parameters define the behavior and properties of the API and t
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/ASEConfigsAsAdditionalProperties.png)
 
-## Additional Configurations of Extension
-Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under \<PingAISecurityHandler> tag.
+## Additional Extension related configurations
+Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<PingAISecurityHandler> tag.
    
     <PingAISecurityHandler>
         <ApplyForAllAPIs>false</ApplyForAllAPIs>
@@ -389,16 +388,16 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.
     </PingAISecurityHandler>
 
 ### Add the policy only for selected APIs
-By default, Ping intelligence will be included in all APIs with individual AI models for each API. To limit that to selected APIs, 
-1. Add the additional configuration \<ApplyForAllAPIs>false\</ApplyForAllAPIs> with the configs in api-manager.xml.
-2. Instead of updating the velocity-template with the handler, add following code inside the \<handlers xmlns="http://ws.apache.org/ns/synapse"> just after the foreach loop.
+By default, PingIntelligence is enabled in all APIs that are published with an individual AI model. Follow the instructions below to enable PingIntelligence only on selected APIs:
+1. Add the additional configuration \<ApplyForAllAPIs>false\</ApplyForAllAPIs> with the configs in the api-manager.xml file.
+2. Instead of updating the velocity-template with the handler, add the following code inside \<handlers xmlns="http://ws.apache.org/ns/synapse"> just after the foreach loop.
       ```
         #if($apiObj.additionalProperties.get('ai_security') == "enable")
             <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
         #end
      ```
      
-    In default velocity_template.xml file, it should be as follows.
+    In the default velocity_template.xml file, it should be as follows:
     ```
      <handlers xmlns="http://ws.apache.org/ns/synapse">
     #foreach($handler in $handlers)
@@ -417,14 +416,14 @@ By default, Ping intelligence will be included in all APIs with individual AI mo
     </handlers>
    ```
 
-3. Log into the API Publisher and create a new API. Before publishing, add a new additional property named **ai_security** and valued **enable**.
+3. Sign in to the API Publisher and create a new API. Before publishing the API, add a new additional property named **ai_security** and valued **enable**.
 
 4. Change the life cycle state to **PUBLISHED**.
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/enablePolicyWithAdditionalProperties.png)
 
 ### Limit Transport Headers
-All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add 
+All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add the following code.
    ```
     <LimitTransportHeaders>
         <Header>HEADER_1</Header>
