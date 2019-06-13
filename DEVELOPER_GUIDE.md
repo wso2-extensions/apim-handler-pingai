@@ -139,7 +139,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory. 
 
-3. Add the bare minimum configurations to the **<PRODUCT_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
+3. Add the bare minimum configurations to the **<APIM_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
 
     ```
     <PingAISecurityHandler>
@@ -483,13 +483,13 @@ Concurrent requests received for the handler are handled by a thread pool combin
 ## Encrypting passwords with Cipher Tool
 The configuration file contains the ASE access token, Management API Access Key, and the Secret Key. If needed, you can use the Cipher Tool to encrypt sensitive data.
 
-1. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-tool.properties file.
+1. Add the following to the <APIM_HOME>/repository/conf/security/cipher-tool.properties file.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ASEToken,false
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/AccessKey,false
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/SecretKey,false
  
 
-2. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-text.properties file. Note that you should enclose the password within square brackets.
+2. Add the following to the <APIM_HOME>/repository/conf/security/cipher-text.properties file. Note that you should enclose the password within square brackets.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=[ASE_TOKEN]
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=[SECRET_KEY]
