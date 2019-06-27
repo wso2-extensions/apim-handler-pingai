@@ -82,7 +82,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
     PingIntelligence software is installed and configured. For installation of PingIntelligence software, 
     see the [manual or platform specific automated deployment guides](https://docs.pingidentity.com/bundle/PingIntelligence_For_APIs_Deployment_Guide_pingintel_32/page/pingintelligence_product_deployment.html).
 - **Verify that ASE is in sideband mode.**
-  
+
   Make sure that the ASE is in sideband mode by running the following command in the ASE command line:
     ```
    /opt/pingidentity/ase/bin/cli.sh status

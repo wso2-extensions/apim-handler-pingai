@@ -326,7 +326,7 @@ public class SecurityHandlerConfiguration {
                 while (headersIterator.hasNext()) {
                     OMElement headerElement = (OMElement) headersIterator.next();
                     if (headerElement != null) {
-                        headerSet.add(headerElement.getText());
+                        headerSet.add(headerElement.getText().toLowerCase());
                     }
                 }
                 limitTransportHeadersConfig.setHeaderSet(headerSet);
