@@ -87,11 +87,6 @@ public class SecurityUtils {
             if (log.isDebugEnabled()) {
                 log.debug("Transport headers found for the request " + correlationID + " are " + headerKeysSet);
             }
-            if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getLimitTransportHeaders().isEnable()) {
-                headerKeysSet.retainAll(
-                        ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getLimitTransportHeaders()
-                                .getHeaderSet());
-            }
 
             if (AISecurityHandlerConstants.ASE_RESOURCE_REQUEST.equals(sideBandCallType)) {
                 String hostValue = transportHeadersMap.get(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME);
@@ -105,10 +100,22 @@ public class SecurityUtils {
                 }
             }
 
-            for (String headerKey : headerKeysSet) {
-                String headerValue = transportHeadersMap.get(headerKey);
-                transportHeadersArray.add(addObj(headerKey, headerValue));
+            if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getLimitTransportHeaders().isEnable()) {
+                Set<String> allowedTransportHeadersKeySet = ServiceReferenceHolder.getInstance()
+                        .getSecurityHandlerConfig().getLimitTransportHeaders().getHeaderSet();
+                for (String headerKey : headerKeysSet) {
+                    if (allowedTransportHeadersKeySet.contains(headerKey.toLowerCase())) {
+                        String headerValue = transportHeadersMap.get(headerKey);
+                        transportHeadersArray.add(addObj(headerKey, headerValue));
+                    }
+                }
+            } else {
+                for (String headerKey : headerKeysSet) {
+                    String headerValue = transportHeadersMap.get(headerKey);
+                    transportHeadersArray.add(addObj(headerKey, headerValue));
+                }
             }
+
             return transportHeadersArray;
         } else {
             log.error("No Transport headers found for the request " + correlationID);

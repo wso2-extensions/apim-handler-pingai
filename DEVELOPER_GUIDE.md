@@ -82,7 +82,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
     PingIntelligence software is installed and configured. For installation of PingIntelligence software, 
     see the [manual or platform specific automated deployment guides](https://docs.pingidentity.com/bundle/PingIntelligence_For_APIs_Deployment_Guide_pingintel_32/page/pingintelligence_product_deployment.html).
 - **Verify that ASE is in sideband mode.**
-  
+
   Make sure that the ASE is in sideband mode by running the following command in the ASE command line:
     ```
    /opt/pingidentity/ase/bin/cli.sh status
@@ -139,7 +139,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory. 
 
-3. Add the bare minimum configurations to the **<PRODUCT_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
+3. Add the bare minimum configurations to the **<APIM_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
 
     ```
     <PingAISecurityHandler>
@@ -188,28 +188,22 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    </handlers>
      ```
   
-5. Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.
-    Start WSO2 API Manager by navigating to the <APIM_HOME>/bin directory and using the command-line to execute either the wso2server.bat (for Windows) or wso2server.sh (for Linux.) file based on your OS.
-
-6. Navigate to **Extensions** > **Configure** > **Lifecycles** and click the *View/Edit* link that corresponds to the 
-*default API LifeCycle*.
-
-7. Add a new execution for the **Publish** event under the **CREATED** and **PROTOTYPED** states. 
-Do not update the already existing execution for the Publish event. Add a new execution.
+5. Update the **<APIM_HOME>/repository/resources/lifecycles/APILifeCycle.xml** file with a new execution for the **Publish** event under **Created** and **Prototyped** states. 
+Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
     </execution>
     ```
-    
-8. Add another execution for the **Retire** event under the **DEPRECATED** state.
-   This will delete the model associated with the API in the ASE when the API is retired.
+ 
+6. Add another execution for the **Retire** event under the **Deprecated** state.
+   This deletes the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire" 
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
     </execution>
     ```
-     
+          
 ### For the API Publisher
 
 **For new APIs**
@@ -483,13 +477,13 @@ Concurrent requests received for the handler are handled by a thread pool combin
 ## Encrypting passwords with Cipher Tool
 The configuration file contains the ASE access token, Management API Access Key, and the Secret Key. If needed, you can use the Cipher Tool to encrypt sensitive data.
 
-1. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-tool.properties file.
+1. Add the following to the <APIM_HOME>/repository/conf/security/cipher-tool.properties file.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ASEToken,false
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/AccessKey,false
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/SecretKey,false
  
 
-2. Add the following to the <PRODUCT_HOME>/repository/conf/security/cipher-text.properties file. Note that you should enclose the password within square brackets.
+2. Add the following to the <APIM_HOME>/repository/conf/security/cipher-text.properties file. Note that you should enclose the password within square brackets.
     - **APIManager.PingAISecurityHandler.ASE.ASEToken**=[ASE_TOKEN]
     - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
     - **APIManager.PingAISecurityHandler.ASE.SecretKey**=[SECRET_KEY]

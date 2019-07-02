@@ -129,14 +129,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
    ```
   
-5. Deploy WSO2 API Manager and access the management console: https://localhost:9443/carbon.
-   
-    Start the API Manager by going to <APIM_HOME>/bin using the command-line and executing wso2server.bat (for Windows) or wso2server.sh (for Linux.) 
-    
-6. Navigate to **Extensions** > **Configure** > **Lifecycles** and Click the **View/Edit** link corresponding to the 
-*default API LifeCycle*.
-
-7. Add a new execution for the **Publish** event under **CREATED** and **PROTOTYPED** states. 
+5. Update the **<APIM_HOME>/repository/resources/lifecycles/APILifeCycle.xml** file with a new execution for the **Publish** event under **Created** and **Prototyped** states. 
 Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
@@ -144,7 +137,7 @@ Do not update the already existing execution for the publish event. Add a new ex
     </execution>
     ```
  
-8. Add another execution for the **Retire** event under the **DEPRECATED** state.
+6. Add another execution for the **Retire** event under the **Deprecated** state.
    This deletes the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire" 
