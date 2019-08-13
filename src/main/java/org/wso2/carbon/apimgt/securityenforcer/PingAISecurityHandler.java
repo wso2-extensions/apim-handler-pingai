@@ -174,8 +174,13 @@ public class PingAISecurityHandler extends AbstractHandler {
         String requestPath = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.API_BASEPATH_STRING);
         String requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
 
+        String userName = authContext.getUsername();
+
+        JSONArray userInfo = new JSONArray();
+        userInfo.add(SecurityUtils.addObj(AISecurityHandlerConstants.JSON_KEY_USER_NAME, userName));
+
         return createRequestJson(requestMethod, requestPath, requestHttpVersion, requestOriginIP, requestOriginPort,
-                transportHeaders);
+                transportHeaders, userInfo);
     }
 
     JSONObject extractResponseMetadata(MessageContext messageContext) throws AISecurityException {
@@ -202,7 +207,7 @@ public class PingAISecurityHandler extends AbstractHandler {
      * This method will format the extracted details to a given json format
      */
     private JSONObject createRequestJson(String requestMethod, String requestPath, String requestHttpVersion,
-            String requestOriginIP, int requestOriginPort, JSONArray transportHeaders) {
+            String requestOriginIP, int requestOriginPort, JSONArray transportHeaders, JSONArray userInfo) {
 
         JSONObject aseRequestBodyJson = new JSONObject();
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_SOURCE_IP, requestOriginIP);
@@ -211,6 +216,7 @@ public class PingAISecurityHandler extends AbstractHandler {
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_API_BASEPATH, requestPath);
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_HTTP_VERSION, requestHttpVersion);
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_HEADERS, transportHeaders);
+        aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_USER_INFO, userInfo);
         return aseRequestBodyJson;
     }
 
@@ -268,7 +274,8 @@ public class PingAISecurityHandler extends AbstractHandler {
         messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, e);
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, SecurityUtils.getFaultPayload(new AISecurityException(status,errorMessage,e)));
+            Utils.setFaultPayload(messageContext,
+                    SecurityUtils.getFaultPayload(new AISecurityException(status, errorMessage, e)));
         } else {
             Utils.setSOAPFault(messageContext, "Client", "Authentication Failure from AI Security Handler",
                     e.getMessage());
