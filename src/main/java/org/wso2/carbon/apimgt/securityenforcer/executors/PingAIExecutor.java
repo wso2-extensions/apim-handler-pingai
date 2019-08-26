@@ -109,9 +109,12 @@ public class PingAIExecutor implements Execution {
                     return false;
                 }
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-                String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME)
-                        + AISecurityHandlerConstants.API_NAME_VERSION_CONNECTOR + apiArtifact
-                        .getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
+                String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME);
+                String apiVersion = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
+
+                //replace "." from version with "_" as from v4, ase does not support "." with version.
+                String modelName = apiName + AISecurityHandlerConstants.API_NAME_VERSION_CONNECTOR + apiVersion.replace(".","_");
+
                 String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
 
                 HttpDataPublisher httpDataPublisher = ServiceReferenceHolder.getInstance().getHttpDataPublisher();
@@ -130,11 +133,11 @@ public class PingAIExecutor implements Execution {
                     requestBody = createAPIJSON(apiContext, context);
 
                     if (log.isDebugEnabled()) {
-                        log.debug("ASE Management API Payload : " + requestBody + " for the API " + apiName
+                        log.debug("ASE Management API Payload : " + requestBody + " for the API " + modelName
                                 + " state change from " + currentState + " to " + targetState);
                     }
 
-                    HttpPost postRequest = new HttpPost(managementAPIEndpoint + "?api_id=" + apiName);
+                    HttpPost postRequest = new HttpPost(managementAPIEndpoint + "?api_id=" + modelName);
                     postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
                     postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
                     postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT, "application/json");
@@ -146,7 +149,7 @@ public class PingAIExecutor implements Execution {
                             .publishToASEManagementAPI(AISecurityHandlerConstants.CREATE, postRequest);
                 }
                 if (AISecurityHandlerConstants.RETIRED.equals(targetState.toUpperCase())) {
-                    HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + apiName);
+                    HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + modelName);
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
                     deleteRequest
@@ -160,10 +163,10 @@ public class PingAIExecutor implements Execution {
 
                 if (responseStatus != null) {
                     if (responseStatus.getStatusCode() == AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS) {
-                        log.info(apiName + " is " + targetState + " in ASE");
+                        log.info(modelName + " is " + targetState + " in ASE");
                     } else {
                         log.info("ASE responded with " + responseStatus.getReasonPhrase() + " for the " + targetState
-                                + " request for the " + apiName + " API");
+                                + " request for the " + modelName + " API");
                     }
                 }
             }
