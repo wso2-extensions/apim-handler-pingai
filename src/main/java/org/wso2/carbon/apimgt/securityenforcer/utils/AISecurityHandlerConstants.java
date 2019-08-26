@@ -30,6 +30,8 @@ public class AISecurityHandlerConstants {
     public static final String JSON_KEY_API_BASEPATH = "url";
     public static final String JSON_KEY_HTTP_VERSION = "http_version";
     public static final String JSON_KEY_HEADERS = "headers";
+    public static final String JSON_KEY_USER_INFO = "user_info";
+    public static final String JSON_KEY_USER_NAME = "username";
     public static final String JSON_KEY_RESPONSE_CODE = "response_code";
     public static final String JSON_KEY_RESPONSE_STATUS = "response_status";
     public static final String ASE_RESOURCE_REQUEST = "request";

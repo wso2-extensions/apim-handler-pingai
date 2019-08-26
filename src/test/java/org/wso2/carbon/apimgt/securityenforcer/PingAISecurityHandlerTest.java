@@ -64,6 +64,7 @@ public class PingAISecurityHandlerTest {
         AuthenticationContext authenticationContext = new AuthenticationContext();
         authenticationContext.setApiKey("1234");
         authenticationContext.setApiTier("secured");
+        authenticationContext.setUsername("John");
         Mockito.when((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT"))
                 .thenReturn(authenticationContext);
 
@@ -104,7 +105,7 @@ public class PingAISecurityHandlerTest {
                 .thenReturn("/shop/get");
 
         JSONObject metaData = pingAiSecurityHandler.extractRequestMetadata(messageContext);
-        Assert.assertTrue(metaData.size() == 6);
+        Assert.assertTrue(metaData.size() == 7);
     }
 
     @Test
