@@ -1,0 +1,83 @@
+#Add the following configurations under [apim.ai_security] to <APIM_HOME>/repository/conf/deployment.toml
+
+#If any of the configurations are not set except the APISecurityEnforcer - ASE Configurations, the default
+#configuration will be used.
+
+[apim.ai_security]
+operation_mode = "MODE"
+apply_for_all = false
+cash_expiry_time = 15
+sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
+ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
+model_creation_endpoint = "ASE_REST_API_ENDPOINT"
+access_key = "ASE_REST_API_ACCESS_KEY"
+secret_key = "ASE_REST_API_SECRET_KEY"
+data_publisher.max_per_route = 500
+data_publisher.max_open_connections = 200
+data_publisher.connection_timeout = 30
+threadpool_executor.core_pool_size = 200
+threadpool_executor.max_pool_size = 500
+threadpool_executor.keep_alive_time = 100
+stack_object_pool.max_idle = 100
+stack_object_pool.init_idle_capacity = 50
+limit_transport_headers.header1 = "Header1"
+limit_transport_headers.header2 = "Header2"
+limit_transport_headers.header3 = "Header3"
+
+#Config descriptions
+
+#Three operation modes. "sync", "async" and "hybrid"
+#operation_mode = "MODE"
+
+#Apply Ping Intelligence for all APIs published from Api Manager
+#apply_for_all = false
+
+#Cache Expiry time in minutes.
+#cash_expiry_time = 15
+
+#Ping ASE related configuration used by the feature.
+#API Security Enforcer is used to validate and authenticate users against the request metadata.
+#Without this configuration, feature will not work.
+#sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
+#ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
+
+#Configurations related to management REST API of the Ping API Security Enforcer. This API is used to
+#create, update, list, delete models for the APIs
+#model_creation_endpoint = "ASE_REST_API_ENDPOINT"
+#access_key = "ASE_REST_API_ACCESS_KEY"
+#secret_key = "ASE_REST_API_SECRET_KEY"
+
+#Configurations related to the HTTP Client used in this feature.
+#HTTP request are used to communicate with the API Security Enforcer and the WSO2 API Manager
+
+#The maximum number of HTTP connections allowed across all routes
+#data_publisher.max_per_route = 500
+#The maximum number of HTTP connections allowed for a route
+#data_publisher.max_open_connections = 200
+#Connection timeout for the HTTP request in seconds. The socket timeout is set with the addition of another 10 seconds
+#data_publisher.connection_timeout = 30
+
+#Configurations related to ThreadPoolExecutor. Thread pool is used to handle concurrent requests to feature"
+
+#The number of threads to keep in the pool, even if they are idle
+#threadpool_executor.core_pool_size = 200
+#The maximum number of threads to allow in the pool.
+#threadpool_executor.max_pool_size = 500
+#When the number of threads is greater than the core, this is the maximum time in seconds that excess idle threads
+#will wait for new tasks before terminating.
+#threadpool_executor.keep_alive_time = 100
+
+#Configurations related to Stack object pool. Stack object pool is used to handle high concurrency scenarios
+#without dropping any messages.
+
+#Cap on the number of "sleeping" instances in the pool.
+#stack_object_pool.max_idle = 100
+#Initial size of the pool (this specifies the size of the container, it does not cause the pool to be pre-populated)
+#stack_object_pool.init_idle_capacity = 50
+
+#Use this config only if you need to limit the transport headers which are sent to API Security Enforcer.
+#Unless that is needed, you don't need to configure this section. Only transport headers mentioned in the
+#following list will be used
+#limit_transport_headers.header1 = "Header1"
+#limit_transport_headers.header2 = "Header2"
+#limit_transport_headers.header3 = "Header3"

@@ -23,7 +23,7 @@
 
 <!--If any of the configurations are not set except the APISecurityEnforcer - ASE Configurations, the default
 configuration will be used.-->
-<PingAISecurityHandler>
+<AISecurityHandler>
 
     <!--Three operation modes. "sync", "async" and "hybrid" -->
     <OperationMode>MODE</OperationMode>
@@ -32,9 +32,6 @@ configuration will be used.-->
 
     <!--Cache Expiry time in minutes.-->
     <CacheExpiryTime>15</CacheExpiryTime>
-
-    <!--Remove the OAuth header from the transport headers.-->
-    <RemoveOAuthHeader>true</RemoveOAuthHeader>
 
     <!--Ping ASE related configuration used by the feature.
     API Security Enforcer is used to validate and authenticate users against the request metadata.
@@ -105,5 +102,5 @@ configuration will be used.-->
         <Header>HEADER_1</Header>
         <Header>HEADER_2</Header>
     </LimitTransportHeaders-->
-</PingAISecurityHandler>
+</AISecurityHandler>
 <!--/APIManager-->

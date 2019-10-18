@@ -100,7 +100,7 @@ public class SecurityHandlerConfiguration {
             String localName = element.getLocalName();
             nameStack.push(localName);
 
-            if (AISecurityHandlerConstants.PING_AI_SECURITY_HANDLER_CONFIGURATION.equals(localName)) {
+            if (AISecurityHandlerConstants.AI_SECURITY_HANDLER_CONFIGURATION.equals(localName)) {
                 try {
                     setPingAISecurityHandlerProperties(serverConfig);
                 } catch (Exception e) {
@@ -124,7 +124,7 @@ public class SecurityHandlerConfiguration {
      */
     private void setPingAISecurityHandlerProperties(OMElement element) throws AISecurityException {
         OMElement aiSecurityConfigurationElement = element
-                .getFirstChildWithName(new QName(AISecurityHandlerConstants.PING_AI_SECURITY_HANDLER_CONFIGURATION));
+                .getFirstChildWithName(new QName(AISecurityHandlerConstants.AI_SECURITY_HANDLER_CONFIGURATION));
         if (aiSecurityConfigurationElement != null) {
 
             //Get mode
@@ -174,8 +174,8 @@ public class SecurityHandlerConfiguration {
                         .getFirstChildWithName(new QName(AISecurityHandlerConstants.ASE_TOKEN_CONFIGURATION));
                 if (aseTokenElement != null) {
                     if (secretResolver.isInitialized() && secretResolver
-                            .isTokenProtected("APIManager.PingAISecurityHandler.ASE.ASEToken")) {
-                        aseConfig.setAseToken(secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.ASEToken"));
+                            .isTokenProtected("APIManager.AISecurityHandler.ASE.ASEToken")) {
+                        aseConfig.setAseToken(secretResolver.resolve("APIManager.AISecurityHandler.ASE.ASEToken"));
                     } else {
                         aseConfig.setAseToken(aseTokenElement.getText());
                     }
@@ -201,9 +201,9 @@ public class SecurityHandlerConfiguration {
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.ACCESS_KEY_CONFIGURATION));
                     if (accessKeyElement != null) {
                         if (secretResolver.isInitialized() && secretResolver
-                                .isTokenProtected("APIManager.PingAISecurityHandler.ASE.AccessKey")) {
+                                .isTokenProtected("APIManager.AISecurityHandler.ASE.AccessKey")) {
                             modelCreationEndpointConfig.setAccessKey(
-                                    secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.AccessKey"));
+                                    secretResolver.resolve("APIManager.AISecurityHandler.ASE.AccessKey"));
                         } else {
                             modelCreationEndpointConfig.setAccessKey(accessKeyElement.getText());
                         }
@@ -214,9 +214,9 @@ public class SecurityHandlerConfiguration {
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.SECRET_KEY_CONFIGURATION));
                     if (secretKeyElement != null) {
                         if (secretResolver.isInitialized() && secretResolver
-                                .isTokenProtected("APIManager.PingAISecurityHandler.ASE.SecretKey")) {
+                                .isTokenProtected("APIManager.AISecurityHandler.ASE.SecretKey")) {
                             modelCreationEndpointConfig.setSecretKey(
-                                    secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.SecretKey"));
+                                    secretResolver.resolve("APIManager.AISecurityHandler.ASE.SecretKey"));
                         } else {
                             modelCreationEndpointConfig.setSecretKey(secretKeyElement.getText());
                         }
