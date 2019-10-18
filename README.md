@@ -96,30 +96,25 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
 2. Add the JAR file of the extension to the directory **<APIM_HOME>/repository/components/dropins**. 
 
-3. Add the bare minimum configurations to the *api-manager.xml* within the tag \<APIManager>, which can be found in the
+3. Add the bare minimum configurations to the *deployment.toml* file, which can be found in the
 **<APIM_HOME>/repository/conf** directory.
 
-    ```
-    <PingAISecurityHandler>
-        <OperationMode>async</OperationMode>
-        <APISecurityEnforcer>
-            <EndPoint>ASE_ENDPOINT</EndPoint>
-            <ASEToken>SIDEBAND_AUTHENTICATION_TOKEN</ASEToken>
-            <ModelCreationEndpoint>
-                <EndPoint>ASE_REST_API_ENDPOINT</EndPoint>
-                <AccessKey>ASE_REST_API_ACCESS_KEY</AccessKey>
-                <SecretKey>ASE_REST_API_SECRET_KEY</SecretKey>
-            </ModelCreationEndpoint>
-       </APISecurityEnforcer>
-    </PingAISecurityHandler>
+   ```
+    [apim.ai_security]
+    operation_mode = "async"
+    sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
+    ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
+    model_creation_endpoint = "ASE_REST_API_ENDPOINT"
+    access_key = "ASE_REST_API_ACCESS_KEY"
+    secret_key = "ASE_REST_API_SECRET_KEY"
    ```
     **Note:**
     - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#sync-mode)**,
     **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)**, and 
     **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
     If the mode is not set, the default mode is set as **async**. 
-    - ASE_ENDPOINT : https://<ase-host-machine-ip>:<data-port>
-    - ASE_REST_API_ENDPOINT: https://<ase-host-machine-ip>:<management-port>/<REST-API-version>/ase/api.
+    - ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
+    - ASE_REST_API_ENDPOINT: https://\<ase-host-machine-ip>:\<management-port>/\<REST-API-version>/ase/api.
     - If you have not set the ModelCreationEndpoint configurations, you will need to manually create the ASE models.
     - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
      that you obtained from the ASE as the ASEToken.

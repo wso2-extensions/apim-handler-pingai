@@ -75,7 +75,7 @@ public class AISecurityHandlerConstants {
     static final String HTTP_VERSION_CONNECTOR = ".";
     static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";
     static final String API_SECURITY_NS_PREFIX = "ams";
-    static final String PING_AI_SECURITY_HANDLER_CONFIGURATION = "PingAISecurityHandler";
+    static final String AI_SECURITY_HANDLER_CONFIGURATION = "AISecurityHandler";
     static final String OPERATION_MODE_CONFIGURATION = "OperationMode";
     static final String CACHE_EXPIRY_TIME_CONFIG = "CacheExpiryTime";
     static final String APPLY_FOR_ALL_APIS_CONFIG = "ApplyForAllAPIs";
