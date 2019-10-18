@@ -21,7 +21,7 @@
 
     <groupId>AISecurityEnforcer</groupId>
     <artifactId>org.wso2.carbon.apimgt.securityenforcer</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>org.wso2.carbon.apimgt.securityenforcer</name>
     <packaging>bundle</packaging>
 

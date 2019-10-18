@@ -118,8 +118,8 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
     **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)**, and 
     **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
     If the mode is not set, the default mode is set as **async**. 
-    - ASE_ENDPOINT : https://<ase-host-machine-ip>:<data-port>
-    - ASE_REST_API_ENDPOINT: https://<ase-host-machine-ip>:<management-port>/<REST-API-version>/ase/api.
+    - ASE_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
+    - ASE_REST_API_ENDPOINT: https://\<ase-host-machine-ip>:\<management-port>/\<REST-API-version>/ase/api.
     - If you have not set the ModelCreationEndpoint configurations, you will need to manually create the ASE models.
     - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
      that you obtained from the ASE as the ASEToken.
