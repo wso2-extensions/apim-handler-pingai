@@ -86,6 +86,11 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    ```
 ## Deploy the WSO2 extension with PingIntelligence
 
+**IMPORTANT**
+
+Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For older versions, please refer [Developer Guide.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md)
+
+
 ### For system admin
 
 1. Download the extension and navigate to the **apim-handler-pingai** directory and run the following Maven command.
