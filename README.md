@@ -146,7 +146,12 @@ Do not update the already existing execution for the publish event. Add a new ex
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
     </execution>
     ```
-     
+          
+ **Note:**  
+    Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.
+    Navigate to **Extensions** > **Configure** > **Lifecycles** and click the *View/Edit* link that corresponds to the 
+    *default API LifeCycle*. Confirm that the new executions are reflected in the APILifeCycle.xml file.     
+
 ### For the API Publisher
 
 **For new APIs**
