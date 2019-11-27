@@ -70,7 +70,7 @@ public class AISecurityHandlerConstants {
     public static final String ARTIFACT_ATTRIBUTE_API_VERSION = "overview_version";
     public static final String ARTIFACT_ATTRIBUTE_API_CONTEXT = "overview_context";
     public static final String API_NAME_VERSION_CONNECTOR = "_";
-    public static final String API_KEY_HEADER_NAME = "APIKey";
+    public static final String AUTHORIZATION_HEADER_NAME = "Authorization";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     static final String HTTP_VERSION_CONNECTOR = ".";
     static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";
