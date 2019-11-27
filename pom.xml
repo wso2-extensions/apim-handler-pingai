@@ -39,13 +39,13 @@
     </repositories>
 
     <properties>
-        <carbon.apimgt.version>6.5.236</carbon.apimgt.version>
+        <carbon.apimgt.version>6.5.349</carbon.apimgt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <carbon.kernel.version>4.5.1</carbon.kernel.version>
         <powermock.version>1.7.4</powermock.version>
         <mockito.all.version>1.10.19</mockito.all.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
-        <carbon.governance.version>4.8.8</carbon.governance.version>
+        <carbon.governance.version>4.8.10</carbon.governance.version>
         <synapse.version>2.1.7-wso2v131</synapse.version>
         <carbon.commons.version>4.7.11</carbon.commons.version>
     </properties>
