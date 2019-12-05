@@ -162,11 +162,12 @@ public class PingAISecurityHandler extends AbstractHandler {
         AuthenticationContext authContext = (AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT");
 
         //OAuth header may not be included in the transport headers after the Authentication handler.
-        String accessToken = "Bearer " + DigestUtils.md5Hex(authContext.getApiKey());
+        String APIKey = authContext.getApiKey();
         String tier = authContext.getTier();
-        if (accessToken != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
+        if (APIKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
+            String accessToken = "Bearer " + DigestUtils.md5Hex(APIKey);
             transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME, accessToken));
-            log.debug("Hashed access token added as a new transport header with Authorization header.");
+            log.debug("Hashed access token added as a new transport header");
         }
 
         String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
