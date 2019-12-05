@@ -72,14 +72,14 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 - **Install Apache Maven 3.x.x**
  (https://maven.apache.org/download.cgi#)
 
-- **Install the latest WSO2 API Manager**
+- **Install the latest WSO2 API Manager**. If you are using API manager versions 2.x, please use the 1.0.x branch of this repository.
 (https://wso2.com/api-management/)
 
     Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
 
 - **PingIntelligence software installation.**
 
-    PingIntelligence software is installed and configured. For installation of PingIntelligence software, 
+    PingIntelligence v4 software is installed and configured. For installation of PingIntelligence software, 
     see the [manual or platform specific automated deployment guides](https://support.pingidentity.com/s/pingintelligence-for-apis-help).
 - **Verify that ASE is in sideband mode.**
 
@@ -120,7 +120,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    ```
    Save the generated authentication token for further use.
    
-- **Add the certificate of the ASE to the WSO2 client keystore.**
+- **Add the certificates of the ASE sideband request endpoint and management endpoint to the WSO2 client keystore.**
  
     Use *wso2carbon* as the default keystore password.
    ```
@@ -136,10 +136,20 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
 
 ### For System Admin
 
-1. Download the extension and navigate to the **apim-handler-pingai** directory and run the following Maven command to build the distribution.
+1. Download the extension and navigate to the **apim-handler-pingai** directory. Update the pom.xml with corresponding dependency versions and run the following Maven command.
    ```
     mvn clean install
      ```
+    org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory. 
+
+    Use the following table to update pom.xml with the corresponding dependency versions for API manager. 
+    
+     |Dependency|APIM 3.0.0|APIM 2.6.0|APIM 2.5.0|APIM 2.2.0|APIM 2.1.0|
+     |----------|:------:|:------:|:------:|:------:|:------:|
+     |carbon.apimgt.version|6.5.349|6.4.50|6.3.95|6.2.201|6.1.66|
+     |carbon.kernel.version|4.5.1|4.4.35|4.4.32|4.4.26|4.4.11|    
+     |carbon.governance.version|4.8.10|4.7.29|4.7.27|4.7.23|4.7.0|
+     |synapse.version|2.1.7-wso2v131|2.1.7-wso2v80|2.1.7-wso2v65|2.1.7-wso2v48|2.1.7-wso2v10|
     
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory. 
@@ -191,7 +201,9 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
    </handlers>
      ```
   
-5. Update the **<APIM_HOME>/repository/resources/lifecycles/APILifeCycle.xml** file with a new execution for the **Publish** event under **Created** and **Prototyped** states. 
+5. Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.  
+Navigate to Extensions > Configure > Lifecycles and click the View/Edit link that corresponds to the default API LifeCycle. 
+Update the **APILifeCycle.xml** with a new execution for the **Publish** event under **Created** and **Prototyped** states. 
 Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
@@ -206,11 +218,6 @@ Do not update the already existing execution for the publish event. Add a new ex
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
     </execution>
     ```
-          
- **Note:**  
-    Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon.
-    Navigate to **Extensions** > **Configure** > **Lifecycles** and click the *View/Edit* link that corresponds to the 
-    *default API LifeCycle*. Confirm that the new executions are reflected in the APILifeCycle.xml file.
     
 ### For the API Publisher
 
@@ -222,7 +229,7 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 **For existing APIs**
 
-- The recommended method is to create a [new version](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-VersioningtheAPI) for the API with PingIntelligence enabled.
+- The recommended method is to create a new version for the API with PingIntelligence enabled.
 
     *Although changing the status of a live API is not recommended, republishing the API will update the Synapse config 
     with the handler and by demoting to the CREATED or PROTOTYPED state and thereafter changing the life cycle back to the PUBLISHED state 
