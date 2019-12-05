@@ -135,7 +135,15 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    ```
     mvn clean install
      ```
-    
+     Use the following table to update pom.xml with the corresponding dependency versions for API manager. 
+     
+     |Dependency|APIM 3.0.0|APIM 2.6.0|APIM 2.5.0|APIM 2.2.0|APIM 2.1.0|
+     |----------|:------:|:------:|:------:|:------:|:------:|
+     |carbon.apimgt.version|6.5.349|6.4.50|6.3.95|6.2.201|6.1.66|
+     |carbon.kernel.version|4.5.1|4.4.35|4.4.32|4.4.26|4.4.11|    
+     |carbon.governance.version|4.8.10|4.7.29|4.7.27|4.7.23|4.7.0|
+     |synapse.version|2.1.7-wso2v131|2.1.7-wso2v80|2.1.7-wso2v65|2.1.7-wso2v48|2.1.7-wso2v10|
+
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory. 
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory. 
 
