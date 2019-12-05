@@ -47,6 +47,7 @@ public class AISecurityHandlerConstants {
     public static final int ASE_RESPONSE_CODE_INCORRECT_JSON = 400;
     public static final int ASE_RESPONSE_CODE_UNKNOWN_API = 503;
     public static final int ASE_RESPONSE_CODE_UNAUTHORIZED = 401;
+    public static final int ASE_RESPONSE_CODE_FORBIDDEN = 403;
     public static final String SYNC_MODE_STRING = "sync";
     public static final String ASYNC_MODE_STRING = "async";
     public static final String HYBRID_MODE_STRING = "hybrid";
@@ -70,7 +71,7 @@ public class AISecurityHandlerConstants {
     public static final String ARTIFACT_ATTRIBUTE_API_VERSION = "overview_version";
     public static final String ARTIFACT_ATTRIBUTE_API_CONTEXT = "overview_context";
     public static final String API_NAME_VERSION_CONNECTOR = "_";
-    public static final String API_KEY_HEADER_NAME = "APIKey";
+    public static final String AUTHORIZATION_HEADER_NAME = "Authorization";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     static final String HTTP_VERSION_CONNECTOR = ".";
     static final String API_SECURITY_NS = "http://wso2.org/apimanager/security";

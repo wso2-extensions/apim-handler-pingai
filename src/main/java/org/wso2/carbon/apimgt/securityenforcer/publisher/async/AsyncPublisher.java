@@ -102,17 +102,17 @@ public class AsyncPublisher implements Publisher {
                         + " with the response code " + aseResponseDTO.getResponseCode());
             }
 
-            if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS == aseResponseDTO.getResponseCode()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
-                }
-                return true;
-            } else {
+            if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
                 }
                 throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
                         AISecurityException.ACCESS_REVOKED_MESSAGE);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
+                }
+                return true;
             }
         }
     }

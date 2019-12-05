@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.securityenforcer;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -160,12 +161,13 @@ public class PingAISecurityHandler extends AbstractHandler {
 
         AuthenticationContext authContext = (AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT");
 
-        //OAuth header may not be included in the transport headers after the Authentication handler. Therefore API key is used.
-        String apiKey = authContext.getApiKey();
+        //OAuth header may not be included in the transport headers after the Authentication handler.
+        String APIKey = authContext.getApiKey();
         String tier = authContext.getTier();
-        if (apiKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
-            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.API_KEY_HEADER_NAME, apiKey));
-            log.debug("APIKey added as a new transport header with authorization token.");
+        if (APIKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
+            String accessToken = "Bearer " + DigestUtils.md5Hex(APIKey);
+            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME, accessToken));
+            log.debug("Hashed access token added as a new transport header");
         }
 
         String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
