@@ -47,6 +47,7 @@ public class AISecurityHandlerConstants {
     public static final int ASE_RESPONSE_CODE_INCORRECT_JSON = 400;
     public static final int ASE_RESPONSE_CODE_UNKNOWN_API = 503;
     public static final int ASE_RESPONSE_CODE_UNAUTHORIZED = 401;
+    public static final int ASE_RESPONSE_CODE_FORBIDDEN = 403;
     public static final String SYNC_MODE_STRING = "sync";
     public static final String ASYNC_MODE_STRING = "async";
     public static final String HYBRID_MODE_STRING = "hybrid";
