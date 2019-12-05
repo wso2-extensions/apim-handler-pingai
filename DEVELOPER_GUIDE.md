@@ -72,14 +72,14 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 - **Install Apache Maven 3.x.x**
  (https://maven.apache.org/download.cgi#)
 
-- **Install the latest WSO2 API Manager**
+- **This branch is for API manager versions of 2.x. Download the relevant API manager**
 (https://wso2.com/api-management/)
 
     Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
 
 - **PingIntelligence software installation.**
 
-    PingIntelligence software is installed and configured. For installation of PingIntelligence software, 
+    PingIntelligence v4 software is installed and configured. For installation of PingIntelligence software, 
     see the [manual or platform specific automated deployment guides](https://support.pingidentity.com/s/pingintelligence-for-apis-help).
 - **Verify that ASE is in sideband mode.**
 
