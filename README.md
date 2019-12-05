@@ -12,14 +12,14 @@ PingIntelligence for APIs uses artificial intelligence (AI) to expose active API
 
 PingIntelligence for APIs can detect many types of cyberattacks, most of which are not visible to API teams today and can go undetected for very long times. 
 
-[Read more about cyber attacks that can be detected by Ping Intelligence.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#types-of-attacks-pingintelligence-protects-against)
+[Read more about cyber attacks that can be detected by Ping Intelligence.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#types-of-attacks-pingintelligence-protects-against)
 
 ### How does integration happen?
 The WSO2 API Manager extension for PingIntelligence uses a new custom handler (Ping AI Security Handler) when working with the WSO2 API Gateway data flow. After this handler receives a request from a client, a sideband call is sent to PingIdentity’s API Security Enforcer (ASE) with the client request metadata. The ASE responds after analyzing the metadata with an Artificial Intelligence Engine. 
 
 If the response of ASE is 200 OK, the Ping AI Security Handler forwards the request and if the response is 403, it blocks the request.
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.1/images/architecture.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/architecture.png)
 
 ## Quick Start Guide
 
@@ -31,7 +31,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 - **Install Apache Maven 3.x.x**
  (https://maven.apache.org/download.cgi#)
 
-- **Install the latest WSO2 API Manager**
+- **This branch is for API manager versions of 2.x. Download the relevant API manager**
 (https://wso2.com/api-management/)
 
     Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, 
@@ -39,7 +39,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
 - **Install the PingIntelligence software.**
 
-    PingIntelligence 3.2.1 software is installed and configured. For installation of PingIntelligence software, 
+    PingIntelligence v4 software is installed and configured. For installation of PingIntelligence software, 
     see the [manual or platform specific automated deployment guides](https://support.pingidentity.com/s/pingintelligence-for-apis-help).
 - **Verify that ASE is in sideband mode.**
   
@@ -80,7 +80,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    ```
    Save the generated authentication token for further use.
    
-- **Add the certificate of the ASE to the WSO2 client keystore.**
+- **Add the certificates of the ASE sideband request endpoint and management endpoint to the WSO2 client keystore.**
    ```
     keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
    ```
@@ -114,16 +114,16 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
     </PingAISecurityHandler>
    ```
     **Note:**
-    - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#sync-mode)**,
-    **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#async-mode)**, and 
-    **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#hybrid-mode)**.
+    - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#sync-mode)**,
+    **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#async-mode)**, and 
+    **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#hybrid-mode)**.
     If the mode is not set, the default mode is set as **async**. 
     - ASE_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
     - ASE_REST_API_ENDPOINT: https://\<ase-host-machine-ip>:\<management-port>/\<REST-API-version>/ase/api.
     - If you have not set the ModelCreationEndpoint configurations, you will need to manually create the ASE models.
-    - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#prerequisites)
+    - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#prerequisites)
      that you obtained from the ASE as the ASEToken.
-     - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY.   
+     - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, ASE_REST_API_SECRET_KEY.   
 
 4. Update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file in order to engage the handler to APIs. Add the handler class as follows inside the 
    *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
@@ -131,7 +131,9 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/> 
    ```
   
-5. Update the **<APIM_HOME>/repository/resources/lifecycles/APILifeCycle.xml** file with a new execution for the **Publish** event under **Created** and **Prototyped** states. 
+5. Deploy WSO2 API Manager and open the management console: https://localhost:9443/carbon. 
+Navigate to Extensions > Configure > Lifecycles and click the View/Edit link that corresponds to the default API LifeCycle. 
+Update the **APILifeCycle.xml** with a new execution for the **Publish** event under **Created** and **Prototyped** states. 
 Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish" 
@@ -167,9 +169,9 @@ for the API with PingIntelligence enabled.
 
 **Note:**
 By default, PingIntelligence is enabled in all APIs that are published with an individual AI model. 
-However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
+However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
 
 
 ### Developer Guide
 
-For more information, see the [Developer Guide](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.1/DEVELOPER_GUIDE.md).
+For more information, see the [Developer Guide](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md).
