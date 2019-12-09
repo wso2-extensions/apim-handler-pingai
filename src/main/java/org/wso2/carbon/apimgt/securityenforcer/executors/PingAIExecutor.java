@@ -26,6 +26,9 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.securityenforcer.internal.PingAIHandlerComponent;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -43,14 +46,18 @@ import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * This class is an implementation of the
- * interface {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
- * This class consists methods that will create, prototype, publish, block, deprecate and
- * retire  an API to API Manager.
+ * This class is an implementation of the interface
+ * {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
+ * This class consists methods that will create, prototype, publish, block,
+ * deprecate and retire an API to API Manager.
  * <p/>
  * This executor used to publish a service to API store as a API.
  *
@@ -66,20 +73,21 @@ public class PingAIExecutor implements Execution {
     private String API_CONTEXT_RESOURCE_CONJUNCTION = ".";
 
     /**
-     * This method is called when the execution class is initialized.
-     * All the execution classes are initialized only once.
+     * This method is called when the execution class is initialized. All the
+     * execution classes are initialized only once.
      *
-     * @param parameterMap Static parameter map given by the user.
-     *                     These are the parameters that have been given in the
-     *                     lifecycle configuration as the parameters of the executor.
+     * @param parameterMap Static parameter map given by the user. These are the
+     *                     parameters that have been given in the lifecycle
+     *                     configuration as the parameters of the executor.
      */
     public void init(Map parameterMap) {
     }
 
     /**
-     * @param context      The request context that was generated from the registry core.
-     *                     The request context contains the resource, resource path and other
-     *                     variables generated during the initial call.
+     * @param context      The request context that was generated from the registry
+     *                     core. The request context contains the resource, resource
+     *                     path and other variables generated during the initial
+     *                     call.
      * @param currentState The current lifecycle state.
      * @param targetState  The target lifecycle state.
      * @return Returns whether the execution was successful or not.
@@ -91,8 +99,8 @@ public class PingAIExecutor implements Execution {
             String property = context.getResource().getProperty(
                     API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + ADDITIONAL_PROPERTY_NAME);
 
-            if (ADDITIONAL_PROPERTY_VALUE.equals(property) || ServiceReferenceHolder.getInstance()
-                    .getSecurityHandlerConfig().isApplyForAllAPIs()) {
+            if (ADDITIONAL_PROPERTY_VALUE.equals(property)
+                    || ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isApplyForAllAPIs()) {
                 if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getModelCreationEndpointConfig()
                         .isEnable()) {
                     modelCreationEnabled = true;
@@ -112,8 +120,10 @@ public class PingAIExecutor implements Execution {
                 String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME);
                 String apiVersion = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
 
-                //replace "." from version with "_" as from v4, ase does not support "." with version.
-                String modelName = apiName + AISecurityHandlerConstants.API_NAME_VERSION_CONNECTOR + apiVersion.replace(".","_");
+                // replace "." from version with "_" as from v4, ase does not support "." with
+                // version.
+                String modelName = apiName + AISecurityHandlerConstants.API_NAME_VERSION_CONNECTOR
+                        + apiVersion.replace(".", "_");
 
                 String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
 
@@ -145,20 +155,20 @@ public class PingAIExecutor implements Execution {
                             "application/json");
                     postRequest.setEntity(new StringEntity(requestBody.toString()));
 
-                    responseStatus = httpDataPublisher
-                            .publishToASEManagementAPI(AISecurityHandlerConstants.CREATE, postRequest);
+                    responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.CREATE,
+                            postRequest);
                 }
                 if (AISecurityHandlerConstants.RETIRED.equals(targetState.toUpperCase())) {
                     HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + modelName);
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
-                    deleteRequest
-                            .addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT, "application/json");
+                    deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT,
+                            "application/json");
                     deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
                             "application/json");
 
-                    responseStatus = httpDataPublisher
-                            .publishToASEManagementAPI(AISecurityHandlerConstants.DELETE, deleteRequest);
+                    responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.DELETE,
+                            deleteRequest);
                 }
 
                 if (responseStatus != null) {
@@ -198,8 +208,8 @@ public class PingAIExecutor implements Execution {
             } else {
                 log.warn("Couldn't find GovernanceArtifactConfiguration of RXT: " + key
                         + ". Tenant id set in registry : " + ((UserRegistry) registry).getTenantId()
-                        + ", Tenant domain set in PrivilegedCarbonContext: " + PrivilegedCarbonContext
-                        .getThreadLocalCarbonContext().getTenantId());
+                        + ", Tenant domain set in PrivilegedCarbonContext: "
+                        + PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId());
             }
         } catch (RegistryException e) {
             String msg = "Failed to initialize GenericArtifactManager";
@@ -210,7 +220,17 @@ public class PingAIExecutor implements Execution {
     }
 
     private JSONObject createAPIJSON(String APIContext, RequestContext requestContext) {
-        JSONObject managmentAPIPayload = ServiceReferenceHolder.getInstance().getManagementAPIPayload();
+        JSONParser jsonParser = new JSONParser();
+        JSONObject managmentAPIPayload = null;
+
+        try {
+            InputStream inputStreamObject = PingAIHandlerComponent.class
+                    .getResourceAsStream(AISecurityHandlerConstants.ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME);
+            managmentAPIPayload = (JSONObject) jsonParser
+                    .parse(new InputStreamReader(inputStreamObject, StandardCharsets.UTF_8));
+        } catch (IOException | ParseException e) {
+            log.error("Error when reading the payload", e);
+        }
 
         if (managmentAPIPayload == null) {
             return null;
@@ -223,8 +243,8 @@ public class PingAIExecutor implements Execution {
                     .getProperty(API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + key);
             if (property != null) {
                 if ("true".equals(property) || "false".equals(property)) {
-                    ((JSONObject) managmentAPIPayload.get("api_metadata"))
-                            .put(key, JavaUtils.isTrueExplicitly(property));
+                    ((JSONObject) managmentAPIPayload.get("api_metadata")).put(key,
+                            JavaUtils.isTrueExplicitly(property));
                 } else {
                     ((JSONObject) managmentAPIPayload.get("api_metadata")).put(key, property);
                 }
@@ -239,4 +259,3 @@ public class PingAIExecutor implements Execution {
         return managmentAPIPayload;
     }
 }
-
