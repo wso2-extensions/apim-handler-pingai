@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.executors;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +32,6 @@ import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.securityenforcer.internal.PingAIHandlerComponent;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -44,14 +47,6 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-
-import java.io.UnsupportedEncodingException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class is an implementation of the interface
@@ -220,33 +215,33 @@ public class PingAIExecutor implements Execution {
     }
 
     private JSONObject createAPIJSON(String APIContext, RequestContext requestContext) {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject managmentAPIPayload = null;
-
-        try {
-            InputStream inputStreamObject = PingAIHandlerComponent.class
-                    .getResourceAsStream(AISecurityHandlerConstants.ASE_MANAGEMENT_API_REQUEST_PAYLOAD_FILE_NAME);
-            managmentAPIPayload = (JSONObject) jsonParser
-                    .parse(new InputStreamReader(inputStreamObject, StandardCharsets.UTF_8));
-        } catch (IOException | ParseException e) {
-            log.error("Error when reading the payload", e);
-        }
+        JSONObject managmentAPIPayload = ServiceReferenceHolder.getInstance().getManagementAPIPayload();
 
         if (managmentAPIPayload == null) {
             return null;
         }
 
-        Set<String> payloadKeyArray = ((JSONObject) managmentAPIPayload.get("api_metadata")).keySet();
+        JSONObject managmentAPIPayloadCopy = null;
+        JSONParser jsonParser = new JSONParser();
+
+        try {
+            managmentAPIPayloadCopy = (JSONObject) jsonParser.parse(managmentAPIPayload.toString());
+        } catch (ParseException e) {
+            log.error("Error when reading the payload", e);
+            return null;
+        }
+
+        Set<String> payloadKeyArray = ((JSONObject) managmentAPIPayloadCopy.get("api_metadata")).keySet();
 
         for (String key : payloadKeyArray) {
             String property = requestContext.getResource()
                     .getProperty(API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + key);
             if (property != null) {
                 if ("true".equals(property) || "false".equals(property)) {
-                    ((JSONObject) managmentAPIPayload.get("api_metadata")).put(key,
+                    ((JSONObject) managmentAPIPayloadCopy.get("api_metadata")).put(key,
                             JavaUtils.isTrueExplicitly(property));
                 } else {
-                    ((JSONObject) managmentAPIPayload.get("api_metadata")).put(key, property);
+                    ((JSONObject) managmentAPIPayloadCopy.get("api_metadata")).put(key, property);
                 }
 
                 if (log.isDebugEnabled()) {
@@ -254,8 +249,8 @@ public class PingAIExecutor implements Execution {
                 }
             }
         }
-        ((JSONObject) managmentAPIPayload.get("api_metadata")).put("url", APIContext);
+        ((JSONObject) managmentAPIPayloadCopy.get("api_metadata")).put("url", APIContext);
 
-        return managmentAPIPayload;
+        return managmentAPIPayloadCopy;
     }
 }

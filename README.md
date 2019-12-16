@@ -82,8 +82,12 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
 - **Add the certificates of the ASE sideband request endpoint and management endpoint to the WSO2 client keystore.**
    ```
-    keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
+    keytool -importcert -file <ase_request_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE request endpoint"
+
+    keytool -importcert -file <ase_management_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE management endpoint"
    ```
+    [Obtaining ASE request endpoint and management endpoint public key certificates](#obtaining-ase-certificates)
+
 ## Deploy the WSO2 extension with PingIntelligence
 
 **IMPORTANT**
@@ -190,3 +194,15 @@ However, if needed you can configure PingIntelligence to be [applied only for se
 ### Developer Guide
 
 For more information, see the [Developer Guide](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md).
+
+
+### Obtaining ASE certificates
+
+openssl client can be used to obtain the ASE sideband request endpoint and management endpoint certificates.
+```
+openssl s_client -showcerts -connect <ase-host-machine-ip>:<data-port>
+
+openssl s_client -showcerts -connect <ase-host-machine-ip>:<management-port>
+```
+
+Copy the content from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE----- into <ase_request_endpoint_cert_name>.cer and <ase_management_endpoint_cert_name>.cer files. These certs can be imported into WSO2 client keystore.

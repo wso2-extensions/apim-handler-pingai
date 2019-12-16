@@ -124,8 +124,11 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
     Use *wso2carbon* as the default keystore password.
    ```
-    keytool -importcert -file <certificate_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "Alias"
+    keytool -importcert -file <ase_request_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE request endpoint"
+
+    keytool -importcert -file <ase_management_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE management endpoint"
    ```
+   [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/README.md#obtaining-ase-certificates)
 
 ## Deploy WSO2 Extension with PingIntelligence
 
@@ -172,7 +175,7 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
     - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#sync-mode)**,
         **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)** and
         **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
-        If the mode is not set, the default mode is set as **async**.
+        If the mode is not set, the default mode is set as **sync**.
    - ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
    - BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<backup-ase-host-machine-ip>:\<data-port>
    - ASE_REST_API_ENDPOINT: https://\<ase-host-machine-ip>:\<management-port>/\<REST-API-version>/ase/api.
@@ -251,24 +254,32 @@ By default, PingIntelligence is enabled in all APIs that are published with an i
 However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
 
 
-#### Verify the policy deployment:
+#### Verify api creation on ASE:
 
 1. Open the Synapse configuration of the published API, located in in the <APIM_HOME>/repository/deployment/server/synapse-configs/default/api directory.
 Check whether the \<handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>  handler is added under \<handlers>.
 2. Open ASE command line. Use the CLI tool to list the published APIs in ASE.
 Check whether the API is listed as <API_NAME>_\<VERSION>.
     Eg: HelloWorld_1.0.0
+3. Run a curl command to check if the API is published to ASE. Check whether the API is listed as <API_NAME>_\<VERSION>.
+    ```
+    curl -k -X GET \
+        https://<ase-host-machine-ip>:<management-port>/v4/ase/api \
+        -H 'x-ase-access-key: <ase_access_key>' \
+        -H 'x-ase-secret-key: <ase_secret_key>'
+    ```
 
 
 ## Configurations
 #### Bare minimum configurations
-Add the following configurations to the  <APIM_HOME>/repository/conf/deployment.toml file. If the mode is not set, the default mode is set as async. If the ModelCreationEndpoint configurations are not set, you need to manually create the ASE models.
+Add the following configurations to the  <APIM_HOME>/repository/conf/deployment.toml file. If the mode is not set, the default mode is set as sync. If the ModelCreationEndpoint configurations are not set, you need to manually create the ASE models.
 
 
    ```
     [apim.ai_security]
-    operation_mode = "async"
+    operation_mode = "sync"
     sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
+    backup_sideband_request_endpoint = "BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT"
     ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
     model_creation_endpoint = "ASE_REST_API_ENDPOINT"
     access_key = "ASE_REST_API_ACCESS_KEY"
@@ -527,16 +538,17 @@ Follow the instructions below to change a password that you had previously encry
 
 | Field            | input                                                       | DefaultValue | Description                                                                                                                   |
 | ---------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| operation_mode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | async        | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
+| operation_mode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
 | apply_for_all    | (Boolean)                                                   | true         | Apply Ping Intelligence for all APIs published.                                                                               |
 | cash_expiry_time | (Integer)                                                   | 15           | Cache Expiry time in minutes.                                                                                                 |
 
 #### APISecurityEnforcer - ASE configurations
 
-| Field                     | input    | DefaultValue | Description                                       |
-| ------------------------- | -------- | ------------ | ------------------------------------------------- |
-| sideband_request_endpoint | (String) | -            | The endpoint of ASE. Support both HTTP and HTTPS. |
-| ase_token                 | (String) | -            | If access token needed to communicate with ASE.   |
+| Field                            | input    | DefaultValue | Description                                                                                                                  |
+| -------------------------------- | -------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| sideband_request_endpoint        | (String) | -            | The endpoint of ASE. Support both HTTP and HTTPS.                                                                            |
+| backup_sideband_request_endpoint | (String) | -            | The backup endpoint of ASE. Support both HTTP and HTTPS. If this is not set, primary sideband_request_endpoint will be used. |
+| ase_token                        | (String) | -            | The access token needed to communicate with ASE.                                                                             |
 
 #### ModelCreationEndpoint - ASE Management REST API configurations
 
@@ -574,5 +586,3 @@ Follow the instructions below to change a password that you had previously encry
 | Field  | input    | DefaultValue | Description                               |
 | ------ | -------- | ------------ | ----------------------------------------- |
 | header | (String) | -            | Name of the header needed to sent to ASE. |
-
-

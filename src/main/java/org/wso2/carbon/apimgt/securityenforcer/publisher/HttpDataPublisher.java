@@ -35,9 +35,7 @@ import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import javax.net.ssl.SSLHandshakeException;
 
 /**
  * HttpDataPublisher class is here to verifyRequest PingAI data to Ping
@@ -52,7 +50,6 @@ public class HttpDataPublisher {
     private String authToken;
     private String endPoint;
     private AISecurityHandlerConfig.AseConfig aseConfig;
-    private AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfig;
 
     public HttpDataPublisher(AISecurityHandlerConfig.AseConfig aseConfiguration,
             AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration) throws AISecurityException {
@@ -69,24 +66,11 @@ public class HttpDataPublisher {
         setAuthToken(aseConfiguration.getAseToken());
         setEndPoint(aseConfiguration.getEndPoint());
         aseConfig = aseConfiguration;
-        dataPublisherConfig = dataPublisherConfiguration;
     }
 
     public HttpDataPublisher(String endPoint, String authToken) {
         setAuthToken(authToken);
         setEndPoint(endPoint);
-    }
-
-    private void reCreateDataPublisherInstance() {
-        String protocol;
-        try {
-            protocol = new URL(aseConfig.getEndPoint()).getProtocol();
-            httpClient = SecurityUtils.getHttpClient(protocol, dataPublisherConfig);
-        } catch (Exception e) {
-            log.error("Error when getting the ASE request protocol", e);
-        }
-        setAuthToken(aseConfig.getAseToken());
-        setEndPoint(aseConfig.getEndPoint());
     }
 
     public AseResponseDTO publish(JSONObject data, String correlationID, String resource) {
@@ -131,7 +115,8 @@ public class HttpDataPublisher {
             }
         } catch (Exception ex) {
             aseConfig.shiftEndpoint();
-            this.reCreateDataPublisherInstance();
+            endPoint = aseConfig.getEndPoint();
+            setEndPoint(aseConfig.getEndPoint());
             aseResponseDTO = getDefaultAcceptResponse();
             log.error("Error sending the HTTP Request with id " + correlationID, ex);
         } finally {
