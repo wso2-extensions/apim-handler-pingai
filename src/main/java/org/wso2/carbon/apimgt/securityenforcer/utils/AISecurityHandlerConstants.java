@@ -82,6 +82,7 @@ public class AISecurityHandlerConstants {
     static final String APPLY_FOR_ALL_APIS_CONFIG = "ApplyForAllAPIs";
     static final String API_SECURITY_ENFORCER_CONFIGURATION = "APISecurityEnforcer";
     static final String END_POINT_CONFIGURATION = "EndPoint";
+    static final String BACKUP_ASE_END_POINT_CONFIGURATION = "BackupEndPoint";
     static final String ASE_TOKEN_CONFIGURATION = "ASEToken";
     static final String MODEL_CREATION_ENDPOINT_CONFIGURATION = "ModelCreationEndpoint";
     static final String ACCESS_KEY_CONFIGURATION = "AccessKey";
@@ -104,4 +105,3 @@ public class AISecurityHandlerConstants {
     }
 
 }
-

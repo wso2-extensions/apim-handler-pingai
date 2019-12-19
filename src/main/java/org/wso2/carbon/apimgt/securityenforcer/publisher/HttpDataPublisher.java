@@ -35,13 +35,12 @@ import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import javax.net.ssl.SSLHandshakeException;
 
 /**
- * HttpDataPublisher class is here to verifyRequest PingAI data to Ping Intelligence ASE via http requests.
- * This will create a http client and a pool. If proxy is enabled for the endpoint, client is changed accordingly.
+ * HttpDataPublisher class is here to verifyRequest PingAI data to Ping
+ * Intelligence ASE via http requests. This will create a http client and a
+ * pool. If proxy is enabled for the endpoint, client is changed accordingly.
  */
 public class HttpDataPublisher {
 
@@ -50,6 +49,7 @@ public class HttpDataPublisher {
     private CloseableHttpClient httpClient;
     private String authToken;
     private String endPoint;
+    private AISecurityHandlerConfig.AseConfig aseConfig;
 
     public HttpDataPublisher(AISecurityHandlerConfig.AseConfig aseConfiguration,
             AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration) throws AISecurityException {
@@ -106,22 +106,18 @@ public class HttpDataPublisher {
                 if (log.isDebugEnabled()) {
                     log.debug("PING ASE Response for method: " + resource + ", correlation ID " + correlationID
                             + " , response: " + response.toString()
-                            + ", connection time for the request in nano seconds is " + (publishingEndTime
-                            - publishingStartTime));
+                            + ", connection time for the request in nano seconds is "
+                            + (publishingEndTime - publishingStartTime));
                 }
             } else {
                 log.error("Null response returned from ASE for the request " + correlationID);
             }
-        } catch (SocketTimeoutException e) {
-            log.error(
-                    "Socket timeout exception when sending the HTTP Request with id " + correlationID, e);
+        } catch (Exception ex) {
+            aseConfig.shiftEndpoint();
+            endPoint = aseConfig.getEndPoint();
+            setEndPoint(aseConfig.getEndPoint());
             aseResponseDTO = getDefaultAcceptResponse();
-        } catch (SSLHandshakeException e) {
-            log.error("SSLHandshakeException exception when sending the HTTP Request with id " + correlationID, e);
-            aseResponseDTO = getDefaultAcceptResponse();
-        } catch (IOException e) {
-            log.error("IO exception when sending the HTTP Request with id " + correlationID, e);
-            aseResponseDTO = getDefaultAcceptResponse();
+            log.error("Error sending the HTTP Request with id " + correlationID, ex);
         } finally {
             if (response != null) {
                 try {
@@ -193,4 +189,3 @@ public class HttpDataPublisher {
     }
 
 }
-

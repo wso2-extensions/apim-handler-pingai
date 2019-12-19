@@ -21,14 +21,14 @@ import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 import java.util.Set;
 
 /**
- * This class contains the config data for AI Security Handlerp .
+ * This class contains the config data for AI Security Handler.
  *
  */
 
 public class AISecurityHandlerConfig {
 
     private boolean applyForAllAPIs = true;
-    private String mode = AISecurityHandlerConstants.ASYNC_MODE_STRING;
+    private String mode = AISecurityHandlerConstants.SYNC_MODE_STRING;
     private int cacheExpiryTime = 15;
     private AISecurityHandlerConfig.AseConfig aseConfig;
     private AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfig;
@@ -112,14 +112,32 @@ public class AISecurityHandlerConfig {
     public static class AseConfig {
 
         private String endPoint;
+        private String backupAseEndPoint;
+        private Boolean shift = false;
+
         private String aseToken;
 
         public String getEndPoint() {
-            return endPoint;
+            if (!shift) {
+                return endPoint;
+            }
+            return backupAseEndPoint;
         }
 
         public void setEndPoint(String endPoint) {
             this.endPoint = endPoint;
+        }
+
+        public void shiftEndpoint() {
+            this.shift = !this.shift;
+        }
+
+        public String getBackupAseEndPoint() {
+            return backupAseEndPoint;
+        }
+
+        public void setBackupAseEndPoint(String backupAseEndPoint) {
+            this.backupAseEndPoint = backupAseEndPoint;
         }
 
         public String getAseToken() {

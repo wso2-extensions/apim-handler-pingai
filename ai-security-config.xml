@@ -41,6 +41,7 @@ configuration will be used.-->
     Without this configuration, feature will not work.-->
     <APISecurityEnforcer>
         <EndPoint>ASE_END_POINT</EndPoint>
+        <BackupEndPoint>BACKUP_ASE_END_POINT</BackupEndPoint>
         <ASEToken>ASE_ACCESS_TOKEN</ASEToken>
 
         <!--Configurations related to management REST API of the Ping API Security Enforcer. This API is used to

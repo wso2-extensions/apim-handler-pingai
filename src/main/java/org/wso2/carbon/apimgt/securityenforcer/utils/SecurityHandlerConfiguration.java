@@ -39,11 +39,12 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * Global API Manager configuration. This is generally populated from a special XML descriptor
- * file at system startup. Once successfully populated, this class does not allow more parameters
- * to be added to the configuration. The design of this class has been greatly inspired by
- * the ServerConfiguration class in Carbon core. This class uses a similar '.' separated
- * approach to keep track of XML parameters.
+ * Global API Manager configuration. This is generally populated from a special
+ * XML descriptor file at system startup. Once successfully populated, this
+ * class does not allow more parameters to be added to the configuration. The
+ * design of this class has been greatly inspired by the ServerConfiguration
+ * class in Carbon core. This class uses a similar '.' separated approach to
+ * keep track of XML parameters.
  */
 public class SecurityHandlerConfiguration {
 
@@ -57,9 +58,10 @@ public class SecurityHandlerConfiguration {
     private AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
 
     /**
-     * Populate this configuration by reading an XML file at the given location. This method
-     * can be executed only once on a given SecurityHandlerConfiguration instance. Once invoked and
-     * successfully populated, it will ignore all subsequent invocations.
+     * Populate this configuration by reading an XML file at the given location.
+     * This method can be executed only once on a given SecurityHandlerConfiguration
+     * instance. Once invoked and successfully populated, it will ignore all
+     * subsequent invocations.
      *
      * @param filePath Path of the XML descriptor file
      *
@@ -95,7 +97,7 @@ public class SecurityHandlerConfiguration {
     }
 
     private void readChildElements(OMElement serverConfig, Stack<String> nameStack) throws AISecurityException {
-        for (Iterator childElements = serverConfig.getChildElements(); childElements.hasNext(); ) {
+        for (Iterator childElements = serverConfig.getChildElements(); childElements.hasNext();) {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
@@ -127,7 +129,7 @@ public class SecurityHandlerConfiguration {
                 .getFirstChildWithName(new QName(AISecurityHandlerConstants.PING_AI_SECURITY_HANDLER_CONFIGURATION));
         if (aiSecurityConfigurationElement != null) {
 
-            //Get mode
+            // Get mode
             OMElement modeElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.OPERATION_MODE_CONFIGURATION));
             if (modeElement != null) {
@@ -136,7 +138,7 @@ public class SecurityHandlerConfiguration {
                 log.info("Operation mode is not set. Set to default async mode");
             }
 
-            //Get Cache expiry time
+            // Get Cache expiry time
             OMElement cacheExpiryElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.CACHE_EXPIRY_TIME_CONFIG));
             if (cacheExpiryElement != null) {
@@ -145,17 +147,17 @@ public class SecurityHandlerConfiguration {
                 log.debug("Cache expiry is not set. Set to default: " + securityHandlerConfig.getCacheExpiryTime());
             }
 
-            //Get Apply for all APIs
+            // Get Apply for all APIs
             OMElement applyForAllAPIsElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.APPLY_FOR_ALL_APIS_CONFIG));
             if (applyForAllAPIsElement != null) {
                 securityHandlerConfig.setApplyForAllAPIs(JavaUtils.isTrueExplicitly(applyForAllAPIsElement.getText()));
             } else {
-                log.debug("Apply For All APIs Element is not set. Set to default: " + securityHandlerConfig
-                        .isApplyForAllAPIs());
+                log.debug("Apply For All APIs Element is not set. Set to default: "
+                        + securityHandlerConfig.isApplyForAllAPIs());
             }
 
-            //Get ASE config data
+            // Get ASE config data
             OMElement aseConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_SECURITY_ENFORCER_CONFIGURATION));
             AISecurityHandlerConfig.AseConfig aseConfig = new AISecurityHandlerConfig.AseConfig();
@@ -170,11 +172,21 @@ public class SecurityHandlerConfiguration {
                             AISecurityException.HANDLER_ERROR_MESSAGE);
                 }
 
+                OMElement backupAseEndPointElement = aseConfigElement.getFirstChildWithName(
+                        new QName(AISecurityHandlerConstants.BACKUP_ASE_END_POINT_CONFIGURATION));
+                if (backupAseEndPointElement != null) {
+                    aseConfig.setBackupAseEndPoint(backupAseEndPointElement.getText());
+                } else {
+                    log.debug("Ping AI config error - Backup ASE Endpoint not found. Set to primary ASE: "
+                            + aseEndPointElement.getText());
+                    aseConfig.setBackupAseEndPoint(aseEndPointElement.getText());
+                }
+
                 OMElement aseTokenElement = aseConfigElement
                         .getFirstChildWithName(new QName(AISecurityHandlerConstants.ASE_TOKEN_CONFIGURATION));
                 if (aseTokenElement != null) {
-                    if (secretResolver.isInitialized() && secretResolver
-                            .isTokenProtected("APIManager.PingAISecurityHandler.ASE.ASEToken")) {
+                    if (secretResolver.isInitialized()
+                            && secretResolver.isTokenProtected("APIManager.PingAISecurityHandler.ASE.ASEToken")) {
                         aseConfig.setAseToken(secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.ASEToken"));
                     } else {
                         aseConfig.setAseToken(aseTokenElement.getText());
@@ -200,8 +212,8 @@ public class SecurityHandlerConfiguration {
                     OMElement accessKeyElement = modelCreationEndpointElement
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.ACCESS_KEY_CONFIGURATION));
                     if (accessKeyElement != null) {
-                        if (secretResolver.isInitialized() && secretResolver
-                                .isTokenProtected("APIManager.PingAISecurityHandler.ASE.AccessKey")) {
+                        if (secretResolver.isInitialized()
+                                && secretResolver.isTokenProtected("APIManager.PingAISecurityHandler.ASE.AccessKey")) {
                             modelCreationEndpointConfig.setAccessKey(
                                     secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.AccessKey"));
                         } else {
@@ -213,8 +225,8 @@ public class SecurityHandlerConfiguration {
                     OMElement secretKeyElement = modelCreationEndpointElement
                             .getFirstChildWithName(new QName(AISecurityHandlerConstants.SECRET_KEY_CONFIGURATION));
                     if (secretKeyElement != null) {
-                        if (secretResolver.isInitialized() && secretResolver
-                                .isTokenProtected("APIManager.PingAISecurityHandler.ASE.SecretKey")) {
+                        if (secretResolver.isInitialized()
+                                && secretResolver.isTokenProtected("APIManager.PingAISecurityHandler.ASE.SecretKey")) {
                             modelCreationEndpointConfig.setSecretKey(
                                     secretResolver.resolve("APIManager.PingAISecurityHandler.ASE.SecretKey"));
                         } else {
@@ -237,7 +249,7 @@ public class SecurityHandlerConfiguration {
                         AISecurityException.HANDLER_ERROR_MESSAGE);
             }
 
-            //Get data publisher config data
+            // Get data publisher config data
             OMElement dataPublisherConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.DATA_PUBLISHER_CONFIGURATION));
             AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfig = new AISecurityHandlerConfig.DataPublisherConfig();
@@ -264,7 +276,7 @@ public class SecurityHandlerConfiguration {
             }
             securityHandlerConfig.setDataPublisherConfig(dataPublisherConfig);
 
-            //Get thread pool executor config data
+            // Get thread pool executor config data
             OMElement threadPoolExecutorConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.THREAD_POOL_EXECUTOR_CONFIGURATION));
             AISecurityHandlerConfig.ThreadPoolExecutorConfig threadPoolExecutorConfig = new AISecurityHandlerConfig.ThreadPoolExecutorConfig();
@@ -291,7 +303,7 @@ public class SecurityHandlerConfiguration {
             }
             securityHandlerConfig.setThreadPoolExecutorConfig(threadPoolExecutorConfig);
 
-            //Get stack object pool config data
+            // Get stack object pool config data
             OMElement stackObjectPoolConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.STACK_OBJECT_POOL_CONFIGURATION));
             AISecurityHandlerConfig.StackObjectPoolConfig stackObjectPoolConfig = new AISecurityHandlerConfig.StackObjectPoolConfig();
@@ -312,7 +324,7 @@ public class SecurityHandlerConfiguration {
             }
             securityHandlerConfig.setStackObjectPoolConfig(stackObjectPoolConfig);
 
-            //Get limit transport headers config data
+            // Get limit transport headers config data
             OMElement limitTransportHeadersElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.LIMIT_TRANSPORT_HEADERS_CONFIGURATION));
 
@@ -353,4 +365,3 @@ public class SecurityHandlerConfiguration {
     }
 
 }
-
