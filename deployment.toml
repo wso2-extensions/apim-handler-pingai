@@ -8,6 +8,7 @@ operation_mode = "MODE"
 apply_for_all = false
 cash_expiry_time = 15
 sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
+backup_sideband_request_endpoint = "BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT"
 ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
 model_creation_endpoint = "ASE_REST_API_ENDPOINT"
 access_key = "ASE_REST_API_ACCESS_KEY"
@@ -39,6 +40,7 @@ limit_transport_headers.header3 = "Header3"
 #API Security Enforcer is used to validate and authenticate users against the request metadata.
 #Without this configuration, feature will not work.
 #sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
+#backup_sideband_request_endpoint = "BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT"
 #ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
 
 #Configurations related to management REST API of the Ping API Security Enforcer. This API is used to
