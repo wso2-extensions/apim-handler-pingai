@@ -61,23 +61,4 @@ public class AsyncPublishingAgentTest {
         asyncPublishingAgent.run();
         asyncPublishingAgent.clearDataReference();
     }
-
-    @Test
-    public void verifyPublishMethodWithSuccessResponseFromASETest() throws AISecurityException {
-       /* System.setProperty("carbon.home", AsyncPublishingAgentTest.class.getResource("/").getFile());
-
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseMessage("OK");
-        aseResponseDTO.setResponseCode(200);
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request"))
-                .thenReturn(aseResponseDTO);
-        ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
-
-        asyncPublishingAgent = new AsyncPublishingAgent();
-        asyncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "request");
-        asyncPublishingAgent.run();
-        asyncPublishingAgent.clearDataReference();
-        */
-    }
-
 }

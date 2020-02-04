@@ -100,9 +100,10 @@ public class SecurityUtils {
                 }
             }
 
-            if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getLimitTransportHeaders().isEnable()) {
-                Set<String> allowedTransportHeadersKeySet = ServiceReferenceHolder.getInstance()
-                        .getSecurityHandlerConfig().getLimitTransportHeaders().getHeaderSet();
+            AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig =
+                    ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getLimitTransportHeaders();
+            if (limitTransportHeadersConfig.isEnable()) {
+                Set<String> allowedTransportHeadersKeySet = limitTransportHeadersConfig.getHeaderSet();
                 for (String headerKey : headerKeysSet) {
                     if (allowedTransportHeadersKeySet.contains(headerKey.toLowerCase())) {
                         String headerValue = transportHeadersMap.get(headerKey);
@@ -173,7 +174,7 @@ public class SecurityUtils {
             CertificateException {
 
         PoolingHttpClientConnectionManager poolManager;
-        if ("https".equals(protocol)) {
+        if (AISecurityHandlerConstants.HTTPS_PROTOCOL.equals(protocol)) {
 
             String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
             String keyStorePassword = CarbonUtils.getServerConfiguration()
@@ -197,7 +198,7 @@ public class SecurityUtils {
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
 
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register("https", sslsf).build();
+                    .register(AISecurityHandlerConstants.HTTPS_PROTOCOL, sslsf).build();
             poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
         } else {
             poolManager = new PoolingHttpClientConnectionManager();

@@ -1,5 +1,5 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ public class SyncPublisher implements Publisher {
     public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
         AseResponseDTO aseResponseDTO = publishSyncEvent(requestMetaData, requestCorrelationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
+        //Handler will block the request only if ASE responds with 403
         if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
             if (log.isDebugEnabled()) {
                 log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
