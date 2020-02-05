@@ -101,7 +101,7 @@ public class AsyncPublisher implements Publisher {
                         + requestMetaData.toString() + " as " + aseResponseDTO.getResponseMessage()
                         + " with the response code " + aseResponseDTO.getResponseCode());
             }
-
+            //Handler will block the request only if ASE responds with forbidden code
             if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);

@@ -100,7 +100,7 @@ public class SyncPublisher implements Publisher {
     public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
         AseResponseDTO aseResponseDTO = publishSyncEvent(requestMetaData, requestCorrelationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        //Handler will block the request only if ASE responds with 403
+        //Handler will block the request only if ASE responds with forbidden code
         if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
             if (log.isDebugEnabled()) {
                 log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
