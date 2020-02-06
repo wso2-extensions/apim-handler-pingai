@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.securityenforcer.utils;
 
 public class AISecurityHandlerConstants {
 
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTP_PROTOCOL = "http";
     public static final String HTTP_METHOD_STRING = "HTTP_METHOD";
     public static final String BACKEND_RESPONSE_STATUS_CODE = "HTTP_SC";
     public static final String BACKEND_RESPONSE_STATUS_MESSAGE = "HTTP_SC_DESC";

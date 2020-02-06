@@ -1,5 +1,5 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -55,7 +55,8 @@ public class PingAISecurityHandler extends AbstractHandler {
     }
 
     /**
-     * This method will handle the request. For every request gateway receives, this is method will invoke first for this handler
+     * This method will handle the request. For every request gateway receives, this is method will invoke first for
+     * this handler
      */
     @Override
     public boolean handleRequest(MessageContext messageContext) {
@@ -65,9 +66,8 @@ public class PingAISecurityHandler extends AbstractHandler {
         try {
             if (authenticate(messageContext, requestCorrelationID)) {
                 if (log.isDebugEnabled()) {
-                    log.debug(
-                            "Handle Request Time for the request " + requestCorrelationID + " is " + (System.nanoTime()
-                                    - handleRequestStartTime) + " Nano seconds");
+                    log.debug("Handle Request Time for the request " + requestCorrelationID + " is "
+                    + (System.nanoTime() - handleRequestStartTime) + " Nano seconds");
                 }
                 SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
             }
@@ -117,8 +117,8 @@ public class PingAISecurityHandler extends AbstractHandler {
         JSONObject requestMetaData = extractRequestMetadata(messageContext);
 
         if (log.isDebugEnabled()) {
-            log.debug(
-                    "Metadata extracted for the request " + requestCorrelationID + " is " + requestMetaData.toString());
+            log.debug( "Metadata extracted for the request " + requestCorrelationID + " is "
+                    + requestMetaData.toString());
         }
 
         return ServiceReferenceHolder.getInstance().getRequestPublisher()
@@ -126,9 +126,9 @@ public class PingAISecurityHandler extends AbstractHandler {
     }
 
     private void sendResponseDetailsToASE(MessageContext messageContext) throws AISecurityException {
-        //getAndSetCorrelationID() method cannot be used here. if the correlation ID is not present in the messageContext,
-        //method will add a new id and send. but when sending the backend response to ASE, this id should correlate to the
-        //handleRequest id. therefore property is read and if not found, an error is thrown.
+        //getAndSetCorrelationID() method cannot be used here. if the correlation ID is not present in the
+        //messageContext, method will add a new id and send. but when sending the backend response to ASE, this id
+        //should correlate to the handleRequest id. therefore property is read and if not found, an error is thrown.
         Object responseCorrelationID = messageContext.getProperty("am.correlationID");
         JSONObject responseMetaData = extractResponseMetadata(messageContext);
         if (responseCorrelationID != null) {
@@ -166,7 +166,8 @@ public class PingAISecurityHandler extends AbstractHandler {
         String tier = authContext.getTier();
         if (APIKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
             String accessToken = "Bearer " + DigestUtils.md5Hex(APIKey);
-            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME, accessToken));
+            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME,
+                    accessToken));
             log.debug("Hashed access token added as a new transport header");
         }
 
@@ -251,7 +252,8 @@ public class PingAISecurityHandler extends AbstractHandler {
         try {
             RelayUtils.consumeAndDiscardMessage(axis2MC);
         } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            //In case of an error it is logged and the process is continued because we're setting a fault message
+            // in the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");

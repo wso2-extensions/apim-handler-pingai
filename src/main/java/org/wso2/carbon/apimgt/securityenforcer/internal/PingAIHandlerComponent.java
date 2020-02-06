@@ -157,7 +157,7 @@ public class PingAIHandlerComponent implements BundleActivator {
     private void logConfigData(AISecurityHandlerConfig securityHandlerConfig) {
 
         if (log.isDebugEnabled()) {
-            try {
+            if(securityHandlerConfig != null) {
                 String logMessage = "Ping AI configurations- ";
                 logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
                 logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
@@ -191,8 +191,6 @@ public class PingAIHandlerComponent implements BundleActivator {
                     logMessage = logMessage + ", Limit Transport headers Disabled";
                 }
                 log.debug(logMessage);
-            } catch (Exception e) {
-                log.error("Error with Ping AI configurations", e);
             }
         }
     }

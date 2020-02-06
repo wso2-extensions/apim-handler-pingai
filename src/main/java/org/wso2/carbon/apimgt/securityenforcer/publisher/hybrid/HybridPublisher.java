@@ -1,5 +1,5 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ public class HybridPublisher implements Publisher {
                             "Cache updated for " + requestCorrelationID + " as  " + aseResponseDTO.getResponseMessage()
                                     + " with the response code " + aseResponseDTO.getResponseCode());
                 }
+                //Handler will block the request only if ASE responds with forbidden code
                 if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
