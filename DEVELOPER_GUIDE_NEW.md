@@ -153,10 +153,7 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
 
      | Dependency                |   APIM 3.0.0   |  APIM 2.6.0   |  APIM 2.5.0   |  APIM 2.2.0   |  APIM 2.1.0   |
      | ------------------------- | :------------: | :-----------: | :-----------: | :-----------: | :-----------: |
-     | carbon.apimgt.version     |    6.5.349     |    6.4.50     |    6.3.95     |    6.2.201    |    6.1.66     |
-     | carbon.kernel.version     |     4.5.1      |    4.4.35     |    4.4.32     |    4.4.26     |    4.4.11     |
-     | carbon.governance.version |     4.8.10     |    4.7.29     |    4.7.27     |    4.7.23     |     4.7.0     |
-     | synapse.version           | 2.1.7-wso2v131 | 2.1.7-wso2v80 | 2.1.7-wso2v65 | 2.1.7-wso2v48 | 2.1.7-wso2v10 |
+     | org.wso2.carbon.apimgt    |    6.5.349     |    6.4.50     |    6.3.95     |    6.2.201    |    6.1.66     |
 
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory.
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory.
@@ -357,9 +354,9 @@ There is a new model created in the security engine for every API deployed with 
             "cookie_idle_timeout": "200m",
             "logout_api_enabled": false,
             "cookie_persistence_enabled": false,
-            "oauth2_access_token": false,
+            "oauth2_access_token": true,
             "apikey_qs": "",
-            "apikey_header": "APIKey",
+            "apikey_header": "",
             "login_url": "",
             "enable_blocking": true,
             "api_memory_size": "128mb",
@@ -590,3 +587,15 @@ Follow the instructions below to change a password that you had previously encry
 | Field  | input    | DefaultValue | Description                               |
 | ------ | -------- | ------------ | ----------------------------------------- |
 | header | (String) | -            | Name of the header needed to sent to ASE. |
+
+
+## Obtaining ASE certificates
+
+openssl client can be used to obtain the ASE sideband request endpoint and management endpoint certificates.
+```
+openssl s_client -showcerts -connect <ase-host-machine-ip>:<data-port>
+
+openssl s_client -showcerts -connect <ase-host-machine-ip>:<management-port>
+```
+
+Copy the content from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE----- into <ase_request_endpoint_cert_name>.cer and <ase_management_endpoint_cert_name>.cer files. These certs can be imported into WSO2 client keystore.
