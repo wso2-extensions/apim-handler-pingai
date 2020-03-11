@@ -54,7 +54,7 @@ public class PingAIHandlerComponent implements BundleActivator {
     private HttpDataPublisher httpDataPublisher;
 
     public void start(BundleContext bundleContext) throws Exception {
-        log.info("OSGi start method for Ping AI security handler");
+        log.debug("OSGi start method for Ping AI security handler");
 
         AISecurityHandlerConfig securityHandlerConfig = getConfigData();
         JSONObject managementAPIPayload = getManagementAPIPayload();

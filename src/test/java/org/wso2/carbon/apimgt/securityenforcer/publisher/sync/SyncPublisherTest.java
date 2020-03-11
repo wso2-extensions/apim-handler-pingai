@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SyncPublisherThreadPool.class })
@@ -57,8 +58,10 @@ public class SyncPublisherTest {
         syncPublisherSpy = Mockito.spy(syncPublisher);
 
         requestMetaData = new JSONObject();
-        requestMetaData.put("A", 1);
-        requestMetaData.put("B", 2);
+        JSONObject asePayload = new JSONObject();
+        asePayload.put("A", 1);
+        asePayload.put("B", 2);
+        requestMetaData.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME,asePayload);
         requestCorrelationID = "2344214";
     }
 

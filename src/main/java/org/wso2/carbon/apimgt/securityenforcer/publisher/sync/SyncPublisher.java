@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
+import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -100,19 +101,8 @@ public class SyncPublisher implements Publisher {
     public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
         AseResponseDTO aseResponseDTO = publishSyncEvent(requestMetaData, requestCorrelationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        //Handler will block the request only if ASE responds with forbidden code
-        if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
-            }
-            throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
-                    AISecurityException.ACCESS_REVOKED_MESSAGE);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
-            }
-            return true;
-        }
+        SecurityUtils.verifyASEResponse(aseResponseDTO, requestCorrelationID);
+        return true;
     }
 
     @Override

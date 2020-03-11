@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
 import java.util.concurrent.Callable;
 
@@ -78,6 +79,7 @@ public class SyncPublishingAgent implements Callable<AseResponseDTO> {
 
     @Override
     public AseResponseDTO call() {
-        return httpDataPublisher.publish(this.requestBody, this.correlationID, this.resource);
+        JSONObject asePayload = (JSONObject) this.requestBody.get(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME);
+        return httpDataPublisher.publish(asePayload, this.correlationID, this.resource);
     }
 }

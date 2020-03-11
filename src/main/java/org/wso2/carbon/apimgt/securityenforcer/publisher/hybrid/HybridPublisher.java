@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher.hybrid;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -27,6 +26,7 @@ import org.wso2.carbon.apimgt.securityenforcer.publisher.async.AsyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.sync.SyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
+import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 
 public class HybridPublisher implements Publisher {
 
@@ -42,56 +42,37 @@ public class HybridPublisher implements Publisher {
 
     @Override
     public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        AseResponseDTO aseResponseDTO = ASEResponseStore.getFromASEResponseCache(hashKey);
-        if (aseResponseDTO == null) { // sync mode
-            aseResponseDTO = syncPublisher.publishSyncEvent(requestMetaData, requestCorrelationID,
-                    AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-            if (aseResponseDTO != null) {
-                ASEResponseStore.writeToASEResponseCache(hashKey, aseResponseDTO);
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                            "Cache updated for " + requestCorrelationID + " as  " + aseResponseDTO.getResponseMessage()
-                                    + " with the response code " + aseResponseDTO.getResponseCode());
-                }
-                //Handler will block the request only if ASE responds with forbidden code
-                if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
-                    }
-                    throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
-                            AISecurityException.ACCESS_REVOKED_MESSAGE);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
-                    }
+
+        try {
+            boolean cachedASEResponseAvailable = SecurityUtils.verifyPropertiesWithCache(requestMetaData,
+                    requestCorrelationID);
+            if (!cachedASEResponseAvailable) {
+                //A Cached response is not available for token, ip or cookie. Therefore sync mode is used
+                AseResponseDTO aseResponseDTO = syncPublisher.publishSyncEvent(requestMetaData, requestCorrelationID,
+                        AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
+                if (aseResponseDTO != null) {
+                    ASEResponseStore.updateCache(requestMetaData, aseResponseDTO, requestCorrelationID);
+                    SecurityUtils.verifyASEResponse(aseResponseDTO, requestCorrelationID);
                     return true;
+                } else {
+                    log.error("Null response from the ASE for the request " + requestCorrelationID);
+                    throw new AISecurityException(AISecurityException.HANDLER_ERROR,
+                            AISecurityException.HANDLER_ERROR_MESSAGE);
                 }
             } else {
-                log.error("Null response from the ASE for the request " + requestCorrelationID);
-                throw new AISecurityException(AISecurityException.HANDLER_ERROR,
-                        AISecurityException.HANDLER_ERROR_MESSAGE);
+                //A Cached response is available for a one of all of the properties and non of them is to block the
+                // request. Async mode is used.
+                asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
+                        AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
             }
-        } else { //async mode
-            if (log.isDebugEnabled()) {
-                log.debug("ASE Response found for the request " + requestCorrelationID + " as " + aseResponseDTO
-                        .getResponseMessage() + " with the response code " + aseResponseDTO.getResponseCode());
-            }
+        } catch (AISecurityException e){
+            // if cached response is to block the request, there will be an exception and cache will be updated
+            // with a new async sideband call
             asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
                     AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-            if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS == aseResponseDTO.getResponseCode()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
-                }
-                return true;
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
-                }
-                throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
-                        AISecurityException.ACCESS_REVOKED_MESSAGE);
-            }
+            throw e;
         }
+        return true;
     }
 
     @Override

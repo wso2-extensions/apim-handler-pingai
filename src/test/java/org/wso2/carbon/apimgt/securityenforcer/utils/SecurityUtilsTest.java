@@ -56,8 +56,6 @@ public class SecurityUtilsTest {
         transportHeaderMap.put(headerThree, "three");
         transportHeaderMap.put(headerFour, "four");
         transportHeaderMap.put(hostHeader, "Host");
-        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(transportHeaderMap);
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
@@ -70,7 +68,7 @@ public class SecurityUtilsTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
         JSONArray transportHeaderJson = SecurityUtils
-                .getTransportHeaders(axis2MessageContext, sideBandCallType, correlationID);
+                .getTransportHeaders(transportHeaderMap, sideBandCallType, correlationID);
         Assert.assertFalse(transportHeaderJson.toString().contains(headerThree));
 
     }
@@ -83,8 +81,7 @@ public class SecurityUtilsTest {
         transportHeaderMap.put(headerThree, "three");
         transportHeaderMap.put(headerFour, "four");
         transportHeaderMap.put(hostHeader, "Host");
-        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(transportHeaderMap);
+
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
@@ -97,7 +94,7 @@ public class SecurityUtilsTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
         JSONArray transportHeaderJson = SecurityUtils
-                .getTransportHeaders(axis2MessageContext, sideBandCallType, correlationID);
+                .getTransportHeaders(transportHeaderMap, sideBandCallType, correlationID);
         Assert.assertFalse(!transportHeaderJson.toString().contains(hostHeader));
 
     }
@@ -110,8 +107,6 @@ public class SecurityUtilsTest {
         transportHeaderMap.put(headerThree, "three");
         transportHeaderMap.put(headerFour, "four");
         transportHeaderMap.put(hostHeader, "Host");
-        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(transportHeaderMap);
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
@@ -125,7 +120,7 @@ public class SecurityUtilsTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
         JSONArray transportHeaderJson = SecurityUtils
-                .getTransportHeaders(axis2MessageContext, sideBandCallType, correlationID);
+                .getTransportHeaders(transportHeaderMap, sideBandCallType, correlationID);
         Assert.assertFalse(transportHeaderJson.toString().contains(headerFive));
 
     }
@@ -137,8 +132,6 @@ public class SecurityUtilsTest {
         transportHeaderMap.put(headerTwo, "two");
         transportHeaderMap.put(headerThree, "three");
         transportHeaderMap.put(headerFour, "four");
-        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(transportHeaderMap);
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
@@ -151,7 +144,7 @@ public class SecurityUtilsTest {
         securityHandlerConfig.setLimitTransportHeaders(limitTransportHeadersConfig);
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
         JSONArray transportHeaderJson = SecurityUtils
-                .getTransportHeaders(axis2MessageContext, sideBandCallType, correlationID);
+                .getTransportHeaders(transportHeaderMap, sideBandCallType, correlationID);
     }
 
     @Test
@@ -162,8 +155,6 @@ public class SecurityUtilsTest {
         transportHeaderMap.put(headerThree, "three");
         transportHeaderMap.put(headerFour, "four");
         transportHeaderMap.put(hostHeader, "Host");
-        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(transportHeaderMap);
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
@@ -177,7 +168,7 @@ public class SecurityUtilsTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
         JSONArray transportHeaderJson = SecurityUtils
-                .getTransportHeaders(axis2MessageContext, sideBandCallType, correlationID);
+                .getTransportHeaders(transportHeaderMap, sideBandCallType, correlationID);
         Assert.assertFalse(transportHeaderJson.size() != 3);
 
     }
@@ -190,8 +181,6 @@ public class SecurityUtilsTest {
         transportHeaderMap.put(headerThree, "three");
         transportHeaderMap.put(headerFour, "four");
         transportHeaderMap.put(hostHeader, "Host");
-        Mockito.when(axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
-                .thenReturn(transportHeaderMap);
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
@@ -205,7 +194,7 @@ public class SecurityUtilsTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
 
         JSONArray transportHeaderJson = SecurityUtils
-                .getTransportHeaders(axis2MessageContext, sideBandCallType, correlationID);
+                .getTransportHeaders(transportHeaderMap, sideBandCallType, correlationID);
         Assert.assertFalse(transportHeaderJson.size() != transportHeaderMap.size() || transportHeaderJson.toString()
                 .contains(headerFive));
 

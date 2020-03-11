@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.async.AsyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.sync.SyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ASEResponseStore.class })
@@ -75,8 +76,13 @@ public class HybridPublisherTest {
         asyncPublisherSpy = Mockito.spy(asyncPublisher);
 
         requestMetaData = new JSONObject();
-        requestMetaData.put("A", 1);
-        requestMetaData.put("B", 2);
+        JSONObject asePayload = new JSONObject();
+        asePayload.put("A", 1);
+        asePayload.put("B", 2);
+        requestMetaData.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME, asePayload);
+        requestMetaData.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, "Cookie");
+        requestMetaData.put(AISecurityHandlerConstants.TOKEN_KEY_NAME, "Token");
+        requestMetaData.put(AISecurityHandlerConstants.IP_KEY_NAME, "IP");
         requestCorrelationID = "2344214";
 
         PowerMockito.mockStatic(ASEResponseStore.class);
@@ -92,9 +98,13 @@ public class HybridPublisherTest {
                 .thenReturn(aseResponseDTO);
         hybridPublisher.setSyncPublisher(syncPublisherSpy);
 
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
         AseResponseDTO aseResponseDTOFromCache = null;
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTOFromCache);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP"))
+                .thenReturn(aseResponseDTOFromCache);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token"))
+                .thenReturn(aseResponseDTOFromCache);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie"))
+                .thenReturn(aseResponseDTOFromCache);
         Assert.assertTrue(hybridPublisher.verifyRequest(requestMetaData, requestCorrelationID));
     }
 
@@ -108,9 +118,14 @@ public class HybridPublisherTest {
                 .thenReturn(aseResponseDTO);
         hybridPublisher.setSyncPublisher(syncPublisherSpy);
 
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
         AseResponseDTO aseResponseDTOFromCache = null;
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTOFromCache);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP"))
+                .thenReturn(aseResponseDTOFromCache);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token"))
+                .thenReturn(aseResponseDTOFromCache);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie"))
+                .thenReturn(aseResponseDTOFromCache);
+
 
         try {
             hybridPublisher.verifyRequest(requestMetaData, requestCorrelationID);
@@ -124,11 +139,16 @@ public class HybridPublisherTest {
         Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, requestCorrelationID, "request");
         hybridPublisher.setAsyncPublisher(asyncPublisherSpy);
 
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
         AseResponseDTO aseResponseDTO = new AseResponseDTO();
         aseResponseDTO.setResponseCode(200);
         aseResponseDTO.setResponseMessage("OK");
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTO);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP"))
+                .thenReturn(aseResponseDTO);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token"))
+                .thenReturn(aseResponseDTO);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie"))
+                .thenReturn(aseResponseDTO);
+
         Assert.assertTrue(hybridPublisher.verifyRequest(requestMetaData, requestCorrelationID));
     }
 
@@ -140,8 +160,13 @@ public class HybridPublisherTest {
         AseResponseDTO aseResponseDTO = new AseResponseDTO();
         aseResponseDTO.setResponseCode(403);
         aseResponseDTO.setResponseMessage("Forbidden");
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTO);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP"))
+                .thenReturn(aseResponseDTO);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token"))
+                .thenReturn(aseResponseDTO);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie"))
+                .thenReturn(aseResponseDTO);
+
 
         try {
             hybridPublisher.verifyRequest(requestMetaData, requestCorrelationID);
@@ -154,8 +179,13 @@ public class HybridPublisherTest {
     public void verifySuccessSecondRequestAfterSuccessCacheUpdateTest() throws AISecurityException {
 
         AseResponseDTO aseResponseDTOFirstCacheResponse = null;
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTOFirstCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP"))
+                .thenReturn(aseResponseDTOFirstCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token"))
+                .thenReturn(aseResponseDTOFirstCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie"))
+                .thenReturn(aseResponseDTOFirstCacheResponse);
+
 
         AseResponseDTO aseResponseDTO = new AseResponseDTO();
         aseResponseDTO.setResponseCode(200);
@@ -172,7 +202,13 @@ public class HybridPublisherTest {
         AseResponseDTO aseResponseDTOSecondCacheResponse = new AseResponseDTO();
         aseResponseDTOSecondCacheResponse.setResponseCode(200);
         aseResponseDTOSecondCacheResponse.setResponseMessage("OK");
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTOSecondCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP"))
+                .thenReturn(aseResponseDTOSecondCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token"))
+                .thenReturn(aseResponseDTOSecondCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie"))
+                .thenReturn(aseResponseDTOSecondCacheResponse);
+
 
         Assert.assertTrue(hybridPublisher.verifyRequest(requestMetaData, requestCorrelationID));
     }
@@ -181,8 +217,10 @@ public class HybridPublisherTest {
     public void verifyRevokeSecondRequestAfterSuccessCacheUpdateTest() throws AISecurityException {
 
         AseResponseDTO aseResponseDTOFirstCacheResponse = null;
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTOFirstCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP")).thenReturn(aseResponseDTOFirstCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token")).thenReturn(aseResponseDTOFirstCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie")).thenReturn(aseResponseDTOFirstCacheResponse);
+
 
         AseResponseDTO aseResponseDTO = new AseResponseDTO();
         aseResponseDTO.setResponseCode(200);
@@ -199,7 +237,9 @@ public class HybridPublisherTest {
         AseResponseDTO aseResponseDTOSecondCacheResponse = new AseResponseDTO();
         aseResponseDTOSecondCacheResponse.setResponseCode(403);
         aseResponseDTOSecondCacheResponse.setResponseMessage("Forbidden");
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTOSecondCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP")).thenReturn(aseResponseDTOSecondCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token")).thenReturn(aseResponseDTOSecondCacheResponse);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie")).thenReturn(aseResponseDTOSecondCacheResponse);
 
         try {
             hybridPublisher.verifyRequest(requestMetaData, requestCorrelationID);

@@ -41,7 +41,13 @@ public class AISecurityHandlerConstants {
     public static final String ASE_TOKEN_HEADER = "ASE-Token";
     public static final String X_CORRELATION_ID_HEADER = "X-CorrelationID";
     public static final String CACHE_MANAGER_NAME = "PING_AI_CACHE";
-    public static final String CACHE_NAME = "PingAI";
+    public static final String TOKEN_CACHE_NAME = "TokenCache";
+    public static final String IP_CACHE_NAME = "IPCache";
+    public static final String COOKIE_CACHE_NAME = "CookieCache";
+    public static final String TOKEN_KEY_NAME = "Token";
+    public static final String IP_KEY_NAME = "IP";
+    public static final String COOKIE_KEY_NAME = "Cookie";
+    public static final String ASE_PAYLOAD_KEY_NAME = "ASEPayload";
     public static final String TRANSPORT_HEADER_HOST_NAME = "Host";
     public static final int DUMMY_REQUEST_PORT = 8080;
     public static final int ASE_RESPONSE_CODE_SUCCESS = 200;
@@ -72,7 +78,7 @@ public class AISecurityHandlerConstants {
     public static final String ARTIFACT_ATTRIBUTE_API_NAME = "overview_name";
     public static final String ARTIFACT_ATTRIBUTE_API_VERSION = "overview_version";
     public static final String ARTIFACT_ATTRIBUTE_API_CONTEXT = "overview_context";
-    public static final String API_NAME_VERSION_CONNECTOR = "_";
+    public static final String API_JSON_NAME_CONNECTOR = "_";
     public static final String AUTHORIZATION_HEADER_NAME = "Authorization";
     public static final String UNAUTHENTICATED_TIER = "Unauthenticated";
     static final String HTTP_VERSION_CONNECTOR = ".";
