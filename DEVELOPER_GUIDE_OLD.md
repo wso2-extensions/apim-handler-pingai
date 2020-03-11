@@ -132,7 +132,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
     keytool -importcert -file <ase_management_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE management endpoint"
    ```
-    [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/README.md#obtaining-ase-certificates)
+    [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_OLD.md#obtaining-ase-certificates)
 
 ## Deploy WSO2 Extension with PingIntelligence
 
@@ -154,7 +154,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 3. Add the bare minimum configurations to the **<APIM_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
 
     ```
-    <PingAISecurityHandler>
+    <AISecurityHandler>
         <OperationMode>sync</OperationMode>
         <APISecurityEnforcer>
             <EndPoint>ASE_ENDPOINT</EndPoint>
@@ -166,7 +166,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
                 <SecretKey>ASE_REST_API_SECRET_KEY</SecretKey>
             </ModelCreationEndpoint>
        </APISecurityEnforcer>
-    </PingAISecurityHandler>
+    </AISecurityHandler>
    ```
      **Note:**
 
@@ -268,7 +268,7 @@ Check whether the API is listed as <API_NAME>_\<VERSION>.
 Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<APIManager> tag. If the mode is not set, the default mode is set as async. If the ModelCreationEndpoint configurations are not set, you need to manually create the ASE models.
 
 ```
-    <PingAISecurityHandler>
+    <AISecurityHandler>
         <OperationMode>sync</OperationMode>
         <APISecurityEnforcer>
             <EndPoint>ASE_ENDPOINT</EndPoint>
@@ -280,7 +280,7 @@ Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager
                 <SecretKey>ASE_REST_API_SECRET_KEY</SecretKey>
             </ModelCreationEndpointiscovery>
        </APISecurityEnforcer>
-    </PingAISecurityHandler>
+    </AISecurityHandler>
    ```
 
 ## Modes of operation
@@ -396,9 +396,9 @@ The API JSON file parameters define the behavior and properties of the API and t
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/ASEConfigsAsAdditionalProperties.png)
 
 ## Adding additional configurations
-Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<PingAISecurityHandler> tag in order to add additional configurations with regard to the PingIntelligence extension.
+Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<AISecurityHandler> tag in order to add additional configurations with regard to the PingIntelligence extension.
 
-    <PingAISecurityHandler>
+    <AISecurityHandler>
         <ApplyForAllAPIs>false</ApplyForAllAPIs>
         <CacheExpiryTime>15</CacheExpiryTime>
         <DataPublisher>
@@ -421,7 +421,7 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.
             <Header>HEADER_3</Header>
             <Header>HEADER_4</Header>
        </LimitTransportHeaders>
-    </PingAISecurityHandler>
+    </AISecurityHandler>
 
 ### Add the policy only for selected APIs
 By default, PingIntelligence is enabled in all APIs that are published with an individual AI model. Follow the instructions below to enable PingIntelligence only on selected APIs:

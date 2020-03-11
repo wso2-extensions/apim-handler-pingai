@@ -132,7 +132,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
     keytool -importcert -file <ase_management_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE management endpoint"
    ```
-   [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/README.md#obtaining-ase-certificates)
+   [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_NEW.md#obtaining-ase-certificates)
 
 ## Deploy WSO2 Extension with PingIntelligence
 
