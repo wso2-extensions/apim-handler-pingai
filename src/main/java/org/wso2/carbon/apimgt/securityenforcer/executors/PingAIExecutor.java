@@ -47,6 +47,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
  * This class is an implementation of the interface
@@ -114,11 +115,14 @@ public class PingAIExecutor implements Execution {
                 GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
                 String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME);
                 String apiVersion = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
-                // replace "." from version with "_" as from v4, ase does not support "." with
-                // version.
-                String modelName = apiName + AISecurityHandlerConstants.API_NAME_VERSION_CONNECTOR
-                        + apiVersion.replace(".", "_");
+                // replace "." from version with "_" as from v4, ase does not support "." with version.
+                if (tenantDomain == null){
+                    tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                }
+                String modelName = tenantDomain + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiName
+                        + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiVersion.replace(".", "_");
 
                 String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
 
