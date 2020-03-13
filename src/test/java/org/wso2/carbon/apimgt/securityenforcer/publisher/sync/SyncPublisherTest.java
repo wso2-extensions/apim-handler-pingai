@@ -40,7 +40,7 @@ public class SyncPublisherTest {
     private SyncPublisher syncPublisherSpy;
     private HttpDataPublisher httpDataPublisher;
     private JSONObject requestMetaData;
-    private String requestCorrelationID;
+    private String correlationID;
 
     @Before
     public void setup() throws AISecurityException {
@@ -50,7 +50,7 @@ public class SyncPublisherTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(aiSecurityHandlerConfig);
 
         httpDataPublisher = Mockito.mock(HttpDataPublisher.class);
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(0);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, correlationID, "request")).thenReturn(0);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         syncPublisher = new SyncPublisher();
@@ -61,24 +61,24 @@ public class SyncPublisherTest {
         asePayload.put("A", 1);
         asePayload.put("B", 2);
         requestMetaData.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME,asePayload);
-        requestCorrelationID = "2344214";
+        correlationID = "2344214";
     }
 
     @Test
     public void verifyRequestForSuccessResponseTest() throws AISecurityException {
         int aseResponseCode = 200;
-        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, requestCorrelationID, "request"))
+        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, correlationID, "request"))
                 .thenReturn(aseResponseCode);
-        Assert.assertTrue(syncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID));
+        Assert.assertTrue(syncPublisherSpy.verifyRequest(requestMetaData, correlationID));
     }
 
     @Test
     public void verifyRequestForAccessRevokeResponseTest() throws AISecurityException {
         int aseResponseCode = 403;
-        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, requestCorrelationID, "request"))
+        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, correlationID, "request"))
                 .thenReturn(aseResponseCode);
         try {
-            syncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID);
+            syncPublisherSpy.verifyRequest(requestMetaData, correlationID);
         } catch (AISecurityException e) {
             Assert.assertTrue(e.getErrorCode() == AISecurityException.ACCESS_REVOKED);
         }

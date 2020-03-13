@@ -31,7 +31,7 @@ public class SyncPublishingAgentTest {
 
     HttpDataPublisher httpDataPublisher;
     JSONObject requestMetaData;
-    String requestCorrelationID;
+    String correlationID;
     SyncPublishingAgent syncPublishingAgent;
 
     @Before
@@ -40,16 +40,16 @@ public class SyncPublishingAgentTest {
         requestMetaData = new JSONObject();
         requestMetaData.put("A", 1);
         requestMetaData.put("B", 2);
-        requestCorrelationID = "2344214";
+        correlationID = "2344214";
     }
 
     @Test
     public void verifyPublishMethodWithNullResponseFromASETest() throws AISecurityException {
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(200);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, correlationID, "request")).thenReturn(200);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         syncPublishingAgent = new SyncPublishingAgent();
-        syncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "request");
+        syncPublishingAgent.setDataReference(requestMetaData, correlationID, "request");
         int aseResponseCode = syncPublishingAgent.call();
         syncPublishingAgent.clearDataReference();
         Assert.assertTrue(aseResponseCode == 0);

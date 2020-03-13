@@ -34,12 +34,12 @@ public interface Publisher {
      * For all unexpected error conditions, this method must throw an AISecurityException.
      *
      * @param requestMetaData Meta data extracted from the client request in the format which ASE supports
-     * @param requestCorrelationID The unique ID for the request.
+     * @param correlationID The unique ID for the request.
      * @return true if the authentication is successful (In Async Implementation, if not available in cache,
      * this returns through without considering the ASE response)
      * @throws AISecurityException If an request failure or some other error occurs
      */
-    boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException;
+    boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException;
 
     /**
      * Handler publish response meta data to the API Security Enforcer using this method. This will never return false.
@@ -47,11 +47,11 @@ public interface Publisher {
      *
      *
      * @param requestMetaData Meta data extracted from the client request in the format which ASE supports
-     * @param requestCorrelationID The unique ID for the request.
+     * @param correlationID The unique ID for the request.
      * @return true if the authentication is successful (In Async Implementation, if not available in cache,
      * this returns through without considering the ASE response)
      * @throws AISecurityException If an request failure or some other error occurs
      */
-    boolean publishResponse(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException;
+    boolean publishResponse(JSONObject requestMetaData, String correlationID) throws AISecurityException;
 
 }

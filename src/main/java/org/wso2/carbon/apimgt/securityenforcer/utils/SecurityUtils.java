@@ -315,32 +315,32 @@ public class SecurityUtils {
      * Verify whether token, cookie or IP has a cache entry
      *
      * @param requestMetaData - Request data
-     * @param requestCorrelationID - Correlation ID of the request
+     * @param correlationID - Correlation ID of the request
      * @return true if token or ip or cookie has a cache entry
      * @return false if non of the properties has any cache entry
      * @throws AISecurityException if the cached response of any property is to block the request
      */
     public static boolean verifyPropertiesWithCache(JSONObject requestMetaData,
-                                                    String requestCorrelationID) throws AISecurityException {
+                                                    String correlationID) throws AISecurityException {
 
         boolean statusForToken = SecurityUtils.verifyPropertyWithCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,
-                AISecurityHandlerConstants.TOKEN_KEY_NAME, requestMetaData, requestCorrelationID);
+                AISecurityHandlerConstants.TOKEN_KEY_NAME, requestMetaData, correlationID);
         boolean statusForIP = SecurityUtils.verifyPropertyWithCache(AISecurityHandlerConstants.IP_CACHE_NAME,
-                AISecurityHandlerConstants.IP_KEY_NAME, requestMetaData, requestCorrelationID);
+                AISecurityHandlerConstants.IP_KEY_NAME, requestMetaData, correlationID);
         boolean statusForCookie = SecurityUtils.verifyPropertyWithCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,
-                AISecurityHandlerConstants.COOKIE_KEY_NAME, requestMetaData, requestCorrelationID);
+                AISecurityHandlerConstants.COOKIE_KEY_NAME, requestMetaData, correlationID);
         return statusForToken || statusForIP || statusForCookie;
     }
 
     public static boolean verifyPropertyWithCache(String cacheName, String propertyName, JSONObject requestMetaData,
-                                                  String requestCorrelationID) throws AISecurityException {
+                                                  String correlationID) throws AISecurityException {
 
         String property = (String) requestMetaData.get(propertyName);
         int aseResponseForProperty = ASEResponseStore.getFromASEResponseCache(cacheName, property);
         if (aseResponseForProperty == 0) {
             return false;
         } else {
-            verifyASEResponse(aseResponseForProperty, requestCorrelationID);
+            verifyASEResponse(aseResponseForProperty, correlationID);
         }
         return true;
     }
@@ -349,15 +349,15 @@ public class SecurityUtils {
      * Verify whether ASE response is to block the request of not
      *
      * @param aseResponseCode - ASE response for the request
-     * @param requestCorrelationID - Correlation ID of the request
+     * @param correlationID - Correlation ID of the request
      * @throws AISecurityException if the ASE response is to block the request
      */
-    public static void verifyASEResponse(int aseResponseCode, String requestCorrelationID)
+    public static void verifyASEResponse(int aseResponseCode, String correlationID)
             throws AISecurityException {
         //Handler will block the request only if ASE responds with forbidden code
         if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseCode) {
             if (log.isDebugEnabled()) {
-                log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
+                log.debug("Access revoked by the Ping AI handler for the request id " + correlationID);
             }
             throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
                     AISecurityException.ACCESS_REVOKED_MESSAGE);

@@ -85,15 +85,15 @@ public class AsyncPublisher implements Publisher {
     }
 
     @Override
-    public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        publishAsyncEvent(requestMetaData, requestCorrelationID, AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        SecurityUtils.verifyPropertiesWithCache(requestMetaData, requestCorrelationID);
+    public boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        publishAsyncEvent(requestMetaData, correlationID, AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
+        SecurityUtils.verifyPropertiesWithCache(requestMetaData, correlationID);
         return true;
     }
 
     @Override
-    public boolean publishResponse(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        publishAsyncEvent(requestMetaData, requestCorrelationID, AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE);
+    public boolean publishResponse(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        publishAsyncEvent(requestMetaData, correlationID, AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE);
         return true;
     }
 

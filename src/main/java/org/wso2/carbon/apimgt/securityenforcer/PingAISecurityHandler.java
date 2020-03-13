@@ -62,11 +62,11 @@ public class PingAISecurityHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext messageContext) {
 
         long handleRequestStartTime = System.nanoTime();
-        String requestCorrelationID = SecurityUtils.getAndSetCorrelationID(messageContext);
+        String correlationID = SecurityUtils.getAndSetCorrelationID(messageContext);
         try {
-            if (authenticate(messageContext, requestCorrelationID)) {
+            if (authenticate(messageContext, correlationID)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Handle Request Time for the request " + requestCorrelationID + " is "
+                    log.debug("Handle Request Time for the request " + correlationID + " is "
                     + (System.nanoTime() - handleRequestStartTime) + " Nano seconds");
                 }
                 SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
@@ -75,7 +75,7 @@ public class PingAISecurityHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 long difference = System.nanoTime() - handleRequestStartTime;
                 String messageDetails = logMessageDetails(messageContext);
-                log.debug("Request " + requestCorrelationID + " failed. " + messageDetails + ", elapsedTimeInNano "
+                log.debug("Request " + correlationID + " failed. " + messageDetails + ", elapsedTimeInNano "
                         + difference);
             }
             handleAuthFailure(messageContext, e);
@@ -111,18 +111,18 @@ public class PingAISecurityHandler extends AbstractHandler {
     /**
      * This method will return true if the request is authorized.
      */
-    private boolean authenticate(MessageContext messageContext, String requestCorrelationID)
+    private boolean authenticate(MessageContext messageContext, String correlationID)
             throws AISecurityException {
 
         JSONObject requestMetaData = extractRequestMetadata(messageContext);
 
         if (log.isDebugEnabled()) {
-            log.debug( "Metadata extracted for the request " + requestCorrelationID + " is "
+            log.debug( "Metadata extracted for the request " + correlationID + " is "
                     + requestMetaData.toString());
         }
 
         return ServiceReferenceHolder.getInstance().getRequestPublisher()
-                .verifyRequest(requestMetaData, requestCorrelationID);
+                .verifyRequest(requestMetaData, correlationID);
     }
 
     private void sendResponseDetailsToASE(MessageContext messageContext) throws AISecurityException {
@@ -150,7 +150,7 @@ public class PingAISecurityHandler extends AbstractHandler {
      */
     JSONObject extractRequestMetadata(MessageContext messageContext) throws AISecurityException {
 
-        String requestCorrelationID = SecurityUtils.getAndSetCorrelationID(messageContext);
+        String correlationID = SecurityUtils.getAndSetCorrelationID(messageContext);
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
@@ -158,7 +158,7 @@ public class PingAISecurityHandler extends AbstractHandler {
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         JSONArray transportHeaders = SecurityUtils.getTransportHeaders(transportHeadersMap,
-                AISecurityHandlerConstants.ASE_RESOURCE_REQUEST, requestCorrelationID);
+                AISecurityHandlerConstants.ASE_RESOURCE_REQUEST, correlationID);
 
         AuthenticationContext authContext = (AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT");
 
@@ -200,7 +200,7 @@ public class PingAISecurityHandler extends AbstractHandler {
 
     JSONObject extractResponseMetadata(MessageContext messageContext) throws AISecurityException {
 
-        String requestCorrelationID = SecurityUtils.getAndSetCorrelationID(messageContext);
+        String correlationID = SecurityUtils.getAndSetCorrelationID(messageContext);
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
@@ -208,7 +208,7 @@ public class PingAISecurityHandler extends AbstractHandler {
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         JSONArray transportHeaders = SecurityUtils.getTransportHeaders(transportHeadersMap,
-                AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE, requestCorrelationID);
+                AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE, correlationID);
 
         String requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
         String responseCode = Integer.toString(

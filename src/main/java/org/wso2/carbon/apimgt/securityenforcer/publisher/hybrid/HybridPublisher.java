@@ -40,47 +40,47 @@ public class HybridPublisher implements Publisher {
     }
 
     @Override
-    public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
+    public boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException {
         int aseResponseCode = 0;
         try {
             boolean cachedASEResponseAvailable = SecurityUtils.verifyPropertiesWithCache(requestMetaData,
-                    requestCorrelationID);
+                    correlationID);
             if (!cachedASEResponseAvailable) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Cached ASE response is not available for the request " + requestCorrelationID
+                    log.debug("Cached ASE response is not available for the request " + correlationID
                             + " hence SYNC mode used");
                 }
                 //A Cached response is not available for token, ip or cookie. Therefore sync mode is used
-                aseResponseCode = syncPublisher.publishSyncEvent(requestMetaData, requestCorrelationID,
+                aseResponseCode = syncPublisher.publishSyncEvent(requestMetaData, correlationID,
                         AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-                ASEResponseStore.updateCache(requestMetaData, aseResponseCode, requestCorrelationID);
+                ASEResponseStore.updateCache(requestMetaData, aseResponseCode, correlationID);
             } else {
                 //A Cached response is available for a one or all of the properties and non of them is to block the
                 // request. Async mode is used.
                 if (log.isDebugEnabled()) {
-                    log.debug("Cached ASE response is available for the request " + requestCorrelationID
+                    log.debug("Cached ASE response is available for the request " + correlationID
                             + " hence ASYNC mode used");
                 }
-                asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
+                asyncPublisher.publishAsyncEvent(requestMetaData, correlationID,
                         AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
             }
         } catch (AISecurityException e){
             // if cached response is to block the request, there will be an exception and cache will be updated
             // with a new async sideband call
             if (log.isDebugEnabled()) {
-                log.debug("Cached ASE response is to block the request " + requestCorrelationID);
+                log.debug("Cached ASE response is to block the request " + correlationID);
             }
-            asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
+            asyncPublisher.publishAsyncEvent(requestMetaData, correlationID,
                     AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
             throw e;
         }
-        SecurityUtils.verifyASEResponse(aseResponseCode, requestCorrelationID); //For the sync response
+        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID); //For the sync response
         return true;
     }
 
     @Override
-    public boolean publishResponse(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
+    public boolean publishResponse(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        asyncPublisher.publishAsyncEvent(requestMetaData, correlationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE);
         return true;
     }

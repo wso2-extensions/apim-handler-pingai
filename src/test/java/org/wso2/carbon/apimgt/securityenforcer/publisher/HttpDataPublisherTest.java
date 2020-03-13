@@ -43,14 +43,14 @@ public class HttpDataPublisherTest {
     private HttpDataPublisher httpDataPublisher;
     private CloseableHttpClient httpClient;
     private JSONObject requestMetaData;
-    private String requestCorrelationID;
+    private String correlationID;
 
     @Before
     public void setup() throws AISecurityException {
         requestMetaData = new JSONObject();
         requestMetaData.put("A", 1);
         requestMetaData.put("B", 2);
-        requestCorrelationID = "2344214";
+        correlationID = "2344214";
         String endPoint = "http://10.100.10.11:2222/ase/";
         String aseToken = "asdf";
         httpClient = Mockito.mock(CloseableHttpClient.class);
@@ -64,7 +64,7 @@ public class HttpDataPublisherTest {
         CloseableHttpResponse response = generateResponse(200, "OK");
         Mockito.when(httpClient.execute(Matchers.<HttpPost>any())).thenReturn(response);
         httpDataPublisher.setHttpClient(httpClient);
-        int aseResponseCode = httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request");
+        int aseResponseCode = httpDataPublisher.publish(requestMetaData, correlationID, "request");
         Assert.assertTrue(aseResponseCode == 200);
 
     }

@@ -97,15 +97,15 @@ public class SyncPublisher implements Publisher {
     }
 
     @Override
-    public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        int aseResponseCode = publishSyncEvent(requestMetaData, requestCorrelationID,
+    public boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        int aseResponseCode = publishSyncEvent(requestMetaData, correlationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        SecurityUtils.verifyASEResponse(aseResponseCode, requestCorrelationID);
+        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID);
         return true;
     }
 
     @Override
-    public boolean publishResponse(JSONObject requestMetaData, String requestCorrelationID) {
+    public boolean publishResponse(JSONObject requestMetaData, String correlationID) {
         return false;
     }
 
