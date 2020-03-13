@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 
 import java.io.IOException;
@@ -65,8 +64,8 @@ public class HttpDataPublisherTest {
         CloseableHttpResponse response = generateResponse(200, "OK");
         Mockito.when(httpClient.execute(Matchers.<HttpPost>any())).thenReturn(response);
         httpDataPublisher.setHttpClient(httpClient);
-        AseResponseDTO aseResponseDTO = httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request");
-        Assert.assertTrue(aseResponseDTO.getResponseCode() == 200);
+        int aseResponseCode = httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request");
+        Assert.assertTrue(aseResponseCode == 200);
 
     }
 

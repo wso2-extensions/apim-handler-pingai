@@ -75,7 +75,7 @@ public class PingAISecurityHandler extends AbstractHandler {
             if (log.isDebugEnabled()) {
                 long difference = System.nanoTime() - handleRequestStartTime;
                 String messageDetails = logMessageDetails(messageContext);
-                log.debug("Request " + requestCorrelationID + " failed. " + messageDetails + ", elapsedTimeInNano"
+                log.debug("Request " + requestCorrelationID + " failed. " + messageDetails + ", elapsedTimeInNano "
                         + difference);
             }
             handleAuthFailure(messageContext, e);
@@ -172,7 +172,6 @@ public class PingAISecurityHandler extends AbstractHandler {
             hashedToken = DigestUtils.md5Hex(APIKey); //OAuth2 Token or API key is hashed for security reasons.
             transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME,
                     "Bearer " + hashedToken));
-            log.debug("Hashed access token added as a new transport header");
         }
         String cookie = SecurityUtils.getCookie(transportHeadersMap);
         if (cookie != null) {

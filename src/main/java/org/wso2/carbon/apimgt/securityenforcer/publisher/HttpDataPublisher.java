@@ -28,7 +28,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
@@ -73,13 +72,13 @@ public class HttpDataPublisher {
         setEndPoint(endPoint);
     }
 
-    public AseResponseDTO publish(JSONObject data, String correlationID, String resource) {
+    public int publish(JSONObject data, String correlationID, String resource) {
         HttpPost postRequest = new HttpPost(endPoint + "/ase/" + resource);
         postRequest.addHeader(AISecurityHandlerConstants.ASE_TOKEN_HEADER, authToken);
         postRequest.addHeader(AISecurityHandlerConstants.X_CORRELATION_ID_HEADER, correlationID);
 
         CloseableHttpResponse response = null;
-        AseResponseDTO aseResponseDTO = null;
+        int aseResponseCode = 200;
 
         try {
             postRequest.setEntity(new StringEntity(data.toString()));
@@ -88,11 +87,9 @@ public class HttpDataPublisher {
             long publishingEndTime = System.nanoTime();
 
             if (response != null) {
-                aseResponseDTO = new AseResponseDTO();
-                aseResponseDTO.setResponseMessage(response.getStatusLine().getReasonPhrase());
-                aseResponseDTO.setResponseCode(response.getStatusLine().getStatusCode());
+                aseResponseCode = response.getStatusLine().getStatusCode();
 
-                switch (response.getStatusLine().getStatusCode()) {
+                switch (aseResponseCode) {
                 case AISecurityHandlerConstants.ASE_RESPONSE_CODE_INCORRECT_JSON:
                     log.error("Incorrect JSON format sent for the ASE from the request " + correlationID);
                     break;
@@ -117,7 +114,6 @@ public class HttpDataPublisher {
             aseConfig.shiftEndpoint();
             endPoint = aseConfig.getEndPoint();
             setEndPoint(aseConfig.getEndPoint());
-            aseResponseDTO = getDefaultAcceptResponse();
             log.error("Error sending the HTTP Request with id " + correlationID, ex);
         } finally {
             if (response != null) {
@@ -128,14 +124,7 @@ public class HttpDataPublisher {
                 }
             }
         }
-        return aseResponseDTO;
-    }
-
-    private AseResponseDTO getDefaultAcceptResponse() {
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS);
-        aseResponseDTO.setResponseMessage(AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS_MESSAGE);
-        return aseResponseDTO;
+        return aseResponseCode;
     }
 
     public StatusLine publishToASEManagementAPI(String type, Object request) {

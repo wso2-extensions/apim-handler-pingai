@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.async.AsyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.sync.SyncPublisher;
@@ -42,36 +41,40 @@ public class HybridPublisher implements Publisher {
 
     @Override
     public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-
+        int aseResponseCode = 0;
         try {
             boolean cachedASEResponseAvailable = SecurityUtils.verifyPropertiesWithCache(requestMetaData,
                     requestCorrelationID);
             if (!cachedASEResponseAvailable) {
-                //A Cached response is not available for token, ip or cookie. Therefore sync mode is used
-                AseResponseDTO aseResponseDTO = syncPublisher.publishSyncEvent(requestMetaData, requestCorrelationID,
-                        AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-                if (aseResponseDTO != null) {
-                    ASEResponseStore.updateCache(requestMetaData, aseResponseDTO, requestCorrelationID);
-                    SecurityUtils.verifyASEResponse(aseResponseDTO, requestCorrelationID);
-                    return true;
-                } else {
-                    log.error("Null response from the ASE for the request " + requestCorrelationID);
-                    throw new AISecurityException(AISecurityException.HANDLER_ERROR,
-                            AISecurityException.HANDLER_ERROR_MESSAGE);
+                if (log.isDebugEnabled()) {
+                    log.debug("Cached ASE response is not available for the request " + requestCorrelationID
+                            + " hence SYNC mode used");
                 }
+                //A Cached response is not available for token, ip or cookie. Therefore sync mode is used
+                aseResponseCode = syncPublisher.publishSyncEvent(requestMetaData, requestCorrelationID,
+                        AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
+                ASEResponseStore.updateCache(requestMetaData, aseResponseCode, requestCorrelationID);
             } else {
-                //A Cached response is available for a one of all of the properties and non of them is to block the
+                //A Cached response is available for a one or all of the properties and non of them is to block the
                 // request. Async mode is used.
+                if (log.isDebugEnabled()) {
+                    log.debug("Cached ASE response is available for the request " + requestCorrelationID
+                            + " hence ASYNC mode used");
+                }
                 asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
                         AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
             }
         } catch (AISecurityException e){
             // if cached response is to block the request, there will be an exception and cache will be updated
             // with a new async sideband call
+            if (log.isDebugEnabled()) {
+                log.debug("Cached ASE response is to block the request " + requestCorrelationID);
+            }
             asyncPublisher.publishAsyncEvent(requestMetaData, requestCorrelationID,
                     AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
             throw e;
         }
+        SecurityUtils.verifyASEResponse(aseResponseCode, requestCorrelationID); //For the sync response
         return true;
     }
 

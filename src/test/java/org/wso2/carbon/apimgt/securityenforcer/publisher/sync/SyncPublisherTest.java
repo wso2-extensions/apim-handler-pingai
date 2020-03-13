@@ -27,7 +27,6 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -51,7 +50,7 @@ public class SyncPublisherTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(aiSecurityHandlerConfig);
 
         httpDataPublisher = Mockito.mock(HttpDataPublisher.class);
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(null);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(0);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         syncPublisher = new SyncPublisher();
@@ -67,21 +66,17 @@ public class SyncPublisherTest {
 
     @Test
     public void verifyRequestForSuccessResponseTest() throws AISecurityException {
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(200);
-        aseResponseDTO.setResponseMessage("OK");
+        int aseResponseCode = 200;
         Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, requestCorrelationID, "request"))
-                .thenReturn(aseResponseDTO);
+                .thenReturn(aseResponseCode);
         Assert.assertTrue(syncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID));
     }
 
     @Test
     public void verifyRequestForAccessRevokeResponseTest() throws AISecurityException {
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(403);
-        aseResponseDTO.setResponseMessage("Forbidden");
+        int aseResponseCode = 403;
         Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, requestCorrelationID, "request"))
-                .thenReturn(aseResponseDTO);
+                .thenReturn(aseResponseCode);
         try {
             syncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID);
         } catch (AISecurityException e) {

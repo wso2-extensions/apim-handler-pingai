@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -63,10 +62,10 @@ public class SyncPublisher implements Publisher {
      * @param correlationID is the String with the xCorrelation ID.
      * @param resource       is the targeted resource of the ASE Instance. It can be either request or response
      */
-    public AseResponseDTO publishSyncEvent(JSONObject requestBody, String correlationID, String resource)
+    public int publishSyncEvent(JSONObject requestBody, String correlationID, String resource)
             throws AISecurityException {
 
-        AseResponseDTO response;
+        int response = 0;
         if (syncPublisherThreadPool != null) {
             SyncPublishingAgent agent;
             try {
@@ -77,7 +76,7 @@ public class SyncPublisher implements Publisher {
                         AISecurityException.HANDLER_ERROR_MESSAGE, e);
             }
             agent.setDataReference(requestBody, correlationID, resource);
-            Future<AseResponseDTO> result = syncExecutor.submit(agent);
+            Future<Integer> result = syncExecutor.submit(agent);
             if (log.isDebugEnabled()) {
                 log.debug("Sync call executed for the " + resource + " id " + correlationID);
             }
@@ -99,9 +98,9 @@ public class SyncPublisher implements Publisher {
 
     @Override
     public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        AseResponseDTO aseResponseDTO = publishSyncEvent(requestMetaData, requestCorrelationID,
+        int aseResponseCode = publishSyncEvent(requestMetaData, requestCorrelationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        SecurityUtils.verifyASEResponse(aseResponseDTO, requestCorrelationID);
+        SecurityUtils.verifyASEResponse(aseResponseCode, requestCorrelationID);
         return true;
     }
 

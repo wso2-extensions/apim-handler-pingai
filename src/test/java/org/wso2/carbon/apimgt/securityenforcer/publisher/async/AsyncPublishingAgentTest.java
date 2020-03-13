@@ -53,11 +53,11 @@ public class AsyncPublishingAgentTest {
 
     @Test
     public void verifyPublishMethodWithNullResponseFromASETest() throws AISecurityException {
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(null);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "response")).thenReturn(200);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         asyncPublishingAgent = new AsyncPublishingAgent();
-        asyncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "request");
+        asyncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "response","carbon.super");
         asyncPublishingAgent.run();
         asyncPublishingAgent.clearDataReference();
     }

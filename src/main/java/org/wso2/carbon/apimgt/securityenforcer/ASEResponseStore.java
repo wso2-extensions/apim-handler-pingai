@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.securityenforcer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
@@ -41,61 +40,113 @@ import javax.cache.Caching;
 public class ASEResponseStore {
 
     private static final Log log = LogFactory.getLog(ASEResponseStore.class);
-    private static boolean pingAICacheInitialized = false;
+    private static boolean cookieCacheInitialized = false;
+    private static boolean tokenCacheInitialized = false;
+    private static boolean IPCacheInitialized = false;
 
     public ASEResponseStore() {
     }
 
-    public synchronized static Cache getASEResponseCache(String cacheName) {
+    public synchronized static void writeToASEResponseCache(String cacheName, String cacheKey,
+                                                            int aseResponseCode) {
+        if (cacheKey != null && aseResponseCode != 0) {
+            Cache cache = getCache(cacheName);
+            cache.put(cacheKey, aseResponseCode);
+        }
+    }
 
-        if (!pingAICacheInitialized) {
-            pingAICacheInitialized = true;
+    public static int getFromASEResponseCache(String cacheName, String cacheKey) {
+
+        int aseResponseCode = 0;
+        if (cacheKey != null) {
+            Cache cache = getCache(cacheName);
+            Object cachedObject = cache.get(cacheKey);
+            if (cachedObject != null) {
+                aseResponseCode = (int) cachedObject;
+            }
+        }
+        return aseResponseCode;
+    }
+
+    public static void updateCache(JSONObject requestBody, int aseResponseCode, String correlationID){
+        String token = (String) requestBody.get(AISecurityHandlerConstants.TOKEN_KEY_NAME);
+        String cookie = (String) requestBody.get(AISecurityHandlerConstants.COOKIE_KEY_NAME);
+        String ip = (String) requestBody.get(AISecurityHandlerConstants.IP_KEY_NAME);
+
+        writeToASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME, token, aseResponseCode);
+        writeToASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME, cookie, aseResponseCode);
+        writeToASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME, ip, aseResponseCode);
+        if (log.isDebugEnabled()) {
+            log.debug("Cache updated for " + correlationID + " as  " + aseResponseCode);
+        }
+    }
+
+    public synchronized static Cache getTokenCache() {
+
+        if (!tokenCacheInitialized) {
+            tokenCacheInitialized = true;
             if (log.isDebugEnabled()) {
-                log.debug("New Cache instance created for Ping AI security handler with the name of " + cacheName);
+                log.debug("New Cache instance created for Ping AI security handler with the name of" + AISecurityHandlerConstants.TOKEN_CACHE_NAME);
             }
             return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME)
-                    .createCacheBuilder(cacheName)
+                    .createCacheBuilder(AISecurityHandlerConstants.TOKEN_CACHE_NAME)
                     .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.MINUTES,
                             ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getCacheExpiryTime()))
                     .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.MINUTES,
                             ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getCacheExpiryTime()))
                     .setStoreByValue(false).build();
         } else {
-            return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME).getCache(cacheName);
+            return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME).getCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME);
         }
     }
 
-    public synchronized static void writeToASEResponseCache(String cacheName, String cacheKey,
-                                                            AseResponseDTO aseResponseDTO) {
-        if (aseResponseDTO != null) {
-            Cache cache = getASEResponseCache(cacheName);
-            cache.put(cacheKey, aseResponseDTO);
+    public synchronized static Cache getIPCache() {
+
+        if (!IPCacheInitialized) {
+            IPCacheInitialized = true;
+            if (log.isDebugEnabled()) {
+                log.debug("New Cache instance created for Ping AI security handler with the name of " + AISecurityHandlerConstants.IP_CACHE_NAME);
+            }
+            return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME)
+                    .createCacheBuilder(AISecurityHandlerConstants.IP_CACHE_NAME)
+                    .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.MINUTES,
+                            ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getCacheExpiryTime()))
+                    .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.MINUTES,
+                            ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getCacheExpiryTime()))
+                    .setStoreByValue(false).build();
+        } else {
+            return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME).getCache(AISecurityHandlerConstants.IP_CACHE_NAME);
+        }
+    }
+    public synchronized static Cache getCookieCache() {
+
+        if (!cookieCacheInitialized) {
+            cookieCacheInitialized = true;
+            if (log.isDebugEnabled()) {
+                log.debug("New Cache instance created for Ping AI security handler with the name of " + AISecurityHandlerConstants.COOKIE_CACHE_NAME);
+            }
+            return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME)
+                    .createCacheBuilder(AISecurityHandlerConstants.COOKIE_CACHE_NAME)
+                    .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.MINUTES,
+                            ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getCacheExpiryTime()))
+                    .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.MINUTES,
+                            ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getCacheExpiryTime()))
+                    .setStoreByValue(false).build();
+        } else {
+            return Caching.getCacheManager(AISecurityHandlerConstants.CACHE_MANAGER_NAME).getCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME);
         }
     }
 
-    public static AseResponseDTO getFromASEResponseCache(String cacheName, String cacheKey) {
-
-        AseResponseDTO aseResponseDTO = null;
-        if (cacheKey != null) {
-            Cache cache = getASEResponseCache(cacheName);
-            aseResponseDTO = (AseResponseDTO) cache.get(cacheKey);
-        }
-        return aseResponseDTO;
-    }
-
-    public static void updateCache(JSONObject requestBody, AseResponseDTO aseResponseDTO, String correlationID){
-        String token = (String) requestBody.get(AISecurityHandlerConstants.TOKEN_KEY_NAME);
-        String cookie = (String) requestBody.get(AISecurityHandlerConstants.COOKIE_KEY_NAME);
-        String ip = (String) requestBody.get(AISecurityHandlerConstants.IP_KEY_NAME);
-
-        writeToASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME, token,
-                aseResponseDTO);
-        writeToASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME, cookie,
-                aseResponseDTO);
-        writeToASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME, ip, aseResponseDTO);
-        if (log.isDebugEnabled()) {
-            log.debug("Cache updated for " + correlationID + " as  " + aseResponseDTO
-                    .getResponseMessage() + " with the response code " + aseResponseDTO.getResponseCode());
+    public static Cache getCache (String cacheName){
+        switch (cacheName){
+            case (AISecurityHandlerConstants.TOKEN_CACHE_NAME):
+                return getTokenCache();
+            case (AISecurityHandlerConstants.IP_CACHE_NAME):
+                return getIPCache();
+            case (AISecurityHandlerConstants.COOKIE_CACHE_NAME):
+                return getCookieCache();
+            default:
+                return null;
         }
     }
 }

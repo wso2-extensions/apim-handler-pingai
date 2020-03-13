@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -80,29 +79,25 @@ public class AsyncPublishingAgent implements Runnable {
     public void run() {
 
         JSONObject asePayload = (JSONObject) this.requestBody.get(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME);
-        AseResponseDTO aseResponseDTO = httpDataPublisher.publish(asePayload, this.correlationID, this.resource);
-        if (aseResponseDTO != null) {
-            if (AISecurityHandlerConstants.ASE_RESOURCE_REQUEST.equals(this.resource)) {
-                String operationMode = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getMode();
-                startTenantFlow();
-                if (AISecurityHandlerConstants.ASYNC_MODE_STRING.equals(operationMode)){
-                    try {
-                        SecurityUtils.verifyASEResponse(aseResponseDTO, correlationID);
-                        SecurityUtils.verifyPropertiesWithCache(requestBody, correlationID);
-                    } catch (AISecurityException e) {
-                        //In Async mode, only a blacklist will be maintained.
-                        ASEResponseStore.updateCache(requestBody, aseResponseDTO, correlationID);
-                    }
-                } else {
-                    //In Hybrid mode, both black and white lists will be maintained
-                    ASEResponseStore.updateCache(requestBody, aseResponseDTO, correlationID);
+        int aseResponseCode = httpDataPublisher.publish(asePayload, this.correlationID, this.resource);
+        if (AISecurityHandlerConstants.ASE_RESOURCE_REQUEST.equals(this.resource)) {
+            String operationMode = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getMode();
+            startTenantFlow();
+            if (AISecurityHandlerConstants.ASYNC_MODE_STRING.equals(operationMode)){
+                try {
+                    SecurityUtils.verifyASEResponse(aseResponseCode, correlationID);
+                    SecurityUtils.verifyPropertiesWithCache(requestBody, correlationID);
+                } catch (AISecurityException e) {
+                    //In Async mode, only a blacklist will be maintained.
+                    ASEResponseStore.updateCache(requestBody, aseResponseCode, correlationID);
                 }
-                if (tenantFlowStarted) {
-                    endTenantFlow();
-                }
+            } else {
+                //In Hybrid mode, both black and white lists will be maintained
+                ASEResponseStore.updateCache(requestBody, aseResponseCode, correlationID);
             }
-        } else {
-            log.error("ASE response is null for the handle " + this.resource + " async request " + this.correlationID);
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 

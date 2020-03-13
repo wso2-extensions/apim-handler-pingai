@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.securityenforcer.publisher.sync;
 
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
@@ -31,7 +30,7 @@ import java.util.concurrent.Callable;
  * need to execute using thread pool executor. Primary task of this class it is accept request body, xCorrelation ID
  * and resource as parameters and verifyRequest event to httpDataPublisher.
  */
-public class SyncPublishingAgent implements Callable<AseResponseDTO> {
+public class SyncPublishingAgent implements Callable<Integer> {
 
     private HttpDataPublisher httpDataPublisher;
     private JSONObject requestBody;
@@ -78,7 +77,7 @@ public class SyncPublishingAgent implements Callable<AseResponseDTO> {
      */
 
     @Override
-    public AseResponseDTO call() {
+    public Integer call() {
         JSONObject asePayload = (JSONObject) this.requestBody.get(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME);
         return httpDataPublisher.publish(asePayload, this.correlationID, this.resource);
     }

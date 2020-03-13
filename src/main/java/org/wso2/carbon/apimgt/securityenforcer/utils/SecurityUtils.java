@@ -43,7 +43,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -262,16 +261,9 @@ public class SecurityUtils {
         String correlationID;
         if (correlationObj != null) {
             correlationID = (String) correlationObj;
-            if (log.isDebugEnabled()) {
-                log.debug("Correlation ID is available in the message context." + correlationID);
-            }
         } else {
             correlationID = UUID.randomUUID().toString();
             messageContext.setProperty("am.correlationID", correlationID);
-            if (log.isDebugEnabled()) {
-                log.debug("Correlation ID is not available in the message context. Setting a new ID to message context."
-                        + correlationID);
-            }
         }
         return correlationID;
     }
@@ -344,8 +336,8 @@ public class SecurityUtils {
                                                   String requestCorrelationID) throws AISecurityException {
 
         String property = (String) requestMetaData.get(propertyName);
-        AseResponseDTO aseResponseForProperty = ASEResponseStore.getFromASEResponseCache(cacheName, property);
-        if (aseResponseForProperty == null) {
+        int aseResponseForProperty = ASEResponseStore.getFromASEResponseCache(cacheName, property);
+        if (aseResponseForProperty == 0) {
             return false;
         } else {
             verifyASEResponse(aseResponseForProperty, requestCorrelationID);
@@ -356,14 +348,14 @@ public class SecurityUtils {
     /**
      * Verify whether ASE response is to block the request of not
      *
-     * @param aseResponseDTO - ASE response for the request
+     * @param aseResponseCode - ASE response for the request
      * @param requestCorrelationID - Correlation ID of the request
      * @throws AISecurityException if the ASE response is to block the request
      */
-    public static void verifyASEResponse(AseResponseDTO aseResponseDTO, String requestCorrelationID)
+    public static void verifyASEResponse(int aseResponseCode, String requestCorrelationID)
             throws AISecurityException {
         //Handler will block the request only if ASE responds with forbidden code
-        if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
+        if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseCode) {
             if (log.isDebugEnabled()) {
                 log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
             }

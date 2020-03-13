@@ -122,7 +122,8 @@ public class PingAIExecutor implements Execution {
                     tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
                 }
                 String modelName = tenantDomain + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiName
-                        + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiVersion.replace(".", "_");
+                        + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiVersion;
+                modelName = modelName.replace(".", "_");
 
                 String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
 
