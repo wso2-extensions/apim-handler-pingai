@@ -46,6 +46,7 @@ public class PingAISecurityHandlerTest {
     private ServerWorker worker;
     private SourceRequest sourceRequest;
     private ProtocolVersion httpProtocolVersion;
+    private TreeMap<String, String> transportHeadersMap;
 
     public static JSONObject addObj(String key, Object value) {
         JSONObject obj = new JSONObject();
@@ -68,7 +69,7 @@ public class PingAISecurityHandlerTest {
         Mockito.when((AuthenticationContext) messageContext.getProperty("__API_AUTH_CONTEXT"))
                 .thenReturn(authenticationContext);
 
-        TreeMap<String, String> transportHeadersMap = new TreeMap<>();
+        transportHeadersMap = new TreeMap<>();
         transportHeadersMap.put(AISecurityHandlerConstants.TRANSPORT_HEADER_HOST_NAME, "xbank.com");
         transportHeadersMap.put("content-type", "application/xml");
 
@@ -105,7 +106,7 @@ public class PingAISecurityHandlerTest {
                 .thenReturn("/shop/get");
 
         JSONObject metaData = pingAiSecurityHandler.extractRequestMetadata(messageContext);
-        Assert.assertTrue(metaData.size() == 7);
+        Assert.assertTrue(metaData.size() == 4);
     }
 
     @Test
@@ -116,7 +117,8 @@ public class PingAISecurityHandlerTest {
         Mockito.when((String) axis2MsgCntxt.getProperty(AISecurityHandlerConstants.BACKEND_RESPONSE_STATUS_MESSAGE))
                 .thenReturn("OK");
         JSONObject responseJSON = pingAiSecurityHandler.extractResponseMetadata(messageContext);
-        Assert.assertTrue(responseJSON.get("response_code").equals("200"));
+        JSONObject asePayload = (JSONObject) responseJSON.get(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME);
+        Assert.assertTrue(asePayload.get("response_code").equals("200"));
     }
 
 }

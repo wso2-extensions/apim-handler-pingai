@@ -43,7 +43,7 @@ The WSO2 API Manager extension for PingIntelligence uses a new custom handler (P
 
 If the response of ASE is 200 OK, the Ping AI Security Handler forwards the request and if the response is 403, it blocks the request.
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/architecture.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/architecture.png)
 
 #### Data flow
 1. The client request is sent to API Gateway.
@@ -62,7 +62,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 7. ASE logs the metadata and sends a **200-OK** response.
 8. API Gateway sends an API response to the client.
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/requestFlow.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/requestFlow.png)
 
 #### Prerequisites
 
@@ -72,7 +72,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 - **Install Apache Maven 3.x.x**
  (https://maven.apache.org/download.cgi#)
 
-- **Install the latest WSO2 API Manager**. If you are using API manager versions 2.x, please use the 1.0.x branch of this repository.
+- **This branch is for API manager versions of 2.x. Download the relevant API manager**
 (https://wso2.com/api-management/)
 
     Installing WSO2 is very fast and easy. Before you begin, be sure you have met the installation prerequisites, and then follow the [installation instructions for your platform](https://docs.wso2.com/display/AM260/Installing+the+Product).
@@ -124,7 +124,7 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
    ```
    Save the generated authentication token for further use.
 
-- **Add the certificates of the ASE sideband request endpoint and management endpoint to the WSO2 client keystore.**
+- **Add the certificate of the ASE to the WSO2 client keystore.**
 
     Use *wso2carbon* as the default keystore password.
    ```
@@ -132,61 +132,55 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
     keytool -importcert -file <ase_management_endpoint_cert_name>.cer -keystore <APIM_HOME>/repository/resources/security/client-truststore.jks -alias "ASE management endpoint"
    ```
-   [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/README.md#obtaining-ase-certificates)
+    [Obtaining ASE request endpoint and management endpoint public key certificates](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_OLD.md#obtaining-ase-certificates)
 
 ## Deploy WSO2 Extension with PingIntelligence
 
-**IMPORTANT**
-
-Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For older versions, please refer [Developer Guide.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md)
-
-
 ### For System Admin
 
-1. Download the extension and navigate to the **apim-handler-pingai** directory. Update the pom.xml with corresponding dependency versions and run the following Maven command.
+1. Download the extension and navigate to the **apim-handler-pingai** directory and run the following Maven command to build the distribution.
    ```
     mvn clean install
      ```
-    org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file can be found in **apim-handler-pingai/target** directory.
+     Use the following table to update pom.xml with the corresponding dependency versions for API manager.
 
-    Use the following table to update pom.xml with the corresponding dependency versions for API manager.
-
-     | Dependency                |   APIM 3.0.0   |  APIM 2.6.0   |  APIM 2.5.0   |  APIM 2.2.0   |  APIM 2.1.0   |
-     | ------------------------- | :------------: | :-----------: | :-----------: | :-----------: | :-----------: |
-     | carbon.apimgt.version     |    6.5.349     |    6.4.50     |    6.3.95     |    6.2.201    |    6.1.66     |
-     | carbon.kernel.version     |     4.5.1      |    4.4.35     |    4.4.32     |    4.4.26     |    4.4.11     |
-     | carbon.governance.version |     4.8.10     |    4.7.29     |    4.7.27     |    4.7.23     |     4.7.0     |
-     | synapse.version           | 2.1.7-wso2v131 | 2.1.7-wso2v80 | 2.1.7-wso2v65 | 2.1.7-wso2v48 | 2.1.7-wso2v10 |
+     | Dependency                |  APIM 2.6.0   |  APIM 2.5.0   |  APIM 2.2.0   |  APIM 2.1.0   |
+     | ------------------------- | :-----------: | :-----------: | :-----------: | :-----------: |
+     | org.wso2.carbon.apimgt    |    6.4.50     |    6.3.95     |    6.2.201    |    6.1.66     |
 
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory.
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory.
 
-3. Add the bare minimum configurations to the *deployment.toml* file, which can be found in the
-**<APIM_HOME>/repository/conf** directory.
+3. Add the bare minimum configurations to the **<APIM_HOME>/repository/conf/api-manager.xml** file within the \<APIManager> tag.
 
-   ```
-    [apim.ai_security]
-    operation_mode = "sync"
-    sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
-    backup_sideband_request_endpoint = "BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT"
-    ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
-    model_creation_endpoint = "ASE_REST_API_ENDPOINT"
-    access_key = "ASE_REST_API_ACCESS_KEY"
-    secret_key = "ASE_REST_API_SECRET_KEY"
+    ```
+    <AISecurityHandler>
+        <OperationMode>sync</OperationMode>
+        <APISecurityEnforcer>
+            <EndPoint>ASE_ENDPOINT</EndPoint>
+            <BackupEndPoint>BACKUP_ASE_END_POINT</BackupEndPoint>
+            <ASEToken>SIDEBAND_AUTHENTICATION_TOKEN</ASEToken>
+            <ModelCreationEndpoint>
+                <EndPoint>ASE_REST_API_ENDPOINT</EndPoint>
+                <AccessKey>ASE_REST_API_ACCESS_KEY</AccessKey>
+                <SecretKey>ASE_REST_API_SECRET_KEY</SecretKey>
+            </ModelCreationEndpoint>
+       </APISecurityEnforcer>
+    </AISecurityHandler>
    ```
      **Note:**
 
-    - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#sync-mode)**,
-        **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)** and
-        **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
+    - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#sync-mode)**,
+        **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#async-mode)** and
+        **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#hybrid-mode)**.
         If the mode is not set, the default mode is set as **sync**.
-   - ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
+   - ASE_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
    - BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<backup-ase-host-machine-ip>:\<data-port>
    - ASE_REST_API_ENDPOINT: https://\<ase-host-machine-ip>:\<management-port>/\<REST-API-version>/ase/api.
    - If ModelCreationEndpoint configurations are not set, you need to manually create ASE models.
-   - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#prerequisites)
+   - Include the [sideband authentication token](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#prerequisites)
          obtained from the ASE as the ASEToken.
-   - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, and the ASE_REST_API_SECRET_KEY.
+   - For additional security you can [encrypt](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#encrypting-passwords-with-cipher-tool) the SIDEBAND_AUTHENTICATION_TOKEN, ASE_REST_API_ACCESS_KEY, and the ASE_REST_API_SECRET_KEY.
 
 4. To engage the handler to APIs, you need to update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file.
    Add the handler class as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
@@ -227,11 +221,6 @@ Do not update the already existing execution for the publish event. Add a new ex
         class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
     </execution>
     ```
-7. Update the **<API_HOME>/repository/resources/conf/templates/repository/conf/api-manager.xml.j2** file for wso2 to pick up the back up ASE end point configuration.
-    Add the below line in \<APISecurityEnforcer> tag under <EndPoint>{{apim.ai_security.sideband_request_endpoint}}</EndPoint>
-    ```
-    <BackupEndPoint>{{apim.ai_security.backup_sideband_request_endpoint}}</BackupEndPoint>
-    ```
 
 ### For the API Publisher
 
@@ -243,19 +232,19 @@ Do not update the already existing execution for the publish event. Add a new ex
 
 **For existing APIs**
 
-- The recommended method is to create a new version for the API with PingIntelligence enabled.
+- The recommended method is to create a [new version](https://docs.wso2.com/display/AM260/Quick+Start+Guide#QuickStartGuide-VersioningtheAPI) for the API with PingIntelligence enabled.
 
     *Although changing the status of a live API is not recommended, republishing the API will update the Synapse config
     with the handler and by demoting to the CREATED or PROTOTYPED state and thereafter changing the life cycle back to the PUBLISHED state
     it will create a new model for the API in the ASE.*
 
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/publishedState.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/publishedState.png)
 
 
 **Note:**
 By default, PingIntelligence is enabled in all APIs that are published with an individual AI model.
-However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
+However, if needed you can configure PingIntelligence to be [applied only for selected APIs.](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#add-the-policy-only-for-selected-apis)
 
 
 #### Verify api creation on ASE:
@@ -276,22 +265,26 @@ Check whether the API is listed as <API_NAME>_\<VERSION>.
 
 ## Configurations
 #### Bare minimum configurations
-Add the following configurations to the  <APIM_HOME>/repository/conf/deployment.toml file. If the mode is not set, the default mode is set as sync. If the ModelCreationEndpoint configurations are not set, you need to manually create the ASE models.
+Add the following configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<APIManager> tag. If the mode is not set, the default mode is set as async. If the ModelCreationEndpoint configurations are not set, you need to manually create the ASE models.
 
-
-   ```
-    [apim.ai_security]
-    operation_mode = "sync"
-    sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
-    backup_sideband_request_endpoint = "BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT"
-    ase_token = "SIDEBAND_AUTHENTICATION_TOKEN"
-    model_creation_endpoint = "ASE_REST_API_ENDPOINT"
-    access_key = "ASE_REST_API_ACCESS_KEY"
-    secret_key = "ASE_REST_API_SECRET_KEY"
+```
+    <AISecurityHandler>
+        <OperationMode>sync</OperationMode>
+        <APISecurityEnforcer>
+            <EndPoint>ASE_ENDPOINT</EndPoint>
+            <BackupEndPoint>BACKUP_ASE_END_POINT</BackupEndPoint>
+            <ASEToken>SIDEBAND_AUTHENTICATION_TOKEN</ASEToken>
+            <ModelCreationEndpoint>
+                <EndPoint>ASE_REST_API_ENDPOINT</EndPoint>
+                <AccessKey>ASE_REST_API_ACCESS_KEY</AccessKey>
+                <SecretKey>ASE_REST_API_SECRET_KEY</SecretKey>
+            </ModelCreationEndpointiscovery>
+       </APISecurityEnforcer>
+    </AISecurityHandler>
    ```
 
 ## Modes of operation
-WSO2 has implemented a custom handler with the handleRequest and handleResponse methods in inorder to integrate this feature with WSO2 API Manager. For every request, WSO2 Gateway sends two sideband calls to the API Security Enforcer (ASE). The first one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). The second sideband call is mainly for the learning mode of the AI Engine.
+WSO2 has implemented a custom handler with the handleRequest and handleResponse methods in iorder to integrate this feature with WSO2 API Manager. For every request, WSO2 Gateway sends two sideband calls to the API Security Enforcer (ASE). The first one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). The second sideband call is mainly for the learning mode of the AI Engine.
 
 
 There are three modes of operation when implementing the extension.
@@ -309,7 +302,7 @@ As this is a thread blocking call, every request will wait until the ASE respond
    **Total time  =~0.2ms + ASE Sideband call time**
 
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/syncFlow.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/syncFlow.png)
 
 ### Async mode
 In this mode, both the sideband calls are sent asynchronously. There is a cache which records the response of each request sent to ASE.
@@ -318,7 +311,7 @@ As the metadata set of each client request is unique to the client (with the aut
 
 **Total time = < 0.2ms**
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/asyncFlow.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/asyncFlow.png)
 
 **Important:**
 *There is a slip rate because the requests received until the first cache update is forwarded to the backend without monitoring.*
@@ -334,13 +327,13 @@ Requests until the first cache update is handled in sync mode and after that it 
 
 Each record in the cache has an expiry time, which is 15min from the last cache update.
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/hybridFlow.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/hybridFlow.png)
 
 ### Response
 
 The second sideband request of each request is sent to ASE asynchronously with the status of the backend server.
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/responseFlow.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/responseFlow.png)
 
 ## ASE Model creation
 There is a new model created in the security engine for every API deployed with this feature. Security decisions are taken according to this model. A template of the ASE configuration file is used with default values and the API context is used as the URL. When OAuth protection is enabled, the authentication token is sent as the API key with the default header name “APIKey”. If you need to change any of the default values with regard to an API, you can do this by adding additional properties. If you need to change any of the default values with regard to all the APIs, you can do this by updating the default JSON (apim-handler-pingai-<version>/src/main/resources/org/wso2/carbon/apimgt/securityenforcer/internal/samplePingAIManagementPayload.json) file. However, note that after you change the default JSON, you can not change it back, because it is inside the bundle. Therefore, if you need to change it back, you have to build the apim-handler-pingai distribution again.
@@ -357,9 +350,9 @@ There is a new model created in the security engine for every API deployed with 
             "cookie_idle_timeout": "200m",
             "logout_api_enabled": false,
             "cookie_persistence_enabled": false,
-            "oauth2_access_token": false,
+            "oauth2_access_token": true,
             "apikey_qs": "",
-            "apikey_header": "APIKey",
+            "apikey_header": "",
             "login_url": "",
             "enable_blocking": true,
             "api_memory_size": "128mb",
@@ -400,31 +393,39 @@ The API JSON file parameters define the behavior and properties of the API and t
 - api_memory_size: Maximum ASE memory allocation for an API. The data unit can be MB or GB.
     - Default - "128mb".
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/ASEConfigsAsAdditionalProperties.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/ASEConfigsAsAdditionalProperties.png)
 
 ## Adding additional configurations
-Add the required configurations to the  <APIM_HOME>/repository/conf/deployment.toml file with the bare minimum configurations, in order to add additional configurations with regard to the PingIntelligence extension.
+Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.xml file under the \<AISecurityHandler> tag in order to add additional configurations with regard to the PingIntelligence extension.
 
-   ```
-    [apim.ai_security]
-    apply_for_all = false
-    cash_expiry_time = 15
-    data_publisher.max_per_route = 500
-    data_publisher.max_open_connections = 200
-    data_publisher.connection_timeout = 30
-    threadpool_executor.core_pool_size = 200
-    threadpool_executor.max_pool_size = 500
-    threadpool_executor.keep_alive_time = 100
-    stack_object_pool.max_idle = 100
-    stack_object_pool.init_idle_capacity = 50
-    limit_transport_headers.header1 = "Header1"
-    limit_transport_headers.header2 = "Header2"
-    limit_transport_headers.header3 = "Header3"
-   ```
+    <AISecurityHandler>
+        <ApplyForAllAPIs>false</ApplyForAllAPIs>
+        <CacheExpiryTime>15</CacheExpiryTime>
+        <DataPublisher>
+           <MaxPerRoute>500</MaxPerRoute>
+           <MaxOpenConnections>200</MaxOpenConnections>
+           <ConnectionTimeout>30</ConnectionTimeout>
+       </DataPublisher>
+       <ThreadPoolExecutor>
+           <CorePoolSize>200</CorePoolSize>
+           <MaximumPoolSize>500</MaximumPoolSize>
+           <KeepAliveTime>100</KeepAliveTime>
+       </ThreadPoolExecutor>
+       <StackObjectPool>
+           <MaxIdle>100</MaxIdle>
+           <InitIdleCapacity>50</InitIdleCapacity>
+       </StackObjectPool>
+       <LimitTransportHeaders>
+            <Header>HEADER_1</Header>
+            <Header>HEADER_2</Header>
+            <Header>HEADER_3</Header>
+            <Header>HEADER_4</Header>
+       </LimitTransportHeaders>
+    </AISecurityHandler>
 
 ### Add the policy only for selected APIs
 By default, PingIntelligence is enabled in all APIs that are published with an individual AI model. Follow the instructions below to enable PingIntelligence only on selected APIs:
-1. Add the additional configuration **apply_for_all = false** with the configs in the deployment.toml file.
+1. Add the additional configuration \<ApplyForAllAPIs>false\</ApplyForAllAPIs> with the configs in the api-manager.xml file.
 2. Instead of updating the velocity-template with the handler, add the following code inside \<handlers xmlns="http://ws.apache.org/ns/synapse"> just after the foreach loop.
       ```
         #if($apiObj.additionalProperties.get('ai_security') == "enable")
@@ -455,14 +456,17 @@ By default, PingIntelligence is enabled in all APIs that are published with an i
 
 4. Change the life cycle state to **PUBLISHED**.
 
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/enablePolicyWithAdditionalProperties.png)
+![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/1.0.x/images/enablePolicyWithAdditionalProperties.png)
 
 ### Limit transport headers
-All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add the following code. For more information, see [Adding additional configurations](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#adding-additional-configurations).
+All transport headers found in the client request and backend response will be sent to ASE by default. To limit the headers, add the following code. For more information, see [Adding additional configurations](https://github.com/wso2-extensions/apim-handler-pingai/blob/1.0.x/DEVELOPER_GUIDE.md#adding-additional-configurations).
    ```
-    limit_transport_headers.header1 = "Header1"
-    limit_transport_headers.header2 = "Header2"
-    limit_transport_headers.header3 = "Header3"
+    <LimitTransportHeaders>
+        <Header>HEADER_1</Header>
+        <Header>HEADER_2</Header>
+        <Header>HEADER_3</Header>
+        <Header>HEADER_4</Header>
+    </LimitTransportHeaders>
    ```
 
 Only the intercept of headers mentioned and present in the transport headers are sent to ASE in both sideband calls.
@@ -473,20 +477,26 @@ Only the intercept of headers mentioned and present in the transport headers are
 #### HTTP client configurations
 Configurations with regard to the HTTP Client can be changed as follows.
   ```
-    data_publisher.max_per_route = 500
-    data_publisher.max_open_connections = 200
-    data_publisher.connection_timeout = 30
+    <DataPublisher>
+        <MaxPerRoute>500</MaxPerRoute>
+        <MaxOpenConnections>200</MaxOpenConnections>
+        <ConnectionTimeout>30</ConnectionTimeout>
+    </DataPublisher>
    ```
 
 #### Thread pool and stack object pool configurations
 Concurrent requests received for the handler are handled by a thread pool combined with a stack object pool.
 
    ```
-    threadpool_executor.core_pool_size = 200
-    threadpool_executor.max_pool_size = 500
-    threadpool_executor.keep_alive_time = 100
-    stack_object_pool.max_idle = 100
-    stack_object_pool.init_idle_capacity = 50
+    <ThreadPoolExecutor>
+        <CorePoolSize>200</CorePoolSize>
+        <MaximumPoolSize>500</MaximumPoolSize>
+        <KeepAliveTime>100</KeepAliveTime>
+    </ThreadPoolExecutor>
+    <StackObjectPool>
+        <MaxIdle>1000</MaxIdle>
+        <InitIdleCapacity>200</InitIdleCapacity>
+    </StackObjectPool>
 ```
 
 
@@ -494,18 +504,18 @@ Concurrent requests received for the handler are handled by a thread pool combin
 The configuration file contains the ASE access token, Management API Access Key, and the Secret Key. If needed, you can use the Cipher Tool to encrypt sensitive data.
 
 1. Add the following to the <APIM_HOME>/repository/conf/security/cipher-tool.properties file.
-    - **APIManager.AISecurityHandler.ASE.ASEToken**=repository/conf/api-manager.xml//APIManager/AISecurityHandler/APISecurityEnforcer/ASEToken,false
-    - **APIManager.AISecurityHandler.ASE.AccessKey**=repository/conf/api-manager.xml//APIManager/AISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/AccessKey,false
-    - **APIManager.AISecurityHandler.ASE.SecretKey**=repository/conf/api-manager.xml//APIManager/AISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/SecretKey,false
+    - **APIManager.PingAISecurityHandler.ASE.ASEToken**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ASEToken,false
+    - **APIManager.PingAISecurityHandler.ASE.AccessKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/AccessKey,false
+    - **APIManager.PingAISecurityHandler.ASE.SecretKey**=repository/conf/api-manager.xml//APIManager/PingAISecurityHandler/APISecurityEnforcer/ModelCreationEndpoint/SecretKey,false
 
 
 2. Add the following to the <APIM_HOME>/repository/conf/security/cipher-text.properties file. Note that you should enclose the password within square brackets.
-    - **APIManager.AISecurityHandler.ASE.ASEToken**=[ASE_TOKEN]
-    - **APIManager.AISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
-    - **APIManager.AISecurityHandler.ASE.SecretKey**=[SECRET_KEY]
+    - **APIManager.PingAISecurityHandler.ASE.ASEToken**=[ASE_TOKEN]
+    - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[ACCESS_KEY]
+    - **APIManager.PingAISecurityHandler.ASE.SecretKey**=[SECRET_KEY]
 
     *If your password contains a backslash character (\) you need to use an alias with the escape characters. For example, if your password is admin\\} the value should be given as shown in the example below.*
-    - **APIManager.AISecurityHandler.ASE.AccessKey**=[admin\\\\}]
+    - **APIManager.PingAISecurityHandler.ASE.AccessKey**=[admin\\\\}]
 
 3. Open a command prompt and go to the <APIM_HOME>/bin directory, where the Cipher Tool scripts (for Windows and Linux) are stored.
 4. Execute the Cipher Tool script from the command prompt using the command relevant to your OS:
@@ -540,53 +550,63 @@ Follow the instructions below to change a password that you had previously encry
 
 ## Configurations guide
 
-| Field            | input                                                       | DefaultValue | Description                                                                                                                   |
-| ---------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| operation_mode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
-| apply_for_all    | (Boolean)                                                   | true         | Apply Ping Intelligence for all APIs published.                                                                               |
-| cash_expiry_time | (Integer)                                                   | 15           | Cache Expiry time in minutes.                                                                                                 |
+| Field           | input                                                       | DefaultValue | Description                                                                                                                   |
+| --------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| OperationMode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
+| ApplyForAllAPIs | (Boolean)                                                   | true         | Apply Ping Intelligence for all APIs published.                                                                               |
+| CacheExpiryTime | (Integer)                                                   | 15           | Cache Expiry time in minutes.                                                                                                 |
 
 #### APISecurityEnforcer - ASE configurations
 
-| Field                            | input    | DefaultValue | Description                                                                                                                  |
-| -------------------------------- | -------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| sideband_request_endpoint        | (String) | -            | The endpoint of ASE. Support both HTTP and HTTPS.                                                                            |
-| backup_sideband_request_endpoint | (String) | -            | The backup endpoint of ASE. Support both HTTP and HTTPS. If this is not set, primary sideband_request_endpoint will be used. |
-| ase_token                        | (String) | -            | The access token needed to communicate with ASE.                                                                             |
+| Field    | input    | DefaultValue | Description                                       |
+| -------- | -------- | ------------ | ------------------------------------------------- |
+| EndPoint | (String) | -            | The endpoint of ASE. Support both HTTP and HTTPS. |
+| ASEToken | (String) | -            | If access token needed to communicate with ASE.   |
 
 #### ModelCreationEndpoint - ASE Management REST API configurations
 
-| Field                   | input    | DefaultValue | Description                                                  |
-| ----------------------- | -------- | ------------ | ------------------------------------------------------------ |
-| model_creation_endpoint | (String) | -            | The management endpoint of ASE. Support both HTTP and HTTPS. |
-| access_key              | (String) | -            | AccessKey to the management endpoint.                        |
-| secret_key              | (String) | -            | SecretKey to the management endpoint.                        |
+| Field     | input    | DefaultValue | Description                                                  |
+| --------- | -------- | ------------ | ------------------------------------------------------------ |
+| Endpoint  | (String) | -            | The management endpoint of ASE. Support both HTTP and HTTPS. |
+| AccessKey | (String) | -            | AccessKey to the management endpoint.                        |
+| SecretKey | (String) | -            | SecretKey to the management endpoint.                        |
 
 #### DataPublisher - HTTP client configurations
 
-| Field                | input     | DefaultValue | Description                                                                                                            |
-| -------------------- | --------- | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| max_per_route        | (Integer) | 500          | The maximum number of HTTP connections allowed across all routes.                                                      |
-| max_open_connections | (Integer) | 200          | The maximum number of HTTP connections allowed for a route.                                                            |
-| connection_timeout   | (Integer) | 30           | Connection timeout for the HTTP request in seconds. The socket timeout is set with the addition of another 10 seconds. |
+| Field              | input     | DefaultValue | Description                                                                                                            |
+| ------------------ | --------- | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| MaxPerRoute        | (Integer) | 500          | The maximum number of HTTP connections allowed across all routes.                                                      |
+| MaxOpenConnections | (Integer) | 200          | The maximum number of HTTP connections allowed for a route.                                                            |
+| ConnectionTimeout  | (Integer) | 30           | Connection timeout for the HTTP request in seconds. The socket timeout is set with the addition of another 10 seconds. |
 
 #### ThreadPoolExecutor - ThreadPoolExecutor configurations
 
 | Field           | input     | DefaultValue | Description                                                                                                                                                   |
 | --------------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| core_pool_size  | (Integer) | 200          | The number of threads to keep in the pool, even if they are idle.                                                                                             |
-| max_pool_size   | (Integer) | 500          | The maximum number of threads to allow in the pool.                                                                                                           |
-| keep_alive_time | (Long)    | 100          | When the number of threads is greater than the core, this is the maximum time in seconds that excess idle threads will wait for new tasks before terminating. |
+| CorePoolSize    | (Integer) | 200          | The number of threads to keep in the pool, even if they are idle.                                                                                             |
+| MaximumPoolSize | (Integer) | 500          | The maximum number of threads to allow in the pool.                                                                                                           |
+| KeepAliveTime   | (Long)    | 100          | When the number of threads is greater than the core, this is the maximum time in seconds that excess idle threads will wait for new tasks before terminating. |
 
 #### StackObjectPool - StackObjectPool configurations
 
-| Field              | input     | DefaultValue | Description                                                                                                          |
-| ------------------ | --------- | ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| max_idle           | (Integer) | 100          | Cap on the number of "sleeping" instances in the pool.                                                               |
-| init_idle_capacity | (Integer) | 50           | Initial size of the pool (this specifies the size of the container, it does not cause the pool to be pre-populated.) |
+| Field            | input     | DefaultValue | Description                                                                                                          |
+| ---------------- | --------- | ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| MaxIdle          | (Integer) | 100          | Cap on the number of "sleeping" instances in the pool.                                                               |
+| InitIdleCapacity | (Integer) | 50           | Initial size of the pool (this specifies the size of the container, it does not cause the pool to be pre-populated.) |
 
 #### LimitTransportHeaders
 
 | Field  | input    | DefaultValue | Description                               |
 | ------ | -------- | ------------ | ----------------------------------------- |
-| header | (String) | -            | Name of the header needed to sent to ASE. |
+| Header | (String) | -            | Name of the header needed to sent to ASE. |
+
+## Obtaining ASE certificates
+
+openssl client can be used to obtain the ASE sideband request endpoint and management endpoint certificates.
+```
+openssl s_client -showcerts -connect <ase-host-machine-ip>:<data-port>
+
+openssl s_client -showcerts -connect <ase-host-machine-ip>:<management-port>
+```
+
+Copy the content from -----BEGIN CERTIFICATE----- to -----END CERTIFICATE----- into <ase_request_endpoint_cert_name>.cer and <ase_management_endpoint_cert_name>.cer files. These certs can be imported into WSO2 client keystore.

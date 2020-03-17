@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher.async;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,10 +29,10 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ASEResponseStore.class, AsyncPublisherThreadPool.class })
@@ -43,7 +42,7 @@ public class AsyncPublisherTest {
     AsyncPublisher asyncPublisherSpy;
     HttpDataPublisher httpDataPublisher;
     JSONObject requestMetaData;
-    String requestCorrelationID;
+    String correlationID;
 
     @Before
     public void setup() throws AISecurityException {
@@ -58,51 +57,55 @@ public class AsyncPublisherTest {
         Mockito.when(AsyncPublisherThreadPool.getInstance()).thenReturn(null);
 
         httpDataPublisher = Mockito.mock(HttpDataPublisher.class);
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(null);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, correlationID, "request")).thenReturn(0);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         asyncPublisher = new AsyncPublisher();
         asyncPublisherSpy = Mockito.spy(asyncPublisher);
 
         requestMetaData = new JSONObject();
-        requestMetaData.put("A", 1);
-        requestMetaData.put("B", 2);
-        requestCorrelationID = "2344214";
+        JSONObject asePayload = new JSONObject();
+        asePayload.put("A", 1);
+        asePayload.put("B", 2);
+        requestMetaData.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME, asePayload);
+        requestMetaData.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, "Cookie");
+        requestMetaData.put(AISecurityHandlerConstants.TOKEN_KEY_NAME, "Token");
+        requestMetaData.put(AISecurityHandlerConstants.IP_KEY_NAME, "IP");
+        correlationID = "2344214";
     }
 
     @Test
     public void verifyRequestWithoutCacheTest() throws AISecurityException {
-        Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, requestCorrelationID, "request");
+        Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, correlationID, "request");
 
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        AseResponseDTO aseResponseDTO = null;
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTO);
-        Assert.assertTrue(asyncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID));
+        int aseResponseCode = 0;
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP")).thenReturn(aseResponseCode);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token")).thenReturn(aseResponseCode);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie")).thenReturn(aseResponseCode);
+        Assert.assertTrue(asyncPublisherSpy.verifyRequest(requestMetaData, correlationID));
     }
 
     @Test
     public void verifyRequestWithSuccessCacheTest() throws AISecurityException {
-        Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, requestCorrelationID, "request");
+        Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, correlationID, "request");
 
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(200);
-        aseResponseDTO.setResponseMessage("OK");
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTO);
-        Assert.assertTrue(asyncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID));
+        int aseResponseCode = 200;
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP")).thenReturn(aseResponseCode);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token")).thenReturn(aseResponseCode);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie")).thenReturn(aseResponseCode);
+        Assert.assertTrue(asyncPublisherSpy.verifyRequest(requestMetaData, correlationID));
     }
 
     @Test
     public void verifyRequestWithAccessRevokedCacheTest() throws AISecurityException {
-        Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, requestCorrelationID, "request");
+        Mockito.doNothing().when(asyncPublisherSpy).publishAsyncEvent(requestMetaData, correlationID, "request");
 
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(403);
-        aseResponseDTO.setResponseMessage("Unauthorized");
-        Mockito.when(ASEResponseStore.getFromASEResponseCache(hashKey)).thenReturn(aseResponseDTO);
+        int aseResponseCode = 403;
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.IP_CACHE_NAME,"IP")).thenReturn(aseResponseCode);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,"Token")).thenReturn(aseResponseCode);
+        Mockito.when(ASEResponseStore.getFromASEResponseCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,"Cookie")).thenReturn(aseResponseCode);
         try {
-            asyncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID);
+            asyncPublisherSpy.verifyRequest(requestMetaData, correlationID);
         } catch (AISecurityException e) {
             Assert.assertTrue(e.getErrorCode() == AISecurityException.ACCESS_REVOKED);
         }

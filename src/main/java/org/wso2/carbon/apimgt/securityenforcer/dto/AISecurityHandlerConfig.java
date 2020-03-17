@@ -116,6 +116,7 @@ public class AISecurityHandlerConfig {
         private Boolean shift = false;
 
         private String aseToken;
+        private String backupAseToken;
 
         public String getEndPoint() {
             if (!shift) {
@@ -141,11 +142,18 @@ public class AISecurityHandlerConfig {
         }
 
         public String getAseToken() {
-            return aseToken;
+            if (!shift) {
+                return aseToken;
+            }
+            return backupAseToken;
         }
 
         public void setAseToken(String aseToken) {
             this.aseToken = aseToken;
+        }
+
+        public void setBackupAseToken(String backupAseToken) {
+            this.backupAseToken = backupAseToken;
         }
     }
 

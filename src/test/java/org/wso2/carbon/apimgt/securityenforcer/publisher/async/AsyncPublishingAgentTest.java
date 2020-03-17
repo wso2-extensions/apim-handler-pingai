@@ -38,7 +38,7 @@ public class AsyncPublishingAgentTest {
 
     HttpDataPublisher httpDataPublisher;
     JSONObject requestMetaData;
-    String requestCorrelationID;
+    String correlationID;
     AsyncPublishingAgent asyncPublishingAgent;
 
     @Before
@@ -48,16 +48,16 @@ public class AsyncPublishingAgentTest {
         requestMetaData = new JSONObject();
         requestMetaData.put("A", 1);
         requestMetaData.put("B", 2);
-        requestCorrelationID = "2344214";
+        correlationID = "2344214";
     }
 
     @Test
     public void verifyPublishMethodWithNullResponseFromASETest() throws AISecurityException {
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(null);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, correlationID, "response")).thenReturn(200);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         asyncPublishingAgent = new AsyncPublishingAgent();
-        asyncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "request");
+        asyncPublishingAgent.setDataReference(requestMetaData, correlationID, "response","carbon.super");
         asyncPublishingAgent.run();
         asyncPublishingAgent.clearDataReference();
     }

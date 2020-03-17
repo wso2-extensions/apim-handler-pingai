@@ -16,17 +16,16 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher.async;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
+import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -73,7 +72,8 @@ public class AsyncPublisher implements Publisher {
                 throw new AISecurityException(AISecurityException.HANDLER_ERROR,
                         AISecurityException.HANDLER_ERROR_MESSAGE, e);
             }
-            agent.setDataReference(requestBody, correlationID, resource);
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            agent.setDataReference(requestBody, correlationID, resource, tenantDomain);
             if (log.isDebugEnabled()) {
                 log.debug("Async call executed for the " + resource + " id " + correlationID);
             }
@@ -85,41 +85,15 @@ public class AsyncPublisher implements Publisher {
     }
 
     @Override
-    public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        publishAsyncEvent(requestMetaData, requestCorrelationID, AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        String hashKey = DigestUtils.md5Hex(requestMetaData.toString());
-        AseResponseDTO aseResponseDTO = ASEResponseStore.getFromASEResponseCache(hashKey);
-
-        if (aseResponseDTO == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Cached ASE response is not found for the request " + requestCorrelationID);
-            }
-            return true;
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("ASE Response found for the request " + requestCorrelationID + " with metadata "
-                        + requestMetaData.toString() + " as " + aseResponseDTO.getResponseMessage()
-                        + " with the response code " + aseResponseDTO.getResponseCode());
-            }
-            //Handler will block the request only if ASE responds with forbidden code
-            if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
-                }
-                throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
-                        AISecurityException.ACCESS_REVOKED_MESSAGE);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
-                }
-                return true;
-            }
-        }
+    public boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        publishAsyncEvent(requestMetaData, correlationID, AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
+        SecurityUtils.verifyPropertiesWithCache(requestMetaData, correlationID);
+        return true;
     }
 
     @Override
-    public boolean publishResponse(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        publishAsyncEvent(requestMetaData, requestCorrelationID, AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE);
+    public boolean publishResponse(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        publishAsyncEvent(requestMetaData, correlationID, AISecurityHandlerConstants.ASE_RESOURCE_RESPONSE);
         return true;
     }
 

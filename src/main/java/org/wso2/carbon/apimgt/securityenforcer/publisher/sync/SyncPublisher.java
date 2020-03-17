@@ -20,11 +20,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
+import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -62,10 +62,10 @@ public class SyncPublisher implements Publisher {
      * @param correlationID is the String with the xCorrelation ID.
      * @param resource       is the targeted resource of the ASE Instance. It can be either request or response
      */
-    public AseResponseDTO publishSyncEvent(JSONObject requestBody, String correlationID, String resource)
+    public int publishSyncEvent(JSONObject requestBody, String correlationID, String resource)
             throws AISecurityException {
 
-        AseResponseDTO response;
+        int response = 0;
         if (syncPublisherThreadPool != null) {
             SyncPublishingAgent agent;
             try {
@@ -76,7 +76,7 @@ public class SyncPublisher implements Publisher {
                         AISecurityException.HANDLER_ERROR_MESSAGE, e);
             }
             agent.setDataReference(requestBody, correlationID, resource);
-            Future<AseResponseDTO> result = syncExecutor.submit(agent);
+            Future<Integer> result = syncExecutor.submit(agent);
             if (log.isDebugEnabled()) {
                 log.debug("Sync call executed for the " + resource + " id " + correlationID);
             }
@@ -97,26 +97,15 @@ public class SyncPublisher implements Publisher {
     }
 
     @Override
-    public boolean verifyRequest(JSONObject requestMetaData, String requestCorrelationID) throws AISecurityException {
-        AseResponseDTO aseResponseDTO = publishSyncEvent(requestMetaData, requestCorrelationID,
+    public boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException {
+        int aseResponseCode = publishSyncEvent(requestMetaData, correlationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        //Handler will block the request only if ASE responds with forbidden code
-        if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseDTO.getResponseCode()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Access revoked by the Ping AI handler for the request id " + requestCorrelationID);
-            }
-            throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
-                    AISecurityException.ACCESS_REVOKED_MESSAGE);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Access granted by the Ping AI handler for the request id " + requestCorrelationID);
-            }
-            return true;
-        }
+        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID);
+        return true;
     }
 
     @Override
-    public boolean publishResponse(JSONObject requestMetaData, String requestCorrelationID) {
+    public boolean publishResponse(JSONObject requestMetaData, String correlationID) {
         return false;
     }
 

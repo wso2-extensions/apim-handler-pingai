@@ -27,10 +27,10 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ SyncPublisherThreadPool.class })
@@ -40,7 +40,7 @@ public class SyncPublisherTest {
     private SyncPublisher syncPublisherSpy;
     private HttpDataPublisher httpDataPublisher;
     private JSONObject requestMetaData;
-    private String requestCorrelationID;
+    private String correlationID;
 
     @Before
     public void setup() throws AISecurityException {
@@ -50,37 +50,35 @@ public class SyncPublisherTest {
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(aiSecurityHandlerConfig);
 
         httpDataPublisher = Mockito.mock(HttpDataPublisher.class);
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(null);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, correlationID, "request")).thenReturn(0);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         syncPublisher = new SyncPublisher();
         syncPublisherSpy = Mockito.spy(syncPublisher);
 
         requestMetaData = new JSONObject();
-        requestMetaData.put("A", 1);
-        requestMetaData.put("B", 2);
-        requestCorrelationID = "2344214";
+        JSONObject asePayload = new JSONObject();
+        asePayload.put("A", 1);
+        asePayload.put("B", 2);
+        requestMetaData.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME,asePayload);
+        correlationID = "2344214";
     }
 
     @Test
     public void verifyRequestForSuccessResponseTest() throws AISecurityException {
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(200);
-        aseResponseDTO.setResponseMessage("OK");
-        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, requestCorrelationID, "request"))
-                .thenReturn(aseResponseDTO);
-        Assert.assertTrue(syncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID));
+        int aseResponseCode = 200;
+        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, correlationID, "request"))
+                .thenReturn(aseResponseCode);
+        Assert.assertTrue(syncPublisherSpy.verifyRequest(requestMetaData, correlationID));
     }
 
     @Test
     public void verifyRequestForAccessRevokeResponseTest() throws AISecurityException {
-        AseResponseDTO aseResponseDTO = new AseResponseDTO();
-        aseResponseDTO.setResponseCode(403);
-        aseResponseDTO.setResponseMessage("Forbidden");
-        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, requestCorrelationID, "request"))
-                .thenReturn(aseResponseDTO);
+        int aseResponseCode = 403;
+        Mockito.when(syncPublisherSpy.publishSyncEvent(requestMetaData, correlationID, "request"))
+                .thenReturn(aseResponseCode);
         try {
-            syncPublisherSpy.verifyRequest(requestMetaData, requestCorrelationID);
+            syncPublisherSpy.verifyRequest(requestMetaData, correlationID);
         } catch (AISecurityException e) {
             Assert.assertTrue(e.getErrorCode() == AISecurityException.ACCESS_REVOKED);
         }

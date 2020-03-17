@@ -18,15 +18,15 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher.async;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
+import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
+import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -45,6 +45,7 @@ public class AsyncPublishingAgent implements Runnable {
     private String correlationID;
     private String resource;
     private boolean tenantFlowStarted = false;
+    private String tenantDomain;
 
     AsyncPublishingAgent() {
 
@@ -60,39 +61,43 @@ public class AsyncPublishingAgent implements Runnable {
         this.requestBody = null;
         this.correlationID = null;
         this.resource = null;
+        this.tenantDomain = null;
     }
 
     /**
      * This method will use to set message context.
      */
-    void setDataReference(JSONObject requestBody, String correlationID, String resource) {
+    void setDataReference(JSONObject requestBody, String correlationID, String resource, String tenantDomain) {
 
         this.requestBody = requestBody;
         this.correlationID = correlationID;
         this.resource = resource;
+        this.tenantDomain = tenantDomain;
 
     }
 
     public void run() {
-        AseResponseDTO aseResponseDTO = httpDataPublisher.publish(this.requestBody, this.correlationID, this.resource);
-        String hashKey = DigestUtils.md5Hex(requestBody.toString());
-        if (aseResponseDTO != null) {
-            if (AISecurityHandlerConstants.ASE_RESOURCE_REQUEST.equals(this.resource)) {
+
+        JSONObject asePayload = (JSONObject) this.requestBody.get(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME);
+        int aseResponseCode = httpDataPublisher.publish(asePayload, this.correlationID, this.resource);
+        if (AISecurityHandlerConstants.ASE_RESOURCE_REQUEST.equals(this.resource)) {
+            String operationMode = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getMode();
+            startTenantFlow();
+            if (AISecurityHandlerConstants.ASYNC_MODE_STRING.equals(operationMode)){
                 try {
-                    startTenantFlow();
-                    ASEResponseStore.writeToASEResponseCache(hashKey, aseResponseDTO);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Cache updated for " + this.correlationID + " as  " + aseResponseDTO
-                                .getResponseMessage() + " with the response code " + aseResponseDTO.getResponseCode());
-                    }
-                } finally {
-                    if (tenantFlowStarted) {
-                        endTenantFlow();
-                    }
+                    SecurityUtils.verifyASEResponse(aseResponseCode, correlationID);
+                    SecurityUtils.verifyPropertiesWithCache(requestBody, correlationID);
+                } catch (AISecurityException e) {
+                    //In Async mode, only a blacklist will be maintained.
+                    ASEResponseStore.updateCache(requestBody, aseResponseCode, correlationID);
                 }
+            } else {
+                //In Hybrid mode, both black and white lists will be maintained
+                ASEResponseStore.updateCache(requestBody, aseResponseCode, correlationID);
             }
-        } else {
-            log.error("ASE response is null for the handle " + this.resource + " async request " + this.correlationID);
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 
@@ -106,11 +111,12 @@ public class AsyncPublishingAgent implements Runnable {
     }
 
     private void startTenantFlow() {
+        if (this.tenantDomain == null){
+            this.tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         tenantFlowStarted = true;
     }
-
 }
 

@@ -41,6 +41,7 @@ import org.apache.synapse.transport.passthru.ServerWorker;
 import org.apache.synapse.transport.passthru.SourceRequest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -70,15 +71,12 @@ public class SecurityUtils {
     /**
      * Return a json array with with transport headers
      *
-     * @param axis2MessageContext- synapse variables
+     * @param transportHeadersMap- transport headers map
      * @param sideBandCallType - request or response message
      * @return transportHeaderArray - JSON array with all the transport headers
      */
-    public static JSONArray getTransportHeaders(org.apache.axis2.context.MessageContext axis2MessageContext,
+    public static JSONArray getTransportHeaders(TreeMap<String, String> transportHeadersMap,
             String sideBandCallType, String correlationID) throws AISecurityException {
-
-        TreeMap<String, String> transportHeadersMap = (TreeMap<String, String>) axis2MessageContext
-                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
         if (transportHeadersMap != null) {
             JSONArray transportHeadersArray = new JSONArray();
@@ -237,6 +235,22 @@ public class SecurityUtils {
     }
 
     /**
+     * Extracts the cookie from Message Context.
+     *
+     * @param transportHeadersMap Transport headers map.
+     * @return cookie as a String.
+     */
+    public static String getCookie(TreeMap<String, String> transportHeadersMap) {
+
+        String cookie = null;
+        //Check whether headers map is null and x forwarded for header is present
+        if (transportHeadersMap != null) {
+            cookie = transportHeadersMap.get("Cookie");
+        }
+        return cookie;
+    }
+
+    /**
      * return existing correlation ID in the message context or set new correlation ID to the message context.
      *
      * @param messageContext synapse message context
@@ -247,16 +261,9 @@ public class SecurityUtils {
         String correlationID;
         if (correlationObj != null) {
             correlationID = (String) correlationObj;
-            if (log.isDebugEnabled()) {
-                log.debug("Correlation ID is available in the message context." + correlationID);
-            }
         } else {
             correlationID = UUID.randomUUID().toString();
             messageContext.setProperty("am.correlationID", correlationID);
-            if (log.isDebugEnabled()) {
-                log.debug("Correlation ID is not available in the message context. Setting a new ID to message context."
-                        + correlationID);
-            }
         }
         return correlationID;
     }
@@ -302,6 +309,58 @@ public class SecurityUtils {
         } else {
             messageContext.setProperty("other_latency", TimeUnit.NANOSECONDS.toMillis((long) otherLatency + latency));
         }
+    }
 
+    /**
+     * Verify whether token, cookie or IP has a cache entry
+     *
+     * @param requestMetaData - Request data
+     * @param correlationID - Correlation ID of the request
+     * @return true if token or ip or cookie has a cache entry
+     * @return false if non of the properties has any cache entry
+     * @throws AISecurityException if the cached response of any property is to block the request
+     */
+    public static boolean verifyPropertiesWithCache(JSONObject requestMetaData,
+                                                    String correlationID) throws AISecurityException {
+
+        boolean statusForToken = SecurityUtils.verifyPropertyWithCache(AISecurityHandlerConstants.TOKEN_CACHE_NAME,
+                AISecurityHandlerConstants.TOKEN_KEY_NAME, requestMetaData, correlationID);
+        boolean statusForIP = SecurityUtils.verifyPropertyWithCache(AISecurityHandlerConstants.IP_CACHE_NAME,
+                AISecurityHandlerConstants.IP_KEY_NAME, requestMetaData, correlationID);
+        boolean statusForCookie = SecurityUtils.verifyPropertyWithCache(AISecurityHandlerConstants.COOKIE_CACHE_NAME,
+                AISecurityHandlerConstants.COOKIE_KEY_NAME, requestMetaData, correlationID);
+        return statusForToken || statusForIP || statusForCookie;
+    }
+
+    public static boolean verifyPropertyWithCache(String cacheName, String propertyName, JSONObject requestMetaData,
+                                                  String correlationID) throws AISecurityException {
+
+        String property = (String) requestMetaData.get(propertyName);
+        int aseResponseForProperty = ASEResponseStore.getFromASEResponseCache(cacheName, property);
+        if (aseResponseForProperty == 0) {
+            return false;
+        } else {
+            verifyASEResponse(aseResponseForProperty, correlationID);
+        }
+        return true;
+    }
+
+    /**
+     * Verify whether ASE response is to block the request of not
+     *
+     * @param aseResponseCode - ASE response for the request
+     * @param correlationID - Correlation ID of the request
+     * @throws AISecurityException if the ASE response is to block the request
+     */
+    public static void verifyASEResponse(int aseResponseCode, String correlationID)
+            throws AISecurityException {
+        //Handler will block the request only if ASE responds with forbidden code
+        if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseCode) {
+            if (log.isDebugEnabled()) {
+                log.debug("Access revoked by the Ping AI handler for the request id " + correlationID);
+            }
+            throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
+                    AISecurityException.ACCESS_REVOKED_MESSAGE);
+        }
     }
 }

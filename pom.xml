@@ -17,12 +17,21 @@
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>carbon-apimgt</artifactId>
+        <version>6.5.349</version>
+    </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>AISecurityEnforcer</groupId>
     <artifactId>org.wso2.carbon.apimgt.securityenforcer</artifactId>
-    <version>1.0.2</version>
-    <name>org.wso2.carbon.apimgt.securityenforcer</name>
+    <version>1.0.2-SNAPSHOT</version>
+    <name>AI Security Enforcer</name>
+    <description>
+        WSO2 API manager extension with Ping Intelligence
+    </description>
+    <url>http://wso2.org</url>
     <packaging>bundle</packaging>
 
     <repositories>
@@ -39,14 +48,9 @@
     </repositories>
 
     <properties>
-        <carbon.apimgt.version>6.5.349</carbon.apimgt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <carbon.kernel.version>4.5.1</carbon.kernel.version>
         <powermock.version>1.7.4</powermock.version>
         <mockito.all.version>1.10.19</mockito.all.version>
-        <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
-        <carbon.governance.version>4.8.10</carbon.governance.version>
-        <synapse.version>2.1.7-wso2v131</synapse.version>
     </properties>
 
     <build>
@@ -91,8 +95,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework,
-                            org.apache.axis2,
-                            org.apache.axis2.util,
+                            org.apache.axis2.*; version="${axis2.osgi.version.range}",
                             org.apache.commons.logging,
                             org.apache.commons.codec.digest,
                             org.apache.commons.pool,
@@ -112,18 +115,14 @@
                             org.apache.synapse.rest,
                             org.apache.synapse.transport.passthru.util,
                             org.json.simple,
-                            org.wso2.carbon.context,
+                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.governance.api.generic,
                             org.wso2.carbon.governance.api.generic.dataobjects,
                             org.wso2.carbon.governance.api.util,
                             org.wso2.carbon.governance.registry.extensions.aspects.utils,
                             org.wso2.carbon.governance.registry.extensions.interfaces,
-                            org.wso2.carbon.registry.core,
-                            org.wso2.carbon.registry.core.exceptions,
-                            org.wso2.carbon.registry.core.jdbc.handlers,
-                            org.wso2.carbon.registry.core.session,
-                            org.wso2.carbon.utils,
-                            org.wso2.carbon.utils.multitenancy,
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             java.net,
                             java.io,
                             java.util,
@@ -131,8 +130,8 @@
                             java.util.concurrent,
                             javax.net.ssl,
                             javax.cache,
-                            org.wso2.carbon.apimgt.gateway.handlers,
-                            org.wso2.carbon.apimgt.gateway.handlers.security,
+                            org.wso2.carbon.apimgt.gateway.handlers; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.gateway.handlers.security; version="${carbon.apimgt.imp.pkg.version}",
                             org.osgi.framework,
                             javax.xml.namespace,
                             javax.xml.stream,

@@ -23,7 +23,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.wso2.carbon.apimgt.securityenforcer.dto.AseResponseDTO;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
@@ -32,7 +31,7 @@ public class SyncPublishingAgentTest {
 
     HttpDataPublisher httpDataPublisher;
     JSONObject requestMetaData;
-    String requestCorrelationID;
+    String correlationID;
     SyncPublishingAgent syncPublishingAgent;
 
     @Before
@@ -41,19 +40,19 @@ public class SyncPublishingAgentTest {
         requestMetaData = new JSONObject();
         requestMetaData.put("A", 1);
         requestMetaData.put("B", 2);
-        requestCorrelationID = "2344214";
+        correlationID = "2344214";
     }
 
     @Test
     public void verifyPublishMethodWithNullResponseFromASETest() throws AISecurityException {
-        Mockito.when(httpDataPublisher.publish(requestMetaData, requestCorrelationID, "request")).thenReturn(null);
+        Mockito.when(httpDataPublisher.publish(requestMetaData, correlationID, "request")).thenReturn(200);
         ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
 
         syncPublishingAgent = new SyncPublishingAgent();
-        syncPublishingAgent.setDataReference(requestMetaData, requestCorrelationID, "request");
-        AseResponseDTO aseResponseDTO = syncPublishingAgent.call();
+        syncPublishingAgent.setDataReference(requestMetaData, correlationID, "request");
+        int aseResponseCode = syncPublishingAgent.call();
         syncPublishingAgent.clearDataReference();
-        Assert.assertTrue(aseResponseDTO == null);
+        Assert.assertTrue(aseResponseCode == 0);
     }
 
 }
