@@ -26,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.wso2.carbon.apimgt.securityenforcer</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>AI Security Enforcer</name>
     <description>
         WSO2 API manager extension with Ping Intelligence
@@ -91,7 +91,7 @@
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.securityenforcer.internal,
-                            org.wso2.carbon.apimgt.securityenforcer.*;version="${project.version}"
+                            org.wso2.carbon.apimgt.securityenforcer.*;version="${version}"
                         </Export-Package>
                         <Import-Package>
                             org.osgi.framework,
@@ -116,14 +116,13 @@
                             org.apache.synapse.transport.passthru.util,
                             org.json.simple,
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.governance.api.generic; version="${carbon.governance.version}",
-                            org.wso2.carbon.governance.api.generic.dataobjects; version="${carbon.governance.version}",
-                            org.wso2.carbon.governance.api.util; version="${carbon.governance.version}",
-                            org.wso2.carbon.governance.registry.extensions.aspects.utils; version="${carbon.governance.version}",
-                            org.wso2.carbon.governance.registry.extensions.interfaces; version="${carbon.governance.version}",
+                            org.wso2.carbon.governance.api.generic,
+                            org.wso2.carbon.governance.api.generic.dataobjects,
+                            org.wso2.carbon.governance.api.util,
+                            org.wso2.carbon.governance.registry.extensions.aspects.utils,
+                            org.wso2.carbon.governance.registry.extensions.interfaces,
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.utils.multitenancy; version="${carbon.platform.package.import.version.range}",
                             java.net,
                             java.io,
                             java.util,
