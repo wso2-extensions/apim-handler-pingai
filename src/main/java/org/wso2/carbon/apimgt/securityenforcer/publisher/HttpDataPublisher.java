@@ -99,6 +99,19 @@ public class HttpDataPublisher {
                 case AISecurityHandlerConstants.ASE_RESPONSE_CODE_UNAUTHORIZED:
                     log.error("Authentication failure (ASE-Token) for the request " + correlationID);
                     break;
+                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN:
+                    if (log.isDebugEnabled()) {
+                        log.debug("Forbidden code sent from the ASE for the " + resource + " " + correlationID);
+                    }
+                    break;
+                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS:
+                    if (log.isDebugEnabled()) {
+                        log.debug("Success code sent from the ASE for the " + resource + " " + correlationID);
+                    }
+                    break;
+                default:
+                    log.error("ASE responded with " + aseResponseCode + " for the request " + correlationID);
+                    break;
                 }
 
                 if (log.isDebugEnabled()) {
