@@ -153,7 +153,7 @@ public class PingAIExecutor implements Execution {
                     postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT, "application/json");
                     postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
                             "application/json");
-                    postRequest.setEntity(new StringEntity(requestBody.toString()));
+                    postRequest.setEntity(new StringEntity(requestBody.toString().replaceAll("\\\\", "")));
 
                     responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.CREATE,
                             postRequest);
