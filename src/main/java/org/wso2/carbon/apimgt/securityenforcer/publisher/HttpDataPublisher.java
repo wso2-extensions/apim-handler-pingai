@@ -81,7 +81,7 @@ public class HttpDataPublisher {
         int aseResponseCode = 200;
 
         try {
-            postRequest.setEntity(new StringEntity(data.toString()));
+            postRequest.setEntity(new StringEntity(data.toString().replaceAll("\\\\", "")));
             long publishingStartTime = System.nanoTime();
             response = httpClient.execute(postRequest);
             long publishingEndTime = System.nanoTime();
