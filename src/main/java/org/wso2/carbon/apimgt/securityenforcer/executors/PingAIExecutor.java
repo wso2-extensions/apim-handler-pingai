@@ -117,12 +117,13 @@ public class PingAIExecutor implements Execution {
                 String apiVersion = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
                 String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
                 String tenantDomainPrefix = "";
-                // replace "." from version with "_" as from v4, ase does not support "." with version.
-                if (!tenantDomain.equals( MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
+
+                if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     tenantDomainPrefix = tenantDomain + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR;
                 }
                 String modelName = tenantDomainPrefix + apiName
                         + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiVersion;
+                // replace "." from version with "_" as from v4, ase does not support "." with version.
                 modelName = modelName.replace(".", "_");
 
                 String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
