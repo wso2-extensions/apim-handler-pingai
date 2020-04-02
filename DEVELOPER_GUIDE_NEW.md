@@ -229,6 +229,15 @@ Do not update the already existing execution for the publish event. Add a new ex
     ```
     <BackupEndPoint>{{apim.ai_security.backup_sideband_request_endpoint}}</BackupEndPoint>
     ```
+   
+   If you want to disable certificate validation of both ASE and Management endpoints, add the following line in the
+    api-manager.xml after the if condition of ApplyForAllAPIs.
+    
+    ```
+   {% if apim.ai_security.validate_certs is defined %}
+   <ValidateCerts>{{apim.ai_security.validate_certs}}</ValidateCerts>
+   {% endif %}
+   ```
 
 ### For the API Publisher
 
@@ -405,6 +414,7 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/deployment.t
    ```
     [apim.ai_security]
     apply_for_all = false
+    validate_certs = true
     cash_expiry_time = 15
     data_publisher.max_per_route = 500
     data_publisher.max_open_connections = 200
@@ -541,6 +551,7 @@ Follow the instructions below to change a password that you had previously encry
 | ---------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | operation_mode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
 | apply_for_all    | (Boolean)                                                   | true         | Apply Ping Intelligence for all APIs published.                                                                               |
+| validate_certs   | (Boolean)                                                   | true         | Validate the certificates of ASE and Management endpoint or not                                                               |
 | cash_expiry_time | (Integer)                                                   | 15           | Cache Expiry time in minutes.                                                                                                 |
 
 #### APISecurityEnforcer - ASE configurations

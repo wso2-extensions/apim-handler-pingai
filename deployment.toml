@@ -6,6 +6,7 @@
 [apim.ai_security]
 operation_mode = "MODE"
 apply_for_all = false
+validate_certs = false
 cash_expiry_time = 15
 sideband_request_endpoint = "ASE_SIDEBAND_REQUEST_ENDPOINT"
 backup_sideband_request_endpoint = "BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT"
@@ -31,6 +32,9 @@ limit_transport_headers.header3 = "Header3"
 #operation_mode = "MODE"
 
 #Apply Ping Intelligence for all APIs published from Api Manager
+#apply_for_all = false
+
+#Whether to validate the certificates of ASE and Management endpoint or not
 #apply_for_all = false
 
 #Cache Expiry time in minutes.

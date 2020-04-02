@@ -32,6 +32,7 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -53,6 +54,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
@@ -173,28 +175,7 @@ public class SecurityUtils {
 
         PoolingHttpClientConnectionManager poolManager;
         if (AISecurityHandlerConstants.HTTPS_PROTOCOL.equals(protocol)) {
-
-            String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
-            String keyStorePassword = CarbonUtils.getServerConfiguration()
-                    .getFirstProperty("Security.TrustStore.Password");
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
-
-            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-
-            X509HostnameVerifier hostnameVerifier;
-            String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
-
-            if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-            } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
-            } else {
-                hostnameVerifier = SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
-            }
-
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-
+            SSLConnectionSocketFactory sslsf = createSocketFactory();
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register(AISecurityHandlerConstants.HTTPS_PROTOCOL, sslsf).build();
             poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
@@ -202,6 +183,42 @@ public class SecurityUtils {
             poolManager = new PoolingHttpClientConnectionManager();
         }
         return poolManager;
+    }
+
+    private static SSLConnectionSocketFactory createSocketFactory()
+            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException,
+            KeyManagementException {
+        SSLContext sslContext;
+        if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isValidateCerts()) {
+            String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
+            String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Password");
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+        } else {
+            //If validate for cert is false, certificates will be trusted without a validation
+            sslContext = SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] chain, String authType)
+                        throws CertificateException {
+                    return true;
+                }
+            }).build();
+        }
+
+        X509HostnameVerifier hostnameVerifier;
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+        return sslsf;
     }
 
     /**

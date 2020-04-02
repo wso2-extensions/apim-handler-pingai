@@ -157,6 +157,16 @@ public class SecurityHandlerConfiguration {
                         + securityHandlerConfig.isApplyForAllAPIs());
             }
 
+            // Get Validate Certificates
+            OMElement validateCertsElement = aiSecurityConfigurationElement
+                    .getFirstChildWithName(new QName(AISecurityHandlerConstants.VALIDATE_CERTS_CONFIG));
+            if (validateCertsElement != null) {
+                securityHandlerConfig.setValidateCerts(JavaUtils.isTrueExplicitly(validateCertsElement.getText()));
+            } else {
+                log.debug("Validate Certificates Element is not set. Set to default: "
+                        + securityHandlerConfig.isValidateCerts());
+            }
+
             // Get ASE config data
             OMElement aseConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_SECURITY_ENFORCER_CONFIGURATION));
