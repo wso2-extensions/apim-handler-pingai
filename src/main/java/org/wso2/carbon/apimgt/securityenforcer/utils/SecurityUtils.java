@@ -353,13 +353,17 @@ public class SecurityUtils {
                                                   String correlationID) throws AISecurityException {
 
         String property = (String) requestMetaData.get(propertyName);
+        boolean status = true;
         int aseResponseForProperty = ASEResponseStore.getFromASEResponseCache(cacheName, property);
         if (aseResponseForProperty == 0) {
-            return false;
+            status = false;
         } else {
-            verifyASEResponse(aseResponseForProperty, correlationID);
+            verifyASEResponse(aseResponseForProperty, correlationID, cacheName + " Cache");
         }
-        return true;
+        if (log.isDebugEnabled()) {
+            log.debug("Status of" + cacheName + " cache  for request " + correlationID + " is " + status);
+        }
+        return status;
     }
 
     /**
@@ -369,12 +373,13 @@ public class SecurityUtils {
      * @param correlationID - Correlation ID of the request
      * @throws AISecurityException if the ASE response is to block the request
      */
-    public static void verifyASEResponse(int aseResponseCode, String correlationID)
+    public static void verifyASEResponse(int aseResponseCode, String correlationID, String instance)
             throws AISecurityException {
         //Handler will block the request only if ASE responds with forbidden code
         if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseCode) {
             if (log.isDebugEnabled()) {
-                log.debug("Access revoked by the Ping AI handler for the request id " + correlationID);
+                log.debug("Access revoked by the Ping AI handler for the request id " + correlationID + " from " +
+                        instance);
             }
             throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
                     AISecurityException.ACCESS_REVOKED_MESSAGE);
