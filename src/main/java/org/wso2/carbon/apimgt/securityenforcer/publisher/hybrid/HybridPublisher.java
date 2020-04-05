@@ -74,7 +74,7 @@ public class HybridPublisher implements Publisher {
                     AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
             throw e;
         }
-        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID); //For the sync response
+        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID, "Sync Publisher"); //For the sync response
         return true;
     }
 

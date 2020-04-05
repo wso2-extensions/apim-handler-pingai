@@ -88,6 +88,7 @@ public class AISecurityHandlerConstants {
     static final String OPERATION_MODE_CONFIGURATION = "OperationMode";
     static final String CACHE_EXPIRY_TIME_CONFIG = "CacheExpiryTime";
     static final String APPLY_FOR_ALL_APIS_CONFIG = "ApplyForAllAPIs";
+    static final String SKIP_CERT_VALIDATION_CONFIG = "SkipCertValidation";
     static final String API_SECURITY_ENFORCER_CONFIGURATION = "APISecurityEnforcer";
     static final String END_POINT_CONFIGURATION = "EndPoint";
     static final String BACKUP_ASE_END_POINT_CONFIGURATION = "BackupEndPoint";

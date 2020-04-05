@@ -32,6 +32,7 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -53,6 +54,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
@@ -173,28 +175,7 @@ public class SecurityUtils {
 
         PoolingHttpClientConnectionManager poolManager;
         if (AISecurityHandlerConstants.HTTPS_PROTOCOL.equals(protocol)) {
-
-            String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
-            String keyStorePassword = CarbonUtils.getServerConfiguration()
-                    .getFirstProperty("Security.TrustStore.Password");
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
-
-            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-
-            X509HostnameVerifier hostnameVerifier;
-            String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
-
-            if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-            } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
-                hostnameVerifier = SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
-            } else {
-                hostnameVerifier = SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
-            }
-
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-
+            SSLConnectionSocketFactory sslsf = createSocketFactory();
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register(AISecurityHandlerConstants.HTTPS_PROTOCOL, sslsf).build();
             poolManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
@@ -202,6 +183,42 @@ public class SecurityUtils {
             poolManager = new PoolingHttpClientConnectionManager();
         }
         return poolManager;
+    }
+
+    private static SSLConnectionSocketFactory createSocketFactory()
+            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException,
+            KeyManagementException {
+        SSLContext sslContext;
+        if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isSkipCertValidation()) {
+            //If skip validation is enabled, certificates will be trusted without a validation
+            sslContext = SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] chain, String authType)
+                        throws CertificateException {
+                    return true;
+                }
+            }).build();
+        } else {
+            String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
+            String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Password");
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
+        }
+
+        X509HostnameVerifier hostnameVerifier;
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
+        return sslsf;
     }
 
     /**
@@ -336,13 +353,17 @@ public class SecurityUtils {
                                                   String correlationID) throws AISecurityException {
 
         String property = (String) requestMetaData.get(propertyName);
+        boolean status = true;
         int aseResponseForProperty = ASEResponseStore.getFromASEResponseCache(cacheName, property);
         if (aseResponseForProperty == 0) {
-            return false;
+            status = false;
         } else {
-            verifyASEResponse(aseResponseForProperty, correlationID);
+            verifyASEResponse(aseResponseForProperty, correlationID, cacheName + " Cache");
         }
-        return true;
+        if (log.isDebugEnabled()) {
+            log.debug("Status of" + cacheName + " cache  for request " + correlationID + " is " + status);
+        }
+        return status;
     }
 
     /**
@@ -352,12 +373,13 @@ public class SecurityUtils {
      * @param correlationID - Correlation ID of the request
      * @throws AISecurityException if the ASE response is to block the request
      */
-    public static void verifyASEResponse(int aseResponseCode, String correlationID)
+    public static void verifyASEResponse(int aseResponseCode, String correlationID, String instance)
             throws AISecurityException {
         //Handler will block the request only if ASE responds with forbidden code
         if (AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN == aseResponseCode) {
             if (log.isDebugEnabled()) {
-                log.debug("Access revoked by the Ping AI handler for the request id " + correlationID);
+                log.debug("Access revoked by the Ping AI handler for the request id " + correlationID + " from " +
+                        instance);
             }
             throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
                     AISecurityException.ACCESS_REVOKED_MESSAGE);

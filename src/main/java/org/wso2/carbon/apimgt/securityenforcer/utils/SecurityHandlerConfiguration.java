@@ -157,6 +157,16 @@ public class SecurityHandlerConfiguration {
                         + securityHandlerConfig.isApplyForAllAPIs());
             }
 
+            // Get skip certificate validation
+            OMElement skipCertValifationElement = aiSecurityConfigurationElement
+                    .getFirstChildWithName(new QName(AISecurityHandlerConstants.SKIP_CERT_VALIDATION_CONFIG));
+            if (skipCertValifationElement != null) {
+                securityHandlerConfig.setSkipCertValidation(JavaUtils.isTrueExplicitly(skipCertValifationElement.getText()));
+            } else {
+                log.debug("Skip Certificate Validation Element is not set. Set to default: "
+                        + securityHandlerConfig.isSkipCertValidation());
+            }
+
             // Get ASE config data
             OMElement aseConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_SECURITY_ENFORCER_CONFIGURATION));

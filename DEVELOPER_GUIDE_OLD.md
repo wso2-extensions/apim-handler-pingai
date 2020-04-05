@@ -400,6 +400,7 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/api-manager.
 
     <AISecurityHandler>
         <ApplyForAllAPIs>false</ApplyForAllAPIs>
+        <SkipCertValidation>False</SkipCertValidation>
         <CacheExpiryTime>15</CacheExpiryTime>
         <DataPublisher>
            <MaxPerRoute>500</MaxPerRoute>
@@ -554,6 +555,7 @@ Follow the instructions below to change a password that you had previously encry
 | --------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | OperationMode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
 | ApplyForAllAPIs | (Boolean)                                                   | true         | Apply Ping Intelligence for all APIs published.                                                                               |
+| SkipCertValidation   | (Boolean)                                              | false        | Validate the certificates of ASE and Management endpints or not                                                               |
 | CacheExpiryTime | (Integer)                                                   | 15           | Cache Expiry time in minutes.                                                                                                 |
 
 #### APISecurityEnforcer - ASE configurations

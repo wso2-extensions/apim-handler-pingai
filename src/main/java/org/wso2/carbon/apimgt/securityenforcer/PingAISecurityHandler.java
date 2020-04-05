@@ -168,10 +168,14 @@ public class PingAISecurityHandler extends AbstractHandler {
         String APIKey = authContext.getApiKey();
         String tier = authContext.getTier();
         String hashedToken = null;
-        if (APIKey != null && !AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
-            hashedToken = DigestUtils.md5Hex(APIKey); //OAuth2 Token or API key is hashed for security reasons.
-            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME,
-                    "Bearer " + hashedToken));
+        String userName = null;
+        if (!AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
+            userName = authContext.getUsername();
+            if (APIKey != null) {
+                hashedToken = DigestUtils.md5Hex(APIKey); //OAuth2 Token or API key is hashed for security reasons.
+                transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME,
+                        "Bearer " + hashedToken));
+            }
         }
         String cookie = SecurityUtils.getCookie(transportHeadersMap);
         if (cookie != null) {
@@ -183,13 +187,15 @@ public class PingAISecurityHandler extends AbstractHandler {
         String requestPath = (String) axis2MessageContext.getProperty(AISecurityHandlerConstants.API_BASEPATH_STRING);
         String requestHttpVersion = SecurityUtils.getHttpVersion(axis2MessageContext);
 
-        String userName = authContext.getUsername();
-
-        JSONArray userInfo = new JSONArray();
-        userInfo.add(SecurityUtils.addObj(AISecurityHandlerConstants.JSON_KEY_USER_NAME, userName));
-
         JSONObject asePayload = createRequestJson(requestMethod, requestPath, requestHttpVersion, requestOriginIP,
-                requestOriginPort, transportHeaders, userInfo);
+                requestOriginPort, transportHeaders);
+        if (userName != null) {
+            //User Info is added only if the request is Authenticated
+            JSONArray userInfo = new JSONArray();
+            userInfo.add(SecurityUtils.addObj(AISecurityHandlerConstants.JSON_KEY_USER_NAME, userName));
+            asePayload.put(AISecurityHandlerConstants.JSON_KEY_USER_INFO, userInfo);
+        }
+
         JSONObject requestPayload = new JSONObject();
         requestPayload.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME, asePayload);
         requestPayload.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, cookie);
@@ -226,8 +232,7 @@ public class PingAISecurityHandler extends AbstractHandler {
      * This method will format the extracted details to a given json format
      */
     private JSONObject createRequestJson(String requestMethod, String requestPath, String requestHttpVersion,
-                                         String requestOriginIP, int requestOriginPort, JSONArray transportHeaders,
-                                         JSONArray userInfo) {
+                                         String requestOriginIP, int requestOriginPort, JSONArray transportHeaders) {
 
         JSONObject aseRequestBodyJson = new JSONObject();
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_SOURCE_IP, requestOriginIP);
@@ -236,7 +241,6 @@ public class PingAISecurityHandler extends AbstractHandler {
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_API_BASEPATH, requestPath);
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_HTTP_VERSION, requestHttpVersion);
         aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_HEADERS, transportHeaders);
-        aseRequestBodyJson.put(AISecurityHandlerConstants.JSON_KEY_USER_INFO, userInfo);
         return aseRequestBodyJson;
     }
 

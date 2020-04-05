@@ -100,7 +100,7 @@ public class SyncPublisher implements Publisher {
     public boolean verifyRequest(JSONObject requestMetaData, String correlationID) throws AISecurityException {
         int aseResponseCode = publishSyncEvent(requestMetaData, correlationID,
                 AISecurityHandlerConstants.ASE_RESOURCE_REQUEST);
-        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID);
+        SecurityUtils.verifyASEResponse(aseResponseCode, correlationID, "Sync Publisher");
         return true;
     }
 
