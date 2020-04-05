@@ -33,8 +33,8 @@ configuration will be used.-->
     <!--Cache Expiry time in minutes.-->
     <CacheExpiryTime>15</CacheExpiryTime>
 
-    <!--Validate the certificates of ASE and Management endpoints-->
-    <ValidateCerts>True</ValidateCerts>
+    <!--Skip the Certificate Validation of ASE and Management endpoints-->
+    <SkipCertValidation>False</SkipCertValidation>
 
     <!--Ping ASE related configuration used by the feature.
     API Security Enforcer is used to validate and authenticate users against the request metadata.

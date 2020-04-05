@@ -28,7 +28,7 @@ import java.util.Set;
 public class AISecurityHandlerConfig {
 
     private boolean applyForAllAPIs = true;
-    private boolean validateCerts = true;
+    private boolean skipCertValidation = false;
     private String mode = AISecurityHandlerConstants.SYNC_MODE_STRING;
     private int cacheExpiryTime = 15;
     private AISecurityHandlerConfig.AseConfig aseConfig;
@@ -62,14 +62,14 @@ public class AISecurityHandlerConfig {
         this.cacheExpiryTime = cacheExpiryTime;
     }
 
-    public boolean isValidateCerts() {
+    public boolean isSkipCertValidation() {
 
-        return validateCerts;
+        return skipCertValidation;
     }
 
-    public void setValidateCerts(boolean validateCerts) {
+    public void setSkipCertValidation(boolean skipCertValidation) {
 
-        this.validateCerts = validateCerts;
+        this.skipCertValidation = skipCertValidation;
     }
 
     public AISecurityHandlerConfig.AseConfig getAseConfig() {

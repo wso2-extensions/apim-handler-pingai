@@ -189,14 +189,8 @@ public class SecurityUtils {
             throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException,
             KeyManagementException {
         SSLContext sslContext;
-        if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isValidateCerts()) {
-            String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
-            String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Password");
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
-            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
-        } else {
-            //If validate for cert is false, certificates will be trusted without a validation
+        if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isSkipCertValidation()) {
+            //If skip validation is enabled, certificates will be trusted without a validation
             sslContext = SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
                 @Override
                 public boolean isTrusted(X509Certificate[] chain, String authType)
@@ -204,6 +198,12 @@ public class SecurityUtils {
                     return true;
                 }
             }).build();
+        } else {
+            String keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Location");
+            String keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.TrustStore.Password");
+            KeyStore trustStore = KeyStore.getInstance("JKS");
+            trustStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            sslContext = SSLContexts.custom().loadTrustMaterial(trustStore).build();
         }
 
         X509HostnameVerifier hostnameVerifier;
