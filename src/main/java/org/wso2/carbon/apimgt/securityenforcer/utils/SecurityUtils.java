@@ -248,6 +248,9 @@ public class SecurityUtils {
         } else {
             remoteIP = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
+        if (remoteIP.indexOf(":") > 0) {
+            remoteIP = remoteIP.substring(0, remoteIP.indexOf(":"));
+        }
         return remoteIP;
     }
 
