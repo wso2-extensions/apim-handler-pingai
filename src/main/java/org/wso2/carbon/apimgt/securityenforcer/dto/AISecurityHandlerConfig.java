@@ -25,8 +25,9 @@ import java.util.Set;
  *
  */
 
-public class AISecurityHandlerConfig {
+public class  AISecurityHandlerConfig {
 
+    private boolean policyEnforcementEnabled = false;
     private boolean applyForAllAPIs = true;
     private boolean skipCertValidation = false;
     private String mode = AISecurityHandlerConstants.SYNC_MODE_STRING;
@@ -37,6 +38,14 @@ public class AISecurityHandlerConfig {
     private AISecurityHandlerConfig.ThreadPoolExecutorConfig threadPoolExecutorConfig;
     private AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeaders;
     private AISecurityHandlerConfig.ModelCreationEndpoint modelCreationEndpointConfig;
+
+    public boolean isPolicyEnforcementEnabled() {
+        return policyEnforcementEnabled;
+    }
+
+    public void setPolicyEnforcementEnabled(boolean policyEnforcementEnabled) {
+        this.policyEnforcementEnabled = policyEnforcementEnabled;
+    }
 
     public boolean isApplyForAllAPIs() {
         return applyForAllAPIs;

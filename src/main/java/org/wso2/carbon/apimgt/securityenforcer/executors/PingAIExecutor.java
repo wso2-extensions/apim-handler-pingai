@@ -32,10 +32,12 @@ import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
+import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityHandlerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -89,104 +91,109 @@ public class PingAIExecutor implements Execution {
      * @return Returns whether the execution was successful or not.
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
-        try {
-            boolean modelCreationEnabled = false;
 
-            String property = context.getResource().getProperty(
-                    API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + ADDITIONAL_PROPERTY_NAME);
+        AISecurityHandlerConfig securityHandlerConfig =
+                ServiceReferenceHolder.getInstance().getSecurityHandlerConfig();
 
-            if (ADDITIONAL_PROPERTY_VALUE.equals(property)
-                    || ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isApplyForAllAPIs()) {
-                if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().getModelCreationEndpointConfig()
-                        .isEnable()) {
-                    modelCreationEnabled = true;
-                } else {
-                    log.debug("Ping AI Model Creation Endpoint configurations not set");
-                }
-            }
+        if (securityHandlerConfig.isPolicyEnforcementEnabled() &&
+                securityHandlerConfig.getModelCreationEndpointConfig().isEnable()) {
 
-            if (modelCreationEnabled) {
-                GenericArtifactManager artifactManager = getArtifactManager(context.getSystemRegistry(), "api");
-                Resource apiResource = context.getResource();
-                String artifactId = apiResource.getUUID();
-                if (artifactId == null || targetState == null) {
-                    return false;
-                }
-                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-                String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME);
-                String apiVersion = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-                String tenantDomainPrefix = "";
+            try {
+                String property = context.getResource().getProperty(
+                        API_CONTEXT_RESOURCE_PROPERTY + API_CONTEXT_RESOURCE_CONJUNCTION + ADDITIONAL_PROPERTY_NAME);
 
-                if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    tenantDomainPrefix = tenantDomain + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR;
-                }
-                String modelName = tenantDomainPrefix + apiName
-                        + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiVersion;
-                // replace "." from version with "_" as from v4, ase does not support "." with version.
-                modelName = modelName.replace(".", "_");
+                if (securityHandlerConfig.isApplyForAllAPIs() || ADDITIONAL_PROPERTY_VALUE.equals(property)) {
+                    //Model creation is done only if the config for apply for all apis is enabled or APIs has an
+                    //additional property as ai_security enabled.
 
-                String apiContext = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
+                    GenericArtifactManager artifactManager = getArtifactManager(context.getSystemRegistry(), "api");
+                    Resource apiResource = context.getResource();
+                    String artifactId = apiResource.getUUID();
+                    if (artifactId == null || targetState == null) {
+                        return false;
+                    }
+                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+                    String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME);
+                    String apiVersion =
+                            apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
+                    String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                    String tenantDomainPrefix = "";
 
-                HttpDataPublisher httpDataPublisher = ServiceReferenceHolder.getInstance().getHttpDataPublisher();
+                    if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        tenantDomainPrefix = tenantDomain + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR;
+                    }
+                    String modelName = tenantDomainPrefix + apiName
+                            + AISecurityHandlerConstants.API_JSON_NAME_CONNECTOR + apiVersion;
+                    // replace "." from version with "_" as from v4, ase does not support "." with version.
+                    modelName = modelName.replace(".", "_");
 
-                String accessKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getModelCreationEndpointConfig().getAccessKey();
-                String secretKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getModelCreationEndpointConfig().getSecretKey();
-                String managementAPIEndpoint = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
-                        .getModelCreationEndpointConfig().getManagementAPIEndpoint();
+                    String apiContext =
+                            apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_CONTEXT);
 
-                StatusLine responseStatus = null;
-                JSONObject requestBody;
+                    HttpDataPublisher httpDataPublisher = ServiceReferenceHolder.getInstance().getHttpDataPublisher();
 
-                if (AISecurityHandlerConstants.PUBLISHED.equals(targetState.toUpperCase())) {
-                    requestBody = createAPIJSON(apiContext, context);
+                    String accessKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                            .getModelCreationEndpointConfig().getAccessKey();
+                    String secretKey = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                            .getModelCreationEndpointConfig().getSecretKey();
+                    String managementAPIEndpoint = ServiceReferenceHolder.getInstance().getSecurityHandlerConfig()
+                            .getModelCreationEndpointConfig().getManagementAPIEndpoint();
 
-                    if (log.isDebugEnabled()) {
-                        log.debug("ASE Management API Payload : " + requestBody + " for the API " + modelName
-                                + " state change from " + currentState + " to " + targetState);
+                    StatusLine responseStatus = null;
+                    JSONObject requestBody;
+
+                    if (AISecurityHandlerConstants.PUBLISHED.equals(targetState.toUpperCase())) {
+                        requestBody = createAPIJSON(apiContext, context);
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("ASE Management API Payload : " + requestBody + " for the API " + modelName
+                                    + " state change from " + currentState + " to " + targetState);
+                        }
+
+                        HttpPost postRequest = new HttpPost(managementAPIEndpoint + "?api_id=" + modelName);
+                        postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
+                        postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
+                        postRequest
+                                .addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT, "application/json");
+                        postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
+                                "application/json");
+                        postRequest.setEntity(new StringEntity(requestBody.toString().replaceAll("\\\\", "")));
+
+                        responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.CREATE,
+                                postRequest);
+                    }
+                    if (AISecurityHandlerConstants.RETIRED.equals(targetState.toUpperCase())) {
+                        HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + modelName);
+                        deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
+                        deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
+                        deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT,
+                                "application/json");
+                        deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
+                                "application/json");
+
+                        responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.DELETE,
+                                deleteRequest);
                     }
 
-                    HttpPost postRequest = new HttpPost(managementAPIEndpoint + "?api_id=" + modelName);
-                    postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
-                    postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
-                    postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT, "application/json");
-                    postRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
-                            "application/json");
-                    postRequest.setEntity(new StringEntity(requestBody.toString().replaceAll("\\\\", "")));
-
-                    responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.CREATE,
-                            postRequest);
-                }
-                if (AISecurityHandlerConstants.RETIRED.equals(targetState.toUpperCase())) {
-                    HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + modelName);
-                    deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCESS_KEY, accessKey);
-                    deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_SECRET_KEY, secretKey);
-                    deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_ACCEPT,
-                            "application/json");
-                    deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
-                            "application/json");
-
-                    responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.DELETE,
-                            deleteRequest);
-                }
-
-                if (responseStatus != null) {
-                    if (responseStatus.getStatusCode() == AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS) {
-                        log.info(modelName + " is " + targetState + " in ASE");
-                    } else {
-                        log.info("ASE responded with " + responseStatus.getReasonPhrase() + " for the " + targetState
-                                + " request for the " + modelName + " API");
+                    if (responseStatus != null) {
+                        if (responseStatus.getStatusCode() == AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS) {
+                            log.info(modelName + " is " + targetState + " in ASE");
+                        } else {
+                            log.info(
+                                    "ASE responded with " + responseStatus.getReasonPhrase() + " for the " + targetState
+                                            + " request for the " + modelName + " API");
+                        }
                     }
                 }
+            } catch (RegistryException e) {
+                log.error("Failed to get the generic artifact while executing PingAIExecutor. ", e);
+                context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                        "APIManagementException:" + e.getMessage());
+            } catch (AISecurityException | UnsupportedEncodingException e) {
+                log.error("Failed to publish service to API store while executing PingAIExecutor. ", e);
+                context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                        "APIManagementException:" + e.getMessage());
             }
-        } catch (RegistryException e) {
-            log.error("Failed to get the generic artifact while executing PingAIExecutor. ", e);
-            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY, "APIManagementException:" + e.getMessage());
-        } catch (AISecurityException | UnsupportedEncodingException e) {
-            log.error("Failed to publish service to API store while executing PingAIExecutor. ", e);
-            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY, "APIManagementException:" + e.getMessage());
         }
         return true;
     }
