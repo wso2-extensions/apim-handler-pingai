@@ -364,7 +364,7 @@ public class SecurityUtils {
             verifyASEResponse(aseResponseForProperty, correlationID, cacheName + " Cache");
         }
         if (log.isDebugEnabled()) {
-            log.debug("Status of" + cacheName + " cache  for request " + correlationID + " is " + status);
+            log.debug("Status of " + cacheName + " for request " + correlationID + " is " + status);
         }
         return status;
     }

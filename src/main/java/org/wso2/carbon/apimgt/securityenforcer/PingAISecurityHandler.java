@@ -61,26 +61,28 @@ public class PingAISecurityHandler extends AbstractHandler {
     @Override
     public boolean handleRequest(MessageContext messageContext) {
 
-        long handleRequestStartTime = System.nanoTime();
-        String correlationID = SecurityUtils.getAndSetCorrelationID(messageContext);
-        try {
-            if (authenticate(messageContext, correlationID)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Handle Request Time for the request " + correlationID + " is "
-                    + (System.nanoTime() - handleRequestStartTime) + " Nano seconds");
+        if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isPolicyEnforcementEnabled()) {
+            long handleRequestStartTime = System.nanoTime();
+            String correlationID = SecurityUtils.getAndSetCorrelationID(messageContext);
+            try {
+                if (authenticate(messageContext, correlationID)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Handle Request Time for the request " + correlationID + " is "
+                                + (System.nanoTime() - handleRequestStartTime) + " Nano seconds");
+                    }
+                    SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
                 }
+            } catch (AISecurityException e) {
+                if (log.isDebugEnabled()) {
+                    long difference = System.nanoTime() - handleRequestStartTime;
+                    String messageDetails = logMessageDetails(messageContext);
+                    log.debug("Request " + correlationID + " failed. " + messageDetails + ", elapsedTimeInNano "
+                            + difference);
+                }
+                handleAuthFailure(messageContext, e);
+            } finally {
                 SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
             }
-        } catch (AISecurityException e) {
-            if (log.isDebugEnabled()) {
-                long difference = System.nanoTime() - handleRequestStartTime;
-                String messageDetails = logMessageDetails(messageContext);
-                log.debug("Request " + correlationID + " failed. " + messageDetails + ", elapsedTimeInNano "
-                        + difference);
-            }
-            handleAuthFailure(messageContext, e);
-        } finally {
-            SecurityUtils.updateLatency(System.nanoTime() - handleRequestStartTime, messageContext);
         }
         return true;
     }
@@ -90,20 +92,23 @@ public class PingAISecurityHandler extends AbstractHandler {
      */
     @Override
     public boolean handleResponse(MessageContext messageContext) {
-        long handleResponseStartTime = System.nanoTime();
-        try {
-            sendResponseDetailsToASE(messageContext);
-            if (log.isDebugEnabled()) {
-                log.debug("Handle Response Time " + (System.nanoTime() - handleResponseStartTime));
+
+        if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isPolicyEnforcementEnabled()) {
+            long handleResponseStartTime = System.nanoTime();
+            try {
+                sendResponseDetailsToASE(messageContext);
+                if (log.isDebugEnabled()) {
+                    log.debug("Handle Response Time " + (System.nanoTime() - handleResponseStartTime));
+                }
+                SecurityUtils.updateLatency(System.nanoTime() - handleResponseStartTime, messageContext);
+            } catch (AISecurityException e) {
+                if (log.isDebugEnabled()) {
+                    long difference = (System.nanoTime() - handleResponseStartTime);
+                    String messageDetails = logMessageDetails(messageContext);
+                    log.debug("Call to Ping ASE : " + messageDetails + ", elapsedTimeInNanoseconds=" + difference);
+                }
+                handleAuthFailure(messageContext, e);
             }
-            SecurityUtils.updateLatency(System.nanoTime() - handleResponseStartTime, messageContext);
-        } catch (AISecurityException e) {
-            if (log.isDebugEnabled()) {
-                long difference = (System.nanoTime() - handleResponseStartTime);
-                String messageDetails = logMessageDetails(messageContext);
-                log.debug("Call to Ping ASE : " + messageDetails + ", elapsedTimeInNanoseconds=" + difference);
-            }
-            handleAuthFailure(messageContext, e);
         }
         return true;
     }

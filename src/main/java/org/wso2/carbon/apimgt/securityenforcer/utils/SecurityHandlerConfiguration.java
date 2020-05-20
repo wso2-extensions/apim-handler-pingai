@@ -125,6 +125,9 @@ public class SecurityHandlerConfiguration {
      * @param element
      */
     private void setPingAISecurityHandlerProperties(OMElement element) throws AISecurityException {
+
+        OMElement aseConfigElement = null;
+        OMElement aseEndPointElement = null;
         OMElement aiSecurityConfigurationElement = element
                 .getFirstChildWithName(new QName(AISecurityHandlerConstants.AI_SECURITY_HANDLER_CONFIGURATION));
         if (aiSecurityConfigurationElement != null) {
@@ -168,11 +171,11 @@ public class SecurityHandlerConfiguration {
             }
 
             // Get ASE config data
-            OMElement aseConfigElement = aiSecurityConfigurationElement
+            aseConfigElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.API_SECURITY_ENFORCER_CONFIGURATION));
             AISecurityHandlerConfig.AseConfig aseConfig = new AISecurityHandlerConfig.AseConfig();
             if (aseConfigElement != null) {
-                OMElement aseEndPointElement = aseConfigElement
+                aseEndPointElement = aseConfigElement
                         .getFirstChildWithName(new QName(AISecurityHandlerConstants.END_POINT_CONFIGURATION));
                 if (aseEndPointElement != null) {
                     aseConfig.setEndPoint(aseEndPointElement.getText());
@@ -368,6 +371,11 @@ public class SecurityHandlerConfiguration {
                 log.debug("Limit transport headers config is not set. Set to default.");
             }
             securityHandlerConfig.setLimitTransportHeaders(limitTransportHeadersConfig);
+        }
+
+        if (aiSecurityConfigurationElement != null && aseConfigElement!=null && aseEndPointElement!=null){
+            securityHandlerConfig.setPolicyEnforcementEnabled(true);
+            log.info("AI security handler policy enforcement enabled");
         }
     }
 

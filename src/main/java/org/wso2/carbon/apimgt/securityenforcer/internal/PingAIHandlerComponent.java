@@ -52,80 +52,88 @@ public class PingAIHandlerComponent implements BundleActivator {
 
     private String operationMode;
     private HttpDataPublisher httpDataPublisher;
+    private AISecurityHandlerConfig securityHandlerConfig;
 
     public void start(BundleContext bundleContext) throws Exception {
         log.debug("OSGi start method for Ping AI security handler");
 
-        AISecurityHandlerConfig securityHandlerConfig = getConfigData();
-        JSONObject managementAPIPayload = getManagementAPIPayload();
-        logConfigData(securityHandlerConfig);
-        operationMode = securityHandlerConfig.getMode();
+        securityHandlerConfig = getConfigData();
         ServiceReferenceHolder.getInstance().setSecurityHandlerConfig(securityHandlerConfig);
-        ServiceReferenceHolder.getInstance().setManagementAPIPayload(managementAPIPayload);
 
-        Publisher requestPublisher;
-        Publisher responsePublisher;
+        if (securityHandlerConfig.isPolicyEnforcementEnabled()) {
+            JSONObject managementAPIPayload = getManagementAPIPayload();
+            logConfigData(securityHandlerConfig);
+            operationMode = securityHandlerConfig.getMode();
 
-        switch (operationMode) {
-        case AISecurityHandlerConstants.SYNC_MODE_STRING:
-            requestPublisher = new SyncPublisher();
-            break;
-        case AISecurityHandlerConstants.ASYNC_MODE_STRING:
-            requestPublisher = new AsyncPublisher();
-            break;
-        case AISecurityHandlerConstants.HYBRID_MODE_STRING:
-            requestPublisher = new HybridPublisher();
-            break;
-        default:
-            throw new Exception("Operation mode is incorrect for Ping AI Security Handler");
-        }
+            ServiceReferenceHolder.getInstance().setManagementAPIPayload(managementAPIPayload);
 
-        ServiceReferenceHolder.getInstance().setRequestPublisher(requestPublisher);
+            Publisher requestPublisher;
+            Publisher responsePublisher;
 
-        //response publisher is for the second sideband request with the backend response metadata. This is sent
-        //asynchronously in all three operation modes and for that async publisher instance is needed. As both async and
-        //hybrid modes contains async publisher instance, only for the sync mode, there will be a new additional instance
-        //created.
-        if (AISecurityHandlerConstants.SYNC_MODE_STRING.equals(operationMode)) {
-            responsePublisher = new AsyncPublisher();
+            switch (operationMode) {
+                case AISecurityHandlerConstants.SYNC_MODE_STRING:
+                    requestPublisher = new SyncPublisher();
+                    break;
+                case AISecurityHandlerConstants.ASYNC_MODE_STRING:
+                    requestPublisher = new AsyncPublisher();
+                    break;
+                case AISecurityHandlerConstants.HYBRID_MODE_STRING:
+                    requestPublisher = new HybridPublisher();
+                    break;
+                default:
+                    throw new Exception("Operation mode is incorrect for Ping AI Security Handler");
+            }
+
+            ServiceReferenceHolder.getInstance().setRequestPublisher(requestPublisher);
+
+            //response publisher is for the second sideband request with the backend response metadata. This is sent
+            //asynchronously in all three operation modes and for that async publisher instance is needed. As both async and
+            //hybrid modes contains async publisher instance, only for the sync mode, there will be a new additional instance
+            //created.
+            if (AISecurityHandlerConstants.SYNC_MODE_STRING.equals(operationMode)) {
+                responsePublisher = new AsyncPublisher();
+            } else {
+                responsePublisher = requestPublisher;
+            }
+
+            ServiceReferenceHolder.getInstance().setResponsePublisher(responsePublisher);
+
+            AISecurityHandlerConfig.AseConfig aseConfiguration = securityHandlerConfig.getAseConfig();
+            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration = securityHandlerConfig
+                    .getDataPublisherConfig();
+
+            try {
+                httpDataPublisher = new HttpDataPublisher(aseConfiguration, dataPublisherConfiguration);
+            } catch (AISecurityException e) {
+                log.error("Error when creating a httpDataPublisher Instance " + e.getMessage());
+                throw new Exception(e);
+            }
+
+            ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
         } else {
-            responsePublisher = requestPublisher;
+            log.info("AI security handler policy enforcement disabled");
         }
-
-        ServiceReferenceHolder.getInstance().setResponsePublisher(responsePublisher);
-
-        AISecurityHandlerConfig.AseConfig aseConfiguration = securityHandlerConfig.getAseConfig();
-        AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration = securityHandlerConfig
-                .getDataPublisherConfig();
-
-        try {
-            httpDataPublisher = new HttpDataPublisher(aseConfiguration, dataPublisherConfiguration);
-        } catch (AISecurityException e) {
-            log.error("Error when creating a httpDataPublisher Instance " + e.getMessage());
-            throw new Exception(e);
-        }
-
-        ServiceReferenceHolder.getInstance().setHttpDataPublisher(httpDataPublisher);
     }
 
     public void stop(BundleContext bundleContext) {
-        log.info("OSGi stop method for Ping AI Security Handler");
-        if (AISecurityHandlerConstants.ASYNC_MODE_STRING.equals(operationMode)) {
-            AsyncPublisherThreadPool.getInstance().cleanup();
-            log.info("Cleaning the Async thread pool");
-        } else {
-            AsyncPublisherThreadPool.getInstance().cleanup();
-            SyncPublisherThreadPool.getInstance().cleanup();
-            log.info("Cleaning both Async and sync thread pools");
-        }
+        if (securityHandlerConfig.isPolicyEnforcementEnabled()) {
+            log.info("OSGi stop method for Ping AI Security Handler");
+            if (AISecurityHandlerConstants.ASYNC_MODE_STRING.equals(operationMode)) {
+                log.info("Cleaning the Async thread pool");
+                AsyncPublisherThreadPool.getInstance().cleanup();
+            } else {
+                log.info("Cleaning both Async and sync thread pools");
+                AsyncPublisherThreadPool.getInstance().cleanup();
+                SyncPublisherThreadPool.getInstance().cleanup();
+            }
 
-        try {
-            httpDataPublisher.getHttpClient().close();
-            log.info("Closing the Http Client");
-        } catch (IOException e) {
-            log.error("Error when closing the HttpClient");
+            try {
+                log.info("Closing the Http Client");
+                httpDataPublisher.getHttpClient().close();
+            } catch (IOException e) {
+                log.error("Error when closing the HttpClient");
+            }
         }
-
     }
 
     /**
