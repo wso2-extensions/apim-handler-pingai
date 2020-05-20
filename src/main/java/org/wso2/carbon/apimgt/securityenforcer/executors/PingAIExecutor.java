@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
-import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityHandlerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;

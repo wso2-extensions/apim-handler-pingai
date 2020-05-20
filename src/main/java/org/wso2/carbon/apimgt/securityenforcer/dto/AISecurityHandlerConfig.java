@@ -25,7 +25,7 @@ import java.util.Set;
  *
  */
 
-public class  AISecurityHandlerConfig {
+public class AISecurityHandlerConfig {
 
     private boolean policyEnforcementEnabled = false;
     private boolean applyForAllAPIs = true;
