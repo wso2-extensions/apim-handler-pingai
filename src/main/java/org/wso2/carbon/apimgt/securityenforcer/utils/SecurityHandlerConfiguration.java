@@ -126,11 +126,9 @@ public class SecurityHandlerConfiguration {
      */
     private void setPingAISecurityHandlerProperties(OMElement element) throws AISecurityException {
 
-        OMElement aiSecurityConfigurationElement = null;
         OMElement aseConfigElement = null;
         OMElement aseEndPointElement = null;
-
-        aiSecurityConfigurationElement = element
+        OMElement aiSecurityConfigurationElement = element
                 .getFirstChildWithName(new QName(AISecurityHandlerConstants.AI_SECURITY_HANDLER_CONFIGURATION));
         if (aiSecurityConfigurationElement != null) {
 

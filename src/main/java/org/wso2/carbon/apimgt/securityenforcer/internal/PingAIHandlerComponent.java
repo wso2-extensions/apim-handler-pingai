@@ -119,17 +119,17 @@ public class PingAIHandlerComponent implements BundleActivator {
         if (securityHandlerConfig.isPolicyEnforcementEnabled()) {
             log.info("OSGi stop method for Ping AI Security Handler");
             if (AISecurityHandlerConstants.ASYNC_MODE_STRING.equals(operationMode)) {
-                AsyncPublisherThreadPool.getInstance().cleanup();
                 log.info("Cleaning the Async thread pool");
+                AsyncPublisherThreadPool.getInstance().cleanup();
             } else {
+                log.info("Cleaning both Async and sync thread pools");
                 AsyncPublisherThreadPool.getInstance().cleanup();
                 SyncPublisherThreadPool.getInstance().cleanup();
-                log.info("Cleaning both Async and sync thread pools");
             }
 
             try {
-                httpDataPublisher.getHttpClient().close();
                 log.info("Closing the Http Client");
+                httpDataPublisher.getHttpClient().close();
             } catch (IOException e) {
                 log.error("Error when closing the HttpClient");
             }
