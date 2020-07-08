@@ -151,9 +151,9 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
 
     Use the following table to update pom.xml with the corresponding dependency versions for API manager.
 
-     | Dependency                |   APIM 3.0.0   |  APIM 2.6.0   |  APIM 2.5.0   |  APIM 2.2.0   |  APIM 2.1.0   |
-     | ------------------------- | :------------: | :-----------: | :-----------: | :-----------: | :-----------: |
-     | org.wso2.carbon.apimgt    |    6.5.349     |    6.4.50     |    6.3.95     |    6.2.201    |    6.1.66     |
+     | Dependency                |   APIM 3.2.0-beta|  APIM 3.1.0   |  APIM 3.0.0   |  
+     | ------------------------- | :---------------:| :-----------: | :-----------: | 
+     | org.wso2.carbon.apimgt    |    6.7.78        |    6.6.163    |    6.5.349     | 
 
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory.
    You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory.
