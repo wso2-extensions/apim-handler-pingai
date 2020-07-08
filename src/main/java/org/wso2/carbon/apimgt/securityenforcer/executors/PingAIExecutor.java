@@ -32,6 +32,10 @@ import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
@@ -115,6 +119,25 @@ public class PingAIExecutor implements Execution {
                     String apiName = apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_NAME);
                     String apiVersion =
                             apiArtifact.getAttribute(AISecurityHandlerConstants.ARTIFACT_ATTRIBUTE_API_VERSION);
+
+                    boolean isAPIAuthenticated = true;
+                    try {
+                        API api = APIUtil.getAPI(apiArtifact);
+                        Set<URITemplate> resourceTemplates = api.getUriTemplates();
+                        for (URITemplate resource : resourceTemplates) {
+                            String authType = resource.getAuthType();
+                            if ("None".equals(authType)) {
+                                isAPIAuthenticated = false;
+                                if (log.isDebugEnabled()) {
+                                    log.debug("UnAuthenticated resource found for API " + apiName);
+                                }
+                                break;
+                            }
+                        }
+                    } catch (APIManagementException e) {
+                        log.error("Error retrieving api object from the artifact to api " + apiName, e);
+                    }
+
                     String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
                     String tenantDomainPrefix = "";
 
@@ -142,7 +165,7 @@ public class PingAIExecutor implements Execution {
                     JSONObject requestBody;
 
                     if (AISecurityHandlerConstants.PUBLISHED.equals(targetState.toUpperCase())) {
-                        requestBody = createAPIJSON(apiContext, context);
+                        requestBody = createAPIJSON(apiContext, context, isAPIAuthenticated);
 
                         if (log.isDebugEnabled()) {
                             log.debug("ASE Management API Payload : " + requestBody + " for the API " + modelName
@@ -226,7 +249,7 @@ public class PingAIExecutor implements Execution {
         return artifactManager;
     }
 
-    private JSONObject createAPIJSON(String APIContext, RequestContext requestContext) {
+    private JSONObject createAPIJSON(String APIContext, RequestContext requestContext, boolean isAPIAuthenticated) {
         JSONObject managmentAPIPayload = ServiceReferenceHolder.getInstance().getManagementAPIPayload();
 
         if (managmentAPIPayload == null) {
@@ -241,6 +264,11 @@ public class PingAIExecutor implements Execution {
         } catch (ParseException e) {
             log.error("Error when reading the payload", e);
             return null;
+        }
+
+        ((JSONObject) managmentAPIPayloadCopy.get("api_metadata")).put("oauth2_access_token", isAPIAuthenticated);
+        if (log.isDebugEnabled()) {
+            log.debug("Ping ASE management API payload oauth2_access_token property updated as " + isAPIAuthenticated);
         }
 
         Set<String> payloadKeyArray = ((JSONObject) managmentAPIPayloadCopy.get("api_metadata")).keySet();
