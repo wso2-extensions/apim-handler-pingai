@@ -27,9 +27,9 @@ import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class SecurityUtilsTest {
 
@@ -59,7 +59,7 @@ public class SecurityUtilsTest {
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
-        Set limitTransportHeaderSet = new HashSet();
+        Set limitTransportHeaderSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         limitTransportHeaderSet.add(headerOne.toLowerCase());
         limitTransportHeaderSet.add(headerTwo.toLowerCase());
         limitTransportHeadersConfig.setEnable(true);
@@ -85,7 +85,7 @@ public class SecurityUtilsTest {
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
-        Set limitTransportHeaderSet = new HashSet();
+        Set limitTransportHeaderSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         limitTransportHeaderSet.add(headerOne.toLowerCase());
         limitTransportHeaderSet.add(headerTwo.toLowerCase());
         limitTransportHeadersConfig.setEnable(true);
@@ -110,7 +110,7 @@ public class SecurityUtilsTest {
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
-        Set limitTransportHeaderSet = new HashSet();
+        Set limitTransportHeaderSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         limitTransportHeaderSet.add(headerOne.toLowerCase());
         limitTransportHeaderSet.add(headerTwo.toLowerCase());
         limitTransportHeaderSet.add(headerFive.toLowerCase());
@@ -135,7 +135,7 @@ public class SecurityUtilsTest {
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
-        Set limitTransportHeaderSet = new HashSet();
+        Set limitTransportHeaderSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         limitTransportHeaderSet.add(headerOne.toLowerCase());
         limitTransportHeaderSet.add(headerTwo.toLowerCase());
         limitTransportHeaderSet.add(headerFive.toLowerCase());
@@ -158,7 +158,7 @@ public class SecurityUtilsTest {
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
-        Set limitTransportHeaderSet = new HashSet();
+        Set limitTransportHeaderSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         limitTransportHeaderSet.add(headerOne.toLowerCase());
         limitTransportHeaderSet.add(headerTwo.toLowerCase());
         limitTransportHeaderSet.add(hostHeader.toLowerCase());
@@ -184,7 +184,7 @@ public class SecurityUtilsTest {
 
         AISecurityHandlerConfig securityHandlerConfig = new AISecurityHandlerConfig();
         AISecurityHandlerConfig.LimitTransportHeaders limitTransportHeadersConfig = new AISecurityHandlerConfig.LimitTransportHeaders();
-        Set limitTransportHeaderSet = new HashSet();
+        Set limitTransportHeaderSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         limitTransportHeaderSet.add(headerOne.toLowerCase());
         limitTransportHeaderSet.add(headerTwo.toLowerCase());
         limitTransportHeaderSet.add(headerFive.toLowerCase());

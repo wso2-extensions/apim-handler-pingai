@@ -31,10 +31,11 @@ import org.wso2.securevault.SecretResolverFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -359,11 +360,11 @@ public class SecurityHandlerConfiguration {
 
                 Iterator headersIterator = limitTransportHeadersElement
                         .getChildrenWithLocalName(AISecurityHandlerConstants.HEADER_CONFIGURATION);
-                Set<String> headerSet = new HashSet<>();
+                Set<String> headerSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
                 while (headersIterator.hasNext()) {
                     OMElement headerElement = (OMElement) headersIterator.next();
                     if (headerElement != null) {
-                        headerSet.add(headerElement.getText().toLowerCase());
+                        headerSet.add(headerElement.getText());
                     }
                 }
                 limitTransportHeadersConfig.setHeaderSet(headerSet);

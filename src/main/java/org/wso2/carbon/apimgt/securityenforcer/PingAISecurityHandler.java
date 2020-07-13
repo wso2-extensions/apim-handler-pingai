@@ -174,8 +174,10 @@ public class PingAISecurityHandler extends AbstractHandler {
         String tier = authContext.getTier();
         String hashedToken = null;
         String userName = null;
+        String clientID = null;
         if (!AISecurityHandlerConstants.UNAUTHENTICATED_TIER.equals(tier)) {
             userName = authContext.getUsername();
+            clientID = authContext.getConsumerKey();
             if (APIKey != null) {
                 hashedToken = DigestUtils.md5Hex(APIKey); //OAuth2 Token or API key is hashed for security reasons.
                 transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.AUTHORIZATION_HEADER_NAME,
@@ -183,8 +185,12 @@ public class PingAISecurityHandler extends AbstractHandler {
             }
         }
         String cookie = SecurityUtils.getCookie(transportHeadersMap);
+        String hashedCookie = "";
         if (cookie != null) {
-            cookie = DigestUtils.md5Hex(cookie);
+            cookie = SecurityUtils.anonymizeCookie(cookie);
+            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.COOKIE_KEY_NAME, cookie));
+            //This cookieHash is used as the key of cookie cache
+            hashedCookie = DigestUtils.md5Hex(cookie);
         }
         String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
         int requestOriginPort = AISecurityHandlerConstants.DUMMY_REQUEST_PORT;
@@ -194,16 +200,21 @@ public class PingAISecurityHandler extends AbstractHandler {
 
         JSONObject asePayload = createRequestJson(requestMethod, requestPath, requestHttpVersion, requestOriginIP,
                 requestOriginPort, transportHeaders);
-        if (userName != null) {
+        if (userName != null || clientID != null) {
             //User Info is added only if the request is Authenticated
             JSONArray userInfo = new JSONArray();
-            userInfo.add(SecurityUtils.addObj(AISecurityHandlerConstants.JSON_KEY_USER_NAME, userName));
+            if (userName != null) {
+                userInfo.add(SecurityUtils.addObj(AISecurityHandlerConstants.JSON_KEY_USER_NAME, userName));
+            }
+            if (clientID != null) {
+                userInfo.add(SecurityUtils.addObj(AISecurityHandlerConstants.JSON_KEY_CLIENT_ID, clientID));
+            }
             asePayload.put(AISecurityHandlerConstants.JSON_KEY_USER_INFO, userInfo);
         }
 
         JSONObject requestPayload = new JSONObject();
         requestPayload.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME, asePayload);
-        requestPayload.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, cookie);
+        requestPayload.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, hashedCookie);
         requestPayload.put(AISecurityHandlerConstants.IP_KEY_NAME, requestOriginIP);
         requestPayload.put(AISecurityHandlerConstants.TOKEN_KEY_NAME, hashedToken);
         return requestPayload;

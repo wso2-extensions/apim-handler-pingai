@@ -23,6 +23,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.Constants;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ProtocolVersion;
@@ -55,9 +56,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
@@ -82,7 +84,10 @@ public class SecurityUtils {
 
         if (transportHeadersMap != null) {
             JSONArray transportHeadersArray = new JSONArray();
-            Set<String> headerKeysSet = new HashSet<String>(transportHeadersMap.keySet());
+            Set<String> headerKeysSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            headerKeysSet.addAll(transportHeadersMap.keySet());
+            headerKeysSet.remove(AISecurityHandlerConstants.AUTHORIZATION);
+            headerKeysSet.remove(AISecurityHandlerConstants.COOKIE_KEY_NAME);
 
             if (log.isDebugEnabled()) {
                 log.debug("Transport headers found for the request " + correlationID + " are " + headerKeysSet);
@@ -105,7 +110,7 @@ public class SecurityUtils {
             if (limitTransportHeadersConfig.isEnable()) {
                 Set<String> allowedTransportHeadersKeySet = limitTransportHeadersConfig.getHeaderSet();
                 for (String headerKey : headerKeysSet) {
-                    if (allowedTransportHeadersKeySet.contains(headerKey.toLowerCase())) {
+                    if (allowedTransportHeadersKeySet.contains(headerKey)) {
                         String headerValue = transportHeadersMap.get(headerKey);
                         transportHeadersArray.add(addObj(headerKey, headerValue));
                     }
@@ -387,5 +392,34 @@ public class SecurityUtils {
             throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
                     AISecurityException.ACCESS_REVOKED_MESSAGE);
         }
+    }
+
+    /**
+     * This method will anonymize the cookie content by hashing with md5
+     *
+     * @param cookieString - Cookie header value
+     */
+    public static String anonymizeCookie(String cookieString) {
+
+        String finalString = "";
+        if (cookieString.isEmpty()) {
+            return null;
+        } else {
+            String[] cookieVariables = cookieString.split(";");
+
+            for (String cookieVariable : cookieVariables) {
+                String[] keyValuePair = cookieVariable.split("=");
+                if (keyValuePair.length > 1) {
+                    finalString = finalString + keyValuePair[0] + "=" + DigestUtils.md5Hex(keyValuePair[1]) + ";";
+                } else {
+                    finalString = finalString + DigestUtils.md5Hex(cookieVariable) + ";";
+                }
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cookie header values were anonymized");
+        }
+        return finalString;
     }
 }
