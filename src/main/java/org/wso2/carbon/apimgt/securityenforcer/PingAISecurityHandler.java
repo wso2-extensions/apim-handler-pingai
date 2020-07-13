@@ -185,8 +185,12 @@ public class PingAISecurityHandler extends AbstractHandler {
             }
         }
         String cookie = SecurityUtils.getCookie(transportHeadersMap);
+        String hashedCookie = "";
         if (cookie != null) {
             cookie = SecurityUtils.anonymizeCookie(cookie);
+            transportHeaders.add(SecurityUtils.addObj(AISecurityHandlerConstants.COOKIE_KEY_NAME, cookie));
+            //This cookieHash is used as the key of cookie cache
+            hashedCookie = DigestUtils.md5Hex(cookie);
         }
         String requestOriginIP = SecurityUtils.getIp(axis2MessageContext);
         int requestOriginPort = AISecurityHandlerConstants.DUMMY_REQUEST_PORT;
@@ -210,7 +214,7 @@ public class PingAISecurityHandler extends AbstractHandler {
 
         JSONObject requestPayload = new JSONObject();
         requestPayload.put(AISecurityHandlerConstants.ASE_PAYLOAD_KEY_NAME, asePayload);
-        requestPayload.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, cookie);
+        requestPayload.put(AISecurityHandlerConstants.COOKIE_KEY_NAME, hashedCookie);
         requestPayload.put(AISecurityHandlerConstants.IP_KEY_NAME, requestOriginIP);
         requestPayload.put(AISecurityHandlerConstants.TOKEN_KEY_NAME, hashedToken);
         return requestPayload;

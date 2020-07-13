@@ -88,11 +88,11 @@ public class AsyncPublishingAgent implements Runnable {
                     SecurityUtils.verifyASEResponse(aseResponseCode, correlationID, "Async Publisher");
                     SecurityUtils.verifyPropertiesWithCache(requestBody, correlationID);
                 } catch (AISecurityException e) {
-                    //In Async mode, only a blacklist will be maintained.
+                    //In Async mode, only a block list will be maintained.
                     ASEResponseStore.updateCache(requestBody, aseResponseCode, correlationID);
                 }
             } else {
-                //In Hybrid mode, both black and white lists will be maintained
+                //In Hybrid mode, both block and allow lists will be maintained
                 ASEResponseStore.updateCache(requestBody, aseResponseCode, correlationID);
             }
             if (tenantFlowStarted) {

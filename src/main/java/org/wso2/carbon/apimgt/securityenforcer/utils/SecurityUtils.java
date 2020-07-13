@@ -56,9 +56,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
@@ -83,7 +84,10 @@ public class SecurityUtils {
 
         if (transportHeadersMap != null) {
             JSONArray transportHeadersArray = new JSONArray();
-            Set<String> headerKeysSet = new HashSet<String>(transportHeadersMap.keySet());
+            Set<String> headerKeysSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            headerKeysSet.addAll(transportHeadersMap.keySet());
+            headerKeysSet.remove(AISecurityHandlerConstants.AUTHORIZATION);
+            headerKeysSet.remove(AISecurityHandlerConstants.COOKIE_KEY_NAME);
 
             if (log.isDebugEnabled()) {
                 log.debug("Transport headers found for the request " + correlationID + " are " + headerKeysSet);
@@ -106,7 +110,7 @@ public class SecurityUtils {
             if (limitTransportHeadersConfig.isEnable()) {
                 Set<String> allowedTransportHeadersKeySet = limitTransportHeadersConfig.getHeaderSet();
                 for (String headerKey : headerKeysSet) {
-                    if (allowedTransportHeadersKeySet.contains(headerKey.toLowerCase())) {
+                    if (allowedTransportHeadersKeySet.contains(headerKey)) {
                         String headerValue = transportHeadersMap.get(headerKey);
                         transportHeadersArray.add(addObj(headerKey, headerValue));
                     }
