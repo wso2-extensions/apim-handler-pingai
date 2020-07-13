@@ -51,8 +51,8 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 3. ASE logs metadata and checks the following.
     - Checks if it is an unregistered API, format error, or bad Auth token.
         - If yes, return specified code.
-    - Checks if the origin IP/Cookie/API Key/OAuth Token is on the blacklist.
-        - If on the blacklist, returns **403**.
+    - Checks if the origin IP/Cookie/API Key/OAuth Token is on the block list.
+        - If on the block list, returns **403**.
     - Otherwise, returns **200-OK**.
 4. WSO2 API Gateway receives the ASE response:
     - If the response is **200-OK**, it sends the API request to the App server.
