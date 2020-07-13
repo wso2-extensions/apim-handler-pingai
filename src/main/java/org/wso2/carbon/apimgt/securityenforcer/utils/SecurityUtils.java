@@ -23,6 +23,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.Constants;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ProtocolVersion;
@@ -387,5 +388,34 @@ public class SecurityUtils {
             throw new AISecurityException(AISecurityException.ACCESS_REVOKED,
                     AISecurityException.ACCESS_REVOKED_MESSAGE);
         }
+    }
+
+    /**
+     * This method will anonymize the cookie content by hashing with md5
+     *
+     * @param cookieString - Cookie header value
+     */
+    public static String anonymizeCookie(String cookieString) {
+
+        String finalString = "";
+        if (cookieString.isEmpty()) {
+            return null;
+        } else {
+            String[] cookieVariables = cookieString.split(";");
+
+            for (String cookieVariable : cookieVariables) {
+                String[] keyValuePair = cookieVariable.split("=");
+                if (keyValuePair.length > 1) {
+                    finalString = finalString + keyValuePair[0] + "=" + DigestUtils.md5Hex(keyValuePair[1]) + ";";
+                } else {
+                    finalString = finalString + DigestUtils.md5Hex(cookieVariable) + ";";
+                }
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Cookie header values were anonymized");
+        }
+        return finalString;
     }
 }
