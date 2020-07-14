@@ -56,7 +56,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -86,7 +85,6 @@ public class SecurityUtils {
             JSONArray transportHeadersArray = new JSONArray();
             Set<String> headerKeysSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
             headerKeysSet.addAll(transportHeadersMap.keySet());
-            headerKeysSet.remove(AISecurityHandlerConstants.AUTHORIZATION);
             headerKeysSet.remove(AISecurityHandlerConstants.COOKIE_KEY_NAME);
 
             if (log.isDebugEnabled()) {
