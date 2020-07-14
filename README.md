@@ -58,8 +58,8 @@ If the response of ASE is 200 OK, the Ping AI Security Handler forwards the requ
 
 
 
-### Developer Guide
+### Quick Start Guide
 
-To use this extension with WSO2 API Manager 3.0.0 or newer versions, see [Developer Guide New](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_NEW.md).
+To use this extension with WSO2 API Manager 3.0.0 or newer versions, see [Quick Start Guide New](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/QUICK_START_GUIDE_NEW.md).
 
-WSO2 API Manager 2.6.0 or older versions, see [Developer Guide Old](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_OLD.md).
+WSO2 API Manager 2.6.0 or older versions, see [Quick Start Guide Old](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/QUICK_START_GUIDE_OLD.md).
