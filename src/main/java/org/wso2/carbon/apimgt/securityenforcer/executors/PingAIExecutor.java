@@ -124,14 +124,18 @@ public class PingAIExecutor implements Execution {
                     try {
                         API api = APIUtil.getAPI(apiArtifact);
                         Set<URITemplate> resourceTemplates = api.getUriTemplates();
+                        int resourceTemplatesSetSize = resourceTemplates.size();
+                        int noneTypeResources = 0;
                         for (URITemplate resource : resourceTemplates) {
                             String authType = resource.getAuthType();
                             if ("None".equals(authType)) {
-                                isAPIAuthenticated = false;
-                                if (log.isDebugEnabled()) {
-                                    log.debug("UnAuthenticated resource found for API " + apiName);
-                                }
-                                break;
+                                noneTypeResources++;
+                            }
+                        }
+                        if (noneTypeResources > resourceTemplatesSetSize-noneTypeResources) {
+                            isAPIAuthenticated = false;
+                            if (log.isDebugEnabled()) {
+                                log.debug("None type resources are more than authenticated resources for API " + apiName);
                             }
                         }
                     } catch (APIManagementException e) {
