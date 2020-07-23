@@ -101,9 +101,11 @@ public class PingAIHandlerComponent implements BundleActivator {
             AISecurityHandlerConfig.AseConfig aseConfiguration = securityHandlerConfig.getAseConfig();
             AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration = securityHandlerConfig
                     .getDataPublisherConfig();
+            AISecurityHandlerConfig.ModelCreationEndpoint modelCreationConfiguration = securityHandlerConfig
+                    .getModelCreationEndpointConfig();
 
             try {
-                httpDataPublisher = new HttpDataPublisher(aseConfiguration, dataPublisherConfiguration);
+                httpDataPublisher = new HttpDataPublisher(aseConfiguration, dataPublisherConfiguration, modelCreationConfiguration);
             } catch (AISecurityException e) {
                 log.error("Error when creating a httpDataPublisher Instance " + e.getMessage());
                 throw new Exception(e);

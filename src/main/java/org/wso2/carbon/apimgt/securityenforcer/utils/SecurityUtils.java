@@ -418,6 +418,10 @@ public class SecurityUtils {
         if (log.isDebugEnabled()) {
             log.debug("Cookie header values were anonymized");
         }
-        return finalString;
+        
+        if (finalString == null || finalString.length() == 0) {
+            return finalString;
+        }
+        return finalString.substring(0, finalString.length() - 1);
     }
 }
