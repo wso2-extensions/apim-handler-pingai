@@ -18,6 +18,23 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.utils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -27,41 +44,37 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ProtocolVersion;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.transport.passthru.ServerWorker;
 import org.apache.synapse.transport.passthru.SourceRequest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.securityenforcer.ASEResponseStore;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLContext;
 
 public class SecurityUtils {
 
@@ -423,5 +436,92 @@ public class SecurityUtils {
             return finalString;
         }
         return finalString.substring(0, finalString.length() - 1);
+    }
+
+    /**
+     * Return a http client instance
+     *
+     * @param port      - server port
+     * @param protocol- service endpoint protocol http/https
+     * @return
+     */
+    public static HttpClient getManagementHttpClient(int port, String protocol) {
+        SchemeRegistry registry = new SchemeRegistry();
+        SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
+        X509HostnameVerifier hostnameVerifier;
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+        socketFactory.setHostnameVerifier(hostnameVerifier);
+
+        if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
+            try {
+                socketFactory = createManagementSocketFactory();
+                socketFactory.setHostnameVerifier(hostnameVerifier);
+                if (port >= 0) {
+                    registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
+                } else {
+                    registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, 443, socketFactory));
+                }
+            } catch (APIManagementException e) {
+                log.error(e);
+            }
+        } else if (APIConstants.HTTP_PROTOCOL.equals(protocol)) {
+            if (port >= 0) {
+                registry.register(new Scheme(APIConstants.HTTP_PROTOCOL, port, PlainSocketFactory.getSocketFactory()));
+            } else {
+                registry.register(new Scheme(APIConstants.HTTP_PROTOCOL, 80, PlainSocketFactory.getSocketFactory()));
+            }
+        }
+        HttpParams params = new BasicHttpParams();
+        ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
+        return new DefaultHttpClient(tcm, params);
+    }
+
+    private static SSLSocketFactory createManagementSocketFactory() throws APIManagementException {
+        KeyStore keyStore;
+        String keyStorePath = null;
+        String keyStorePassword;
+        try {
+            SSLSocketFactory sslSocketFactory;
+            if (ServiceReferenceHolder.getInstance().getSecurityHandlerConfig().isSkipCertValidation()) {
+                //If skip validation is enabled, certificates will be trusted without a validation
+                SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, new TrustStrategy() {
+                    @Override
+                    public boolean isTrusted(X509Certificate[] chain, String authType)
+                            throws CertificateException {
+                        return true;
+                    }
+                }).build();
+                sslSocketFactory = new SSLSocketFactory(sslContext);
+                return sslSocketFactory;
+            } else {
+                keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Location");
+                keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Password");
+                keyStore = KeyStore.getInstance("JKS");
+                keyStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+                sslSocketFactory = new SSLSocketFactory(keyStore, keyStorePassword);
+                return sslSocketFactory;
+            }
+        } catch (KeyStoreException e) {
+            log.error("Failed to read from Key Store", e);
+        } catch (CertificateException e) {
+            log.error("Failed to read Certificate", e);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Failed to load Key Store from " + keyStorePath, e);
+        } catch (IOException e) {
+            log.error("Key Store not found in " + keyStorePath, e);
+        } catch (UnrecoverableKeyException e) {
+            log.error("Failed to load key from" + keyStorePath, e);
+        } catch (KeyManagementException e) {
+            log.error("Failed to load key from" + keyStorePath, e);
+        }
+        return null;
     }
 }

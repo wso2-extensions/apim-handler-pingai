@@ -33,7 +33,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
@@ -152,8 +151,8 @@ public class HttpDataPublisher {
         try {
             aseManagementEndpointPort = new URL(modelCreationEndpoint).getPort();
             aseManagementEndpointProtocol = new URL(modelCreationEndpoint).getProtocol();
-            HttpClient aseManagementEndpointHttpClient = APIUtil.getHttpClient(aseManagementEndpointPort,
-                    aseManagementEndpointProtocol);
+            HttpClient aseManagementEndpointHttpClient = SecurityUtils
+                    .getManagementHttpClient(aseManagementEndpointPort, aseManagementEndpointProtocol);
 
             if (AISecurityHandlerConstants.CREATE.equals(type)) {
                 HttpPost postRequest = (HttpPost) request;
