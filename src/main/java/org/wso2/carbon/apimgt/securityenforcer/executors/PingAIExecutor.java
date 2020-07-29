@@ -185,8 +185,9 @@ public class PingAIExecutor implements Execution {
                                 "application/json");
                         postRequest.setEntity(new StringEntity(requestBody.toString().replaceAll("\\\\", "")));
 
-                        responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.CREATE,
-                                postRequest);
+                        responseStatus = httpDataPublisher.publishToASEManagementAPI(
+                                securityHandlerConfig.getModelCreationEndpointConfig().getManagementAPIEndpoint(),
+                                AISecurityHandlerConstants.CREATE, postRequest);
                     }
                     if (AISecurityHandlerConstants.RETIRED.equals(targetState.toUpperCase())) {
                         HttpDelete deleteRequest = new HttpDelete(managementAPIEndpoint + "?api_id=" + modelName);
@@ -197,8 +198,9 @@ public class PingAIExecutor implements Execution {
                         deleteRequest.addHeader(AISecurityHandlerConstants.ASE_MANAGEMENT_HEADER_CONTENT_TYPE,
                                 "application/json");
 
-                        responseStatus = httpDataPublisher.publishToASEManagementAPI(AISecurityHandlerConstants.DELETE,
-                                deleteRequest);
+                        responseStatus = httpDataPublisher.publishToASEManagementAPI(
+                                securityHandlerConfig.getModelCreationEndpointConfig().getManagementAPIEndpoint(),
+                                AISecurityHandlerConstants.DELETE, deleteRequest);
                     }
 
                     if (responseStatus != null) {
