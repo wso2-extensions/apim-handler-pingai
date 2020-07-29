@@ -16,9 +16,15 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -27,14 +33,11 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * HttpDataPublisher class is here to verifyRequest PingAI data to Ping
@@ -46,25 +49,16 @@ public class HttpDataPublisher {
     private static final Log log = LogFactory.getLog(HttpDataPublisher.class);
 
     private CloseableHttpClient httpClient;
-    private CloseableHttpClient aseManagementEndpointHttpClient;
     private String authToken;
     private String endPoint;
     private AISecurityHandlerConfig.AseConfig aseConfig;
 
     public HttpDataPublisher(AISecurityHandlerConfig.AseConfig aseConfiguration,
-            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration,
-            AISecurityHandlerConfig.ModelCreationEndpoint modelCreationConfiguration) throws AISecurityException {
+            AISecurityHandlerConfig.DataPublisherConfig dataPublisherConfiguration) throws AISecurityException {
 
         String protocol;
-        String aseManagementEndpointProtocol;
         try {
             protocol = new URL(aseConfiguration.getEndPoint()).getProtocol();
-            if (modelCreationConfiguration.isEnable()) {
-                aseManagementEndpointProtocol = new URL(modelCreationConfiguration.getManagementAPIEndpoint())
-                        .getProtocol();
-                aseManagementEndpointHttpClient = SecurityUtils.getHttpClient(aseManagementEndpointProtocol,
-                        dataPublisherConfiguration);
-            }
         } catch (MalformedURLException e) {
             log.error("Error when getting the ASE request protocol", e);
             throw new AISecurityException(AISecurityException.HANDLER_ERROR, AISecurityException.HANDLER_ERROR_MESSAGE,
@@ -149,11 +143,18 @@ public class HttpDataPublisher {
         return aseResponseCode;
     }
 
-    public StatusLine publishToASEManagementAPI(String type, Object request) {
+    public StatusLine publishToASEManagementAPI(String modelCreationEndpoint, String type, Object request) {
 
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
+        int aseManagementEndpointPort;
+        String aseManagementEndpointProtocol;
 
         try {
+            aseManagementEndpointPort = new URL(modelCreationEndpoint).getPort();
+            aseManagementEndpointProtocol = new URL(modelCreationEndpoint).getProtocol();
+            HttpClient aseManagementEndpointHttpClient = APIUtil.getHttpClient(aseManagementEndpointPort,
+                    aseManagementEndpointProtocol);
+
             if (AISecurityHandlerConstants.CREATE.equals(type)) {
                 HttpPost postRequest = (HttpPost) request;
                 response = aseManagementEndpointHttpClient.execute(postRequest);
@@ -178,6 +179,8 @@ public class HttpDataPublisher {
                 }
                 return response.getStatusLine();
             }
+        } catch (MalformedURLException e) {
+            log.error("Error occurred while retrieving ASE management endpoint configuration", e);
         } catch (Exception e) {
             log.error("Error occurred while publishing " + type + " request to ASE Management API", e);
         }
