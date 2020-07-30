@@ -463,6 +463,9 @@ public class SecurityUtils {
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             try {
                 socketFactory = createManagementSocketFactory();
+                if (socketFactory == null) {
+                    return null;
+                }
                 socketFactory.setHostnameVerifier(hostnameVerifier);
                 if (port >= 0) {
                     registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));

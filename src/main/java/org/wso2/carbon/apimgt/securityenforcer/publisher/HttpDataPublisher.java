@@ -154,6 +154,11 @@ public class HttpDataPublisher {
             HttpClient aseManagementEndpointHttpClient = SecurityUtils
                     .getManagementHttpClient(aseManagementEndpointPort, aseManagementEndpointProtocol);
 
+            if (aseManagementEndpointHttpClient == null) {
+                log.error("Error occurred while publishing " + type + " request to ASE Management API");
+                return null;
+            }
+
             if (AISecurityHandlerConstants.CREATE.equals(type)) {
                 HttpPost postRequest = (HttpPost) request;
                 response = aseManagementEndpointHttpClient.execute(postRequest);
