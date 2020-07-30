@@ -16,9 +16,15 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.publisher;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -31,10 +37,6 @@ import org.wso2.carbon.apimgt.securityenforcer.dto.AISecurityHandlerConfig;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityUtils;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * HttpDataPublisher class is here to verifyRequest PingAI data to Ping
@@ -81,7 +83,7 @@ public class HttpDataPublisher {
         int aseResponseCode = 200;
 
         try {
-            postRequest.setEntity(new StringEntity(data.toString().replaceAll("\\\\", "")));
+            postRequest.setEntity(new StringEntity(data.toString()));
             long publishingStartTime = System.nanoTime();
             response = httpClient.execute(postRequest);
             long publishingEndTime = System.nanoTime();
@@ -90,28 +92,28 @@ public class HttpDataPublisher {
                 aseResponseCode = response.getStatusLine().getStatusCode();
 
                 switch (aseResponseCode) {
-                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_INCORRECT_JSON:
-                    log.error("Incorrect JSON format sent for the ASE from the request " + correlationID);
-                    break;
-                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_UNKNOWN_API:
-                    log.error("Unknown API for the request " + correlationID);
-                    break;
-                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_UNAUTHORIZED:
-                    log.error("Authentication failure (ASE-Token) for the request " + correlationID);
-                    break;
-                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN:
-                    if (log.isDebugEnabled()) {
-                        log.debug("Forbidden code sent from the ASE for the " + resource + " " + correlationID);
-                    }
-                    break;
-                case AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS:
-                    if (log.isDebugEnabled()) {
-                        log.debug("Success code sent from the ASE for the " + resource + " " + correlationID);
-                    }
-                    break;
-                default:
-                    log.error("ASE responded with " + aseResponseCode + " for the request " + correlationID);
-                    break;
+                    case AISecurityHandlerConstants.ASE_RESPONSE_CODE_INCORRECT_JSON:
+                        log.error("Incorrect JSON format sent for the ASE from the request " + correlationID);
+                        break;
+                    case AISecurityHandlerConstants.ASE_RESPONSE_CODE_UNKNOWN_API:
+                        log.error("Unknown API for the request " + correlationID);
+                        break;
+                    case AISecurityHandlerConstants.ASE_RESPONSE_CODE_UNAUTHORIZED:
+                        log.error("Authentication failure (ASE-Token) for the request " + correlationID);
+                        break;
+                    case AISecurityHandlerConstants.ASE_RESPONSE_CODE_FORBIDDEN:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Forbidden code sent from the ASE for the " + resource + " " + correlationID);
+                        }
+                        break;
+                    case AISecurityHandlerConstants.ASE_RESPONSE_CODE_SUCCESS:
+                        if (log.isDebugEnabled()) {
+                            log.debug("Success code sent from the ASE for the " + resource + " " + correlationID);
+                        }
+                        break;
+                    default:
+                        log.error("ASE responded with " + aseResponseCode + " for the request " + correlationID);
+                        break;
                 }
 
                 if (log.isDebugEnabled()) {
@@ -140,26 +142,38 @@ public class HttpDataPublisher {
         return aseResponseCode;
     }
 
-    public StatusLine publishToASEManagementAPI(String type, Object request) {
+    public StatusLine publishToASEManagementAPI(String modelCreationEndpoint, String type, Object request) {
 
-        CloseableHttpResponse response = null;
+        HttpResponse response = null;
+        int aseManagementEndpointPort;
+        String aseManagementEndpointProtocol;
 
         try {
+            aseManagementEndpointPort = new URL(modelCreationEndpoint).getPort();
+            aseManagementEndpointProtocol = new URL(modelCreationEndpoint).getProtocol();
+            HttpClient aseManagementEndpointHttpClient = SecurityUtils
+                    .getManagementHttpClient(aseManagementEndpointPort, aseManagementEndpointProtocol);
+
+            if (aseManagementEndpointHttpClient == null) {
+                log.error("Error occurred while publishing " + type + " request to ASE Management API");
+                return null;
+            }
+
             if (AISecurityHandlerConstants.CREATE.equals(type)) {
                 HttpPost postRequest = (HttpPost) request;
-                response = httpClient.execute(postRequest);
+                response = aseManagementEndpointHttpClient.execute(postRequest);
                 log.debug("ASE Management API create request sent");
             } else if (AISecurityHandlerConstants.UPDATE.equals(type)) {
                 HttpPut putRequest = (HttpPut) request;
-                response = httpClient.execute(putRequest);
+                response = aseManagementEndpointHttpClient.execute(putRequest);
                 log.debug("ASE Management API update request sent");
             } else if (AISecurityHandlerConstants.LIST.equals(type)) {
                 HttpGet getRequest = (HttpGet) request;
-                response = httpClient.execute(getRequest);
+                response = aseManagementEndpointHttpClient.execute(getRequest);
                 log.debug("ASE Management API list request sent");
             } else if (AISecurityHandlerConstants.DELETE.equals(type)) {
                 HttpDelete deleteRequest = (HttpDelete) request;
-                response = httpClient.execute(deleteRequest);
+                response = aseManagementEndpointHttpClient.execute(deleteRequest);
                 log.debug("ASE Management API delete request sent");
             }
             if (response != null) {
@@ -169,6 +183,8 @@ public class HttpDataPublisher {
                 }
                 return response.getStatusLine();
             }
+        } catch (MalformedURLException e) {
+            log.error("Error occurred while retrieving ASE management endpoint configuration", e);
         } catch (Exception e) {
             log.error("Error occurred while publishing " + type + " request to ASE Management API", e);
         }

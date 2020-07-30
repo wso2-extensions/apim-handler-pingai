@@ -354,7 +354,7 @@ There is a new model created in the security engine for every API deployed with 
             "apikey_qs": "",
             "apikey_header": "",
             "login_url": "",
-            "enable_blocking": true,
+            "enable_blocking": false,
             "api_memory_size": "128mb",
             "server_ssl": false,
             "decoy_config": {

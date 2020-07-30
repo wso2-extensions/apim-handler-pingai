@@ -33,3 +33,6 @@ target/test-classes/*
 *Test.txt
 *Test.xml
 target/classes/org/wso2/carbon/apimgt/securityenforcer/internal/samplePingAIManagementPayload.json
+target/classes/META-INF/*
+target/maven-shared-archive-resources/*
+target/.plxarc
