@@ -174,7 +174,7 @@ public class SecurityUtils {
         //Socket timeout is set to 10 seconds addition to connection timeout.
         RequestConfig params = RequestConfig.custom()
                 .setConnectTimeout(dataPublisherConfiguration.getConnectionTimeout() * 1000)
-                .setSocketTimeout((dataPublisherConfiguration.getConnectionTimeout() + 10) * 10000).build();
+                .setSocketTimeout((dataPublisherConfiguration.getConnectionTimeout() + 10) * 1000).build();
 
         return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
     }
