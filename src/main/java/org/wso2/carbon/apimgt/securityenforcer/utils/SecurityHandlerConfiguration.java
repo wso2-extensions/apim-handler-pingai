@@ -211,18 +211,6 @@ public class SecurityHandlerConfiguration {
                             AISecurityException.HANDLER_ERROR_MESSAGE);
                 }
 
-                OMElement backupAseTokenElement = aseConfigElement
-                        .getFirstChildWithName(new QName(AISecurityHandlerConstants.BACKUP_ASE_TOKEN_CONFIGURATION));
-                if (backupAseTokenElement != null) {
-                    if (secretResolver.isInitialized()
-                            && secretResolver.isTokenProtected("APIManager.AISecurityHandler.ASE.BackupASEToken")) {
-                        aseConfig.setBackupAseToken(secretResolver
-                                .resolve("APIManager.AISecurityHandler.ASE.BackupASEToken"));
-                    } else {
-                        aseConfig.setBackupAseToken(backupAseTokenElement.getText());
-                    }
-                }
-
                 OMElement modelCreationEndpointElement = aseConfigElement.getFirstChildWithName(
                         new QName(AISecurityHandlerConstants.MODEL_CREATION_ENDPOINT_CONFIGURATION));
                 AISecurityHandlerConfig.ModelCreationEndpoint modelCreationEndpointConfig = new AISecurityHandlerConfig.ModelCreationEndpoint();

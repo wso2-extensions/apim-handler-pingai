@@ -75,6 +75,7 @@ public class HttpDataPublisher {
     }
 
     public int publish(JSONObject data, String correlationID, String resource) {
+        String localEndPoint = endPoint;
         HttpPost postRequest = new HttpPost(endPoint + "/ase/" + resource);
         postRequest.addHeader(AISecurityHandlerConstants.ASE_TOKEN_HEADER, authToken);
         postRequest.addHeader(AISecurityHandlerConstants.X_CORRELATION_ID_HEADER, correlationID);
@@ -126,10 +127,9 @@ public class HttpDataPublisher {
                 log.error("Null response returned from ASE for the request " + correlationID);
             }
         } catch (Exception ex) {
-            aseConfig.shiftEndpoint();
-            endPoint = aseConfig.getEndPoint();
-            setEndPoint(aseConfig.getEndPoint());
             log.error("Error sending the HTTP Request with id " + correlationID, ex);
+            aseConfig.shiftEndpoint(localEndPoint);
+            endPoint = aseConfig.getEndPoint();
         } finally {
             if (response != null) {
                 try {
