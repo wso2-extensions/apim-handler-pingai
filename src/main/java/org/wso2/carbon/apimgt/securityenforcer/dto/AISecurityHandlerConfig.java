@@ -131,26 +131,27 @@ public class AISecurityHandlerConfig {
 
     public static class AseConfig {
 
-        private String endPoint;
+        private String primaryAseEndPoint;
         private String backupAseEndPoint;
-        private Boolean shift = false;
+        private String currentEndpoint;
 
         private String aseToken;
-        private String backupAseToken;
 
         public String getEndPoint() {
-            if (!shift) {
-                return endPoint;
-            }
-            return backupAseEndPoint;
+            return currentEndpoint;
         }
 
         public void setEndPoint(String endPoint) {
-            this.endPoint = endPoint;
+            this.primaryAseEndPoint = endPoint;
+            this.currentEndpoint = endPoint;
         }
 
-        public void shiftEndpoint() {
-            this.shift = !this.shift;
+        public synchronized void shiftEndpoint(String currEndpoint) {
+            if (currEndpoint.equalsIgnoreCase(primaryAseEndPoint)) {
+                this.currentEndpoint = backupAseEndPoint;
+            } else {
+                this.currentEndpoint = primaryAseEndPoint;
+            }
         }
 
         public String getBackupAseEndPoint() {
@@ -162,18 +163,11 @@ public class AISecurityHandlerConfig {
         }
 
         public String getAseToken() {
-            if (!shift) {
-                return aseToken;
-            }
-            return backupAseToken;
+            return aseToken;
         }
 
         public void setAseToken(String aseToken) {
             this.aseToken = aseToken;
-        }
-
-        public void setBackupAseToken(String backupAseToken) {
-            this.backupAseToken = backupAseToken;
         }
     }
 
