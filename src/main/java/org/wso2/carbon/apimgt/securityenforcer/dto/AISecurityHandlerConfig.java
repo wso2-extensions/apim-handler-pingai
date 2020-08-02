@@ -133,6 +133,8 @@ public class AISecurityHandlerConfig {
 
         private String primaryAseEndPoint;
         private String backupAseEndPoint;
+        // currentEndpoint is the ASE endpoint to which AISecurityHandler will send the
+        // requests to at any point of time.
         private String currentEndpoint;
 
         private String aseToken;
@@ -141,11 +143,23 @@ public class AISecurityHandlerConfig {
             return currentEndpoint;
         }
 
+        /**
+         * This method is called only once when the AISecurityHandler configuration is
+         * loaded. It will set the primaryAseEndPoint and currentEndpoint.
+         */
         public void setEndPoint(String endPoint) {
             this.primaryAseEndPoint = endPoint;
             this.currentEndpoint = endPoint;
         }
 
+        /**
+         * This method takes currEndpoint as an argument that has resulted in a
+         * connection refused or connection timeout exception. If shiftEndpoint receives
+         * primaryAseEndPoint as argument, currentEndpoint will be set to
+         * backupAseEndPoint. If shiftEndpoint receives backupAseEndPoint as argument,
+         * currentEndpoint will be set to primaryAseEndPoint. This method is thread safe
+         * since it is synchronized.
+         */
         public synchronized void shiftEndpoint(String currEndpoint) {
             if (currEndpoint.equalsIgnoreCase(primaryAseEndPoint)) {
                 this.currentEndpoint = backupAseEndPoint;
