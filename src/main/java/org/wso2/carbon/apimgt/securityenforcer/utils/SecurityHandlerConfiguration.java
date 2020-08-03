@@ -139,7 +139,7 @@ public class SecurityHandlerConfiguration {
             if (modeElement != null) {
                 securityHandlerConfig.setMode(modeElement.getText());
             } else {
-                log.info("Operation mode is not set. Set to default async mode");
+                log.info("Operation mode is not set. Set to default: " + securityHandlerConfig.getMode());
             }
 
             // Get Cache expiry time
@@ -165,7 +165,8 @@ public class SecurityHandlerConfiguration {
             OMElement skipCertValifationElement = aiSecurityConfigurationElement
                     .getFirstChildWithName(new QName(AISecurityHandlerConstants.SKIP_CERT_VALIDATION_CONFIG));
             if (skipCertValifationElement != null) {
-                securityHandlerConfig.setSkipCertValidation(JavaUtils.isTrueExplicitly(skipCertValifationElement.getText()));
+                securityHandlerConfig
+                        .setSkipCertValidation(JavaUtils.isTrueExplicitly(skipCertValifationElement.getText()));
             } else {
                 log.debug("Skip Certificate Validation Element is not set. Set to default: "
                         + securityHandlerConfig.isSkipCertValidation());
@@ -362,7 +363,7 @@ public class SecurityHandlerConfiguration {
             securityHandlerConfig.setLimitTransportHeaders(limitTransportHeadersConfig);
         }
 
-        if (aiSecurityConfigurationElement != null && aseConfigElement!=null && aseEndPointElement!=null){
+        if (aiSecurityConfigurationElement != null && aseConfigElement != null && aseEndPointElement != null) {
             securityHandlerConfig.setPolicyEnforcementEnabled(true);
             log.info("AI security handler policy enforcement enabled");
         }

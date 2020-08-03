@@ -18,6 +18,12 @@
 
 package org.wso2.carbon.apimgt.securityenforcer.internal;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -31,19 +37,12 @@ import org.wso2.carbon.apimgt.securityenforcer.publisher.HttpDataPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.Publisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.async.AsyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.async.AsyncPublisherThreadPool;
-import org.wso2.carbon.apimgt.securityenforcer.publisher.hybrid.HybridPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.sync.SyncPublisher;
 import org.wso2.carbon.apimgt.securityenforcer.publisher.sync.SyncPublisherThreadPool;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityException;
 import org.wso2.carbon.apimgt.securityenforcer.utils.AISecurityHandlerConstants;
 import org.wso2.carbon.apimgt.securityenforcer.utils.SecurityHandlerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 @Component(name = "org.wso2.carbon.apimgt.securityenforcer", immediate = true)
 public class PingAIHandlerComponent implements BundleActivator {
@@ -77,19 +76,20 @@ public class PingAIHandlerComponent implements BundleActivator {
                 case AISecurityHandlerConstants.ASYNC_MODE_STRING:
                     requestPublisher = new AsyncPublisher();
                     break;
-                case AISecurityHandlerConstants.HYBRID_MODE_STRING:
-                    requestPublisher = new HybridPublisher();
-                    break;
                 default:
-                    throw new Exception("Operation mode is incorrect for Ping AI Security Handler");
+                    log.info(operationMode + " is not a supported mode. Setting Ping AI Security Handler mode to sync");
+                    operationMode = AISecurityHandlerConstants.SYNC_MODE_STRING;
+                    securityHandlerConfig.setMode(AISecurityHandlerConstants.SYNC_MODE_STRING);
+                    requestPublisher = new SyncPublisher();
             }
 
             ServiceReferenceHolder.getInstance().setRequestPublisher(requestPublisher);
 
-            //response publisher is for the second sideband request with the backend response metadata. This is sent
-            //asynchronously in all three operation modes and for that async publisher instance is needed. As both async and
-            //hybrid modes contains async publisher instance, only for the sync mode, there will be a new additional instance
-            //created.
+            // response publisher is for the second sideband request with the backend
+            // response metadata. This is sent asynchronously in all three operation modes
+            // and for that async publisher instance is needed. As both async and
+            // hybrid modes contains async publisher instance, only for the sync mode, there
+            // will be a new additional instance created.
             if (AISecurityHandlerConstants.SYNC_MODE_STRING.equals(operationMode)) {
                 responsePublisher = new AsyncPublisher();
             } else {
@@ -141,8 +141,8 @@ public class PingAIHandlerComponent implements BundleActivator {
      */
     private AISecurityHandlerConfig getConfigData() throws AISecurityException {
         SecurityHandlerConfiguration configuration = new SecurityHandlerConfiguration();
-        configuration.load(CarbonUtils.getCarbonConfigDirPath() + File.separator
-                + AISecurityHandlerConstants.CONFIG_FILE_NAME);
+        configuration.load(
+                CarbonUtils.getCarbonConfigDirPath() + File.separator + AISecurityHandlerConstants.CONFIG_FILE_NAME);
         return configuration.getPingAISecurityHandlerProperties();
     }
 
@@ -165,36 +165,32 @@ public class PingAIHandlerComponent implements BundleActivator {
     private void logConfigData(AISecurityHandlerConfig securityHandlerConfig) {
 
         if (log.isDebugEnabled()) {
-            if(securityHandlerConfig != null) {
+            if (securityHandlerConfig != null) {
                 String logMessage = "Ping AI configurations- ";
                 logMessage = logMessage + ", Operation Mode: " + securityHandlerConfig.getMode();
                 logMessage = logMessage + ", Cache Expiry time: " + securityHandlerConfig.getCacheExpiryTime();
                 logMessage = logMessage + ", ASE Endpoint: " + securityHandlerConfig.getAseConfig().getEndPoint();
-                logMessage =
-                        logMessage + ", Management Endpoint: " + securityHandlerConfig.getModelCreationEndpointConfig()
-                                .getManagementAPIEndpoint();
-                logMessage =
-                        logMessage + ", DataPublisher- MaxPerRoute: " + securityHandlerConfig.getDataPublisherConfig()
-                                .getMaxPerRoute();
-                logMessage = logMessage + ", DataPublisher- MaxOpenConnections: " + securityHandlerConfig
-                        .getDataPublisherConfig().getMaxOpenConnections();
-                logMessage = logMessage + ", DataPublisher- ConnectionTimeout: " + securityHandlerConfig
-                        .getDataPublisherConfig().getConnectionTimeout();
-                logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: " + securityHandlerConfig
-                        .getThreadPoolExecutorConfig().getCorePoolSize();
-                logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: " + securityHandlerConfig
-                        .getThreadPoolExecutorConfig().getMaximumPoolSize();
-                logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: " + securityHandlerConfig
-                        .getThreadPoolExecutorConfig().getKeepAliveTime();
-                logMessage =
-                        logMessage + ", StackObjectPool- MaxIdle: " + securityHandlerConfig.getStackObjectPoolConfig()
-                                .getMaxIdle();
-                logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: " + securityHandlerConfig
-                        .getStackObjectPoolConfig().getInitIdleCapacity();
+                logMessage = logMessage + ", Management Endpoint: "
+                        + securityHandlerConfig.getModelCreationEndpointConfig().getManagementAPIEndpoint();
+                logMessage = logMessage + ", DataPublisher- MaxPerRoute: "
+                        + securityHandlerConfig.getDataPublisherConfig().getMaxPerRoute();
+                logMessage = logMessage + ", DataPublisher- MaxOpenConnections: "
+                        + securityHandlerConfig.getDataPublisherConfig().getMaxOpenConnections();
+                logMessage = logMessage + ", DataPublisher- ConnectionTimeout: "
+                        + securityHandlerConfig.getDataPublisherConfig().getConnectionTimeout();
+                logMessage = logMessage + ", ThreadPoolExecutor- CorePoolSize: "
+                        + securityHandlerConfig.getThreadPoolExecutorConfig().getCorePoolSize();
+                logMessage = logMessage + ", ThreadPoolExecutor- MaximumPoolSize: "
+                        + securityHandlerConfig.getThreadPoolExecutorConfig().getMaximumPoolSize();
+                logMessage = logMessage + ", ThreadPoolExecutor- KeepAliveTime: "
+                        + securityHandlerConfig.getThreadPoolExecutorConfig().getKeepAliveTime();
+                logMessage = logMessage + ", StackObjectPool- MaxIdle: "
+                        + securityHandlerConfig.getStackObjectPoolConfig().getMaxIdle();
+                logMessage = logMessage + ", StackObjectPool- InitIdleCapacity: "
+                        + securityHandlerConfig.getStackObjectPoolConfig().getInitIdleCapacity();
                 if (securityHandlerConfig.getLimitTransportHeaders().isEnable()) {
-                    logMessage =
-                            logMessage + ", LimitTransportHeaders: " + securityHandlerConfig.getLimitTransportHeaders()
-                                    .getHeaderSet().toString();
+                    logMessage = logMessage + ", LimitTransportHeaders: "
+                            + securityHandlerConfig.getLimitTransportHeaders().getHeaderSet().toString();
                 } else {
                     logMessage = logMessage + ", Limit Transport headers Disabled";
                 }
