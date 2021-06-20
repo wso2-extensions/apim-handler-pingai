@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>6.6.163</version>
+        <version>9.0.174</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>org.wso2.carbon.apimgt.securityenforcer</artifactId>
+    <artifactId>org.wso2.carbon.apimgt.securityenforcer.pingai</artifactId>
     <version>1.1.1-SNAPSHOT</version>
-    <name>AI Security Enforcer</name>
+    <name>Ping AI Security Handler</name>
     <description>
         WSO2 API manager extension with Ping Intelligence
     </description>
@@ -129,7 +129,6 @@
                             java.security,
                             java.util.concurrent,
                             javax.net.ssl,
-                            javax.cache,
                             org.wso2.carbon.apimgt.gateway.handlers; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.gateway.handlers.security; version="${carbon.apimgt.imp.pkg.version}",
                             org.osgi.framework,
@@ -146,7 +145,7 @@
                             *; resolution:=optional
                         </Import-Package>
                         <Bundle-Activator>
-                            org.wso2.carbon.apimgt.securityenforcer.internal.PingAIHandlerComponent
+                            org.wso2.carbon.apimgt.securityenforcer.pingai.internal.PingAIHandlerComponent
                         </Bundle-Activator>
                     </instructions>
                 </configuration>

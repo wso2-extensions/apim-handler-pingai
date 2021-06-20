@@ -28,7 +28,7 @@ limit_transport_headers.header3 = "Header3"
 
 #Config descriptions
 
-#Three operation modes. "sync", "async" and "hybrid"
+#Two operation modes. "sync" and "async"
 #operation_mode = "MODE"
 
 #Apply Ping Intelligence for all APIs published from Api Manager
@@ -36,9 +36,6 @@ limit_transport_headers.header3 = "Header3"
 
 #Whether to validate the certificates of ASE and Management endpoint or not
 #skip_cert_validation = false
-
-#Cache Expiry time in minutes.
-#cash_expiry_time = 15
 
 #Ping ASE related configuration used by the feature.
 #API Security Enforcer is used to validate and authenticate users against the request metadata.
