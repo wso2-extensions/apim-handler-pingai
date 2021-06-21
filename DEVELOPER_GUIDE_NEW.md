@@ -151,12 +151,12 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
 
     Use the following table to update pom.xml with the corresponding dependency versions for API manager.
 
-     | Dependency                |   APIM 3.2.0-beta|  APIM 3.1.0   |  APIM 3.0.0   |  
-     | ------------------------- | :---------------:| :-----------: | :-----------: | 
-     | org.wso2.carbon.apimgt    |    6.7.78        |    6.6.163    |    6.5.349    | 
+     | Dependency                |   APIM 4.0.0     | APIM 3.2.0    |  APIM 3.1.0  |  APIM 3.0.0   |  
+     | ------------------------- | :---------------:| :-----------: | :-----------:| :-----------: | 
+     | org.wso2.carbon.apimgt    |    9.0.174       |    6.7.206    |    6.6.163   |  6.5.349      | 
 
 2. Add the JAR file of the extension to the **<APIM_HOME>/repository/components/dropins** directory.
-   You can find the org.wso2.carbon.apimgt.securityenforcer-\<version>.jar file in the **apim-handler-pingai/target** directory.
+   You can find the org.wso2.carbon.apimgt.securityenforcer.pingai-\<version>.jar file in the **apim-handler-pingai/target** directory.
 
 3. Add the bare minimum configurations to the *deployment.toml* file, which can be found in the
 **<APIM_HOME>/repository/conf** directory.
@@ -175,7 +175,6 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
 
     - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#sync-mode)**,
         **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#async-mode)** and
-        **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE.md#hybrid-mode)**.
         If the mode is not set, the default mode is set as **sync**.
    - ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
    - BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<backup-ase-host-machine-ip>:\<data-port>
@@ -188,7 +187,7 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
 4. To engage the handler to APIs, you need to update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file.
    Add the handler class as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
-   <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
+   <handler class="org.wso2.carbon.apimgt.securityenforcer.pingai.PingAISecurityHandler"/>
    ```
    In the default velocity_template.xml file, it should be as follows.
      ```
@@ -203,7 +202,7 @@ Following configurations are for WSO2 Api Manager 3.0.0 or newer versions. For o
        #end
    </handler>
    #end
-   <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
+   <handler class="org.wso2.carbon.apimgt.securityenforcer.pingai.PingAISecurityHandler"/>
    </handlers>
      ```
 
@@ -213,7 +212,7 @@ Update the **APILifeCycle.xml** with a new execution for the **Publish** event u
 Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish"
-        class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
+        class="org.wso2.carbon.apimgt.securityenforcer.pingai.executors.PingAIExecutor">
     </execution>
     ```
 
@@ -221,7 +220,7 @@ Do not update the already existing execution for the publish event. Add a new ex
    This deletes the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire"
-        class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
+        class="org.wso2.carbon.apimgt.securityenforcer.pingai.executors.PingAIExecutor">
     </execution>
     ```
 7. Update the **<API_HOME>/repository/resources/conf/templates/repository/conf/api-manager.xml.j2** file for wso2 to pick up the back up ASE end point configuration.
@@ -267,7 +266,7 @@ However, if needed you can configure PingIntelligence to be [applied only for se
 #### Verify api creation on ASE:
 
 1. Open the Synapse configuration of the published API, located in in the <APIM_HOME>/repository/deployment/server/synapse-configs/default/api directory.
-Check whether the \<handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>  handler is added under \<handlers>.
+Check whether the \<handler class="PingAISecurityHandler"/>  handler is added under \<handlers>.
 2. Open ASE command line. Use the CLI tool to list the published APIs in ASE.
 Check whether the API is listed as <API_NAME>_\<VERSION>.
     Eg: HelloWorld_1.0.0
@@ -300,47 +299,26 @@ Add the following configurations to the  <APIM_HOME>/repository/conf/deployment.
 WSO2 has implemented a custom handler with the handleRequest and handleResponse methods in inorder to integrate this feature with WSO2 API Manager. For every request, WSO2 Gateway sends two sideband calls to the API Security Enforcer (ASE). The first one is to analyze the metadata (Endpoint: ASE/request). The second one is to pass the status of the overall request after connecting to the backend (EndPoint: ASE/response). The second sideband call is mainly for the learning mode of the AI Engine.
 
 
-There are three modes of operation when implementing the extension.
+There are two modes of operation with this component.
 * Sync Mode
 * Async Mode
-* Hybrid Mode
-
-The difference with all these modes is only with the first sideband request. The second sideband request will be asynchronous in all three modes.
 
 ### Sync mode
 In the sync mode, the first sideband call is sent synchronously to the request data flow. Depending on the ASE response, the handler will allow each request to connect to the backend.
 
 As this is a thread blocking call, every request will wait until the ASE responds.
 
-   **Total time  =~0.2ms + ASE Sideband call time**
+   **Total time  =~0.2ms + ASE Sideband call time*
+   
+The second side band request (response flow) will be sent asynchronously.
 
 
 ![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/syncFlow.png)
 
 ### Async mode
-In this mode, both the sideband calls are sent asynchronously. There is a cache which records the response of each request sent to ASE.
-
-As the metadata set of each client request is unique to the client (with the authorization header), the cache records the ASE response with the metadata. The metadata is hashed with MD5 and the hash code is used as the key.
+This is a publish only mode. In this mode, instead of filtering the requests based on the ASE response, handler will only publish request meta data to the ASE (Similar to analytics). You can view the data from Ping intelligence dashboard.
 
 **Total time = < 0.2ms**
-
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/asyncFlow.png)
-
-**Important:**
-*There is a slip rate because the requests received until the first cache update is forwarded to the backend without monitoring.*
-
-
-### Hybrid mode
-
-In this mode, if there is no ASE response for the metadata in the cache, the thread is blocked and the sideband call to the ASE is sent synchronously. The cache is updated with the response and the request will be processed depending on the reponse.
-
-The next request of the same client will be handled according to the cached response. However, later on the cache will be updated asynchronously.
-
-Requests until the first cache update is handled in sync mode and after that it will be handled in async mode.
-
-Each record in the cache has an expiry time, which is 15min from the last cache update.
-
-![alt text](https://raw.githubusercontent.com/wso2-extensions/apim-handler-pingai/master/images/hybridFlow.png)
 
 ### Response
 
@@ -415,7 +393,6 @@ Add the required configurations to the  <APIM_HOME>/repository/conf/deployment.t
     [apim.ai_security]
     apply_for_all = false
     skip_cert_validation = false
-    cash_expiry_time = 15
     data_publisher.max_per_route = 500
     data_publisher.max_open_connections = 200
     data_publisher.connection_timeout = 30
@@ -435,7 +412,7 @@ By default, PingIntelligence is enabled in all APIs that are published with an i
 2. Instead of updating the velocity-template with the handler, add the following code inside \<handlers xmlns="http://ws.apache.org/ns/synapse"> just after the foreach loop.
       ```
         #if($apiObj.additionalProperties.get('ai_security') == "enable")
-            <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
+            <handler class="org.wso2.carbon.apimgt.securityenforcer.pingai.PingAISecurityHandler"/>
         #end
      ```
 
@@ -474,7 +451,6 @@ All transport headers found in the client request and backend response will be s
 
 Only the intercept of headers mentioned and present in the transport headers are sent to ASE in both sideband calls.
 
-*If there is a transport header which changes with each request, it is essential to use this feature and drop that header. Otherwise, this extension will not be useful when working with async and hybrid modes.*
 
 ### Other configurations
 #### HTTP client configurations
@@ -549,10 +525,9 @@ Follow the instructions below to change a password that you had previously encry
 
 | Field            | input                                                       | DefaultValue | Description                                                                                                                   |
 | ---------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| operation_mode   | (String)<ul><li>async</li><li>sync</li><li>hybrid</li></ul> | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li><li>Hybrid mode - hybrid</li></ul> |
+| operation_mode   | (String)<ul><li>async</li><li>sync</li></ul>                | sync         | The operation mode. <ul><li>Asynchronous mode -  async</li><li>Synchronous mode - sync</li></ul> |
 | apply_for_all    | (Boolean)                                                   | true         | Apply Ping Intelligence for all APIs published.                                                                               |
 | skip_cert_validation   | (Boolean)                                             | false        | Validate the certificates of ASE and Management endpoint or not                                                               |
-| cash_expiry_time | (Integer)                                                   | 15           | Cache Expiry time in minutes.                                                                                                 |
 
 #### APISecurityEnforcer - ASE configurations
 

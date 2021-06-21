@@ -108,7 +108,6 @@
 
     - Select the Operation mode from **[sync](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_OLD.md#sync-mode)**,
         **[async](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_OLD.md#async-mode)** and
-        **[hybrid](https://github.com/wso2-extensions/apim-handler-pingai/blob/master/DEVELOPER_GUIDE_OLD.md#hybrid-mode)**.
         If the mode is not set, the default mode is set as **sync**.
    - ASE_ENDPOINT : https://\<ase-host-machine-ip>:\<data-port>
    - BACKUP_ASE_SIDEBAND_REQUEST_ENDPOINT : https://\<backup-ase-host-machine-ip>:\<data-port>
@@ -122,7 +121,7 @@
 4. To engage the handler to APIs, you need to update the **<APIM_HOME>/repository/resources/api_templates/velocity_template.xml** file.
    Add the handler class as follows inside the *\<handlers xmlns="http://ws.apache.org/ns/synapse">* just after the foreach loop.
    ```
-   <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
+   <handler class="PingAISecurityHandler"/>
    ```
    In the default velocity_template.xml file, it should be as follows.
      ```
@@ -137,7 +136,7 @@
        #end
    </handler>
    #end
-   <handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>
+   <handler class="PingAISecurityHandler"/>
    </handlers>
      ```
 
@@ -147,7 +146,7 @@ Update the **APILifeCycle.xml** with a new execution for the **Publish** event u
 Do not update the already existing execution for the publish event. Add a new execution.
     ```
     <execution forEvent="Publish"
-        class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
+        class="PingAIExecutor">
     </execution>
     ```
 
@@ -155,7 +154,7 @@ Do not update the already existing execution for the publish event. Add a new ex
    This deletes the model associated with the API in the ASE when the API is retired.
     ```
     <execution forEvent="Retire"
-        class="org.wso2.carbon.apimgt.securityenforcer.executors.PingAIExecutor">
+        class="PingAIExecutor">
     </execution>
     ```
 
@@ -187,7 +186,7 @@ However, if needed you can configure PingIntelligence to be [applied only for se
 #### Verify api creation on ASE:
 
 1. Open the Synapse configuration of the published API, located in in the <APIM_HOME>/repository/deployment/server/synapse-configs/default/api directory.
-Check whether the \<handler class="org.wso2.carbon.apimgt.securityenforcer.PingAISecurityHandler"/>  handler is added under \<handlers>.
+Check whether the \<handler class="PingAISecurityHandler"/>  handler is added under \<handlers>.
 2. Open ASE command line. Use the CLI tool to list the published APIs in ASE.
 Check whether the API is listed as <API_NAME>_\<VERSION>.
     Eg: HelloWorld_1.0.0

@@ -25,13 +25,10 @@
 configuration will be used.-->
 <AISecurityHandler>
 
-    <!--Three operation modes. "sync", "async" and "hybrid" -->
+    <!--Two operation modes. "sync" and "async" -->
     <OperationMode>MODE</OperationMode>
 
     <ApplyForAllAPIs>false</ApplyForAllAPIs>
-
-    <!--Cache Expiry time in minutes.-->
-    <CacheExpiryTime>15</CacheExpiryTime>
 
     <!--Skip the Certificate Validation of ASE and Management endpoints-->
     <SkipCertValidation>False</SkipCertValidation>
